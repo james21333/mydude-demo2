@@ -276,6 +276,7 @@ function DemoApp() {
   const streamSpeakingRef = useRef(false);
   const streamAfterRef = useRef(null);
   const personalityRef = useRef(null);
+  const currentSpeechTextRef = useRef('');
 
   const avatarSeed = avatar?.prompt || 'voice-orb';
   const colors = useMemo(() => colorsFromName(avatarSeed), [avatarSeed]);
@@ -446,11 +447,69 @@ function DemoApp() {
   }
 
   function handleUserUtterance(text) {
-    appendLog(`Heard: ${text}`);
+    const cleanText = text.trim();
+    if (!cleanText) return;
+    appendLog(`Heard: ${cleanText}`);
     listenTokenRef.current += 1;
     try { recognitionRef.current?.abort?.(); } catch {}
-    if (shouldUpdateAvatar(text)) buildAvatar(text);
-    else talkWithBrain(text);
+    if (shouldUpdateAvatar(cleanText)) buildAvatar(cleanText);
+    else talkWithBrain(cleanText);
+  }
+
+  function interruptSpeechFor(text) {
+    const cleanText = text.trim();
+    if (!cleanText) return;
+    window.speechSynthesis?.cancel?.();
+    speechRunRef.current += 1;
+    streamQueueRef.current = [];
+    streamSpeakingRef.current = false;
+    streamAfterRef.current = null;
+    clearInterval(speakingTimer.current);
+    clearTimeout(mouthCloseTimer.current);
+    setMouthOpen(false);
+    statusRef.current = 'listening';
+    setStatus('listening');
+    setTranscript(cleanText);
+    setDebug('interrupted speech for new voice input');
+    handleUserUtterance(cleanText);
+  }
+
+  function shouldInterruptSpeech(heard, spokenText) {
+    const cleanHeard = heard.trim().toLowerCase();
+    if (cleanHeard.length < 5) return false;
+    const words = cleanHeard.split(/\s+/).filter(Boolean);
+    if (words.length < 2) return false;
+    const cleanSpoken = plainSpeechText(spokenText || currentSpeechTextRef.current).toLowerCase();
+    if (cleanSpoken && cleanSpoken.includes(cleanHeard)) return false;
+    return true;
+  }
+
+  function startBargeInListener(speechRun, spokenText) {
+    if (!activatedRef.current || !SpeechRecognition) return;
+    try { recognitionRef.current?.abort?.(); } catch {}
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    recognition.onresult = (event) => {
+      if (speechRun !== speechRunRef.current || !['speaking', 'building'].includes(statusRef.current)) return;
+      let finalText = '';
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; i += 1) {
+        const resultText = event.results[i][0].transcript;
+        if (event.results[i].isFinal) finalText += resultText;
+        else interim += resultText;
+      }
+      const heard = (finalText || interim).trim();
+      if (shouldInterruptSpeech(heard, spokenText)) interruptSpeechFor(heard);
+    };
+    recognition.onerror = () => {};
+    recognition.onend = () => {
+      if (speechRun !== speechRunRef.current || !['speaking', 'building'].includes(statusRef.current)) return;
+      window.setTimeout(() => startBargeInListener(speechRun, spokenText), 180);
+    };
+    recognitionRef.current = recognition;
+    try { recognition.start(); } catch {}
   }
 
   function shouldUpdateAvatar(text) {
@@ -641,6 +700,8 @@ function DemoApp() {
       mouthCloseTimer.current = setTimeout(() => setMouthOpen(false), 48);
     };
     utterance.onstart = () => {
+      currentSpeechTextRef.current = chunk.text;
+      startBargeInListener(speechRun, chunk.text);
       pulseMouth();
       clearInterval(speakingTimer.current);
       speakingTimer.current = setInterval(pulseMouth, 118);
@@ -671,16 +732,8 @@ function DemoApp() {
     setVoiceChoice({ name: voice.name, lang: voice.lang, localService: voice.localService, default: voice.default, platform, manual: true });
     setVoiceStatus(`voice: ${voice.name} (${voice.lang || 'unknown'}) selected`);
     appendLog(`Voice selected: ${voice.name} (${voice.lang || 'unknown'})`);
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-      speechRunRef.current += 1;
-      const preview = new SpeechSynthesisUtterance('Voice selected.');
-      preview.voice = voice;
-      preview.lang = voice.lang || 'en-US';
-      preview.rate = 1.08;
-      preview.pitch = 1.08;
-      window.speechSynthesis.speak(preview);
-    }
+    window.speechSynthesis?.cancel?.();
+    speechRunRef.current += 1;
   }
 
   function speak(text, options = {}) {
@@ -730,6 +783,8 @@ function DemoApp() {
         utterance.lang = 'en-US';
       }
       utterance.onstart = () => {
+        currentSpeechTextRef.current = chunk.text;
+        startBargeInListener(speechRun, chunk.text);
         pulseMouth();
         clearInterval(speakingTimer.current);
         speakingTimer.current = setInterval(pulseMouth, 118);
@@ -767,10 +822,10 @@ function DemoApp() {
     setBuildProgress(0);
     statusRef.current = 'listening';
     setStatus('listening');
-    setMessage('Reset complete. I am listening.');
-    setDebug('reset — starting listener');
+    setMessage('Listening now. Say anything.');
+    setDebug('reset — starting listener silently');
     appendLog('Demo reset. Avatar and conversation vibe cleared.');
-    speak('Reset complete. I am listening.', { after: startListening });
+    startListening();
   }
 
   function resetSpeakerSession(sessionId) {
