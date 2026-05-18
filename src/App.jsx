@@ -276,7 +276,6 @@ function DemoApp() {
   const streamSpeakingRef = useRef(false);
   const streamAfterRef = useRef(null);
   const personalityRef = useRef(null);
-  const currentSpeechTextRef = useRef('');
 
   const avatarSeed = avatar?.prompt || 'voice-orb';
   const colors = useMemo(() => colorsFromName(avatarSeed), [avatarSeed]);
@@ -454,62 +453,6 @@ function DemoApp() {
     try { recognitionRef.current?.abort?.(); } catch {}
     if (shouldUpdateAvatar(cleanText)) buildAvatar(cleanText);
     else talkWithBrain(cleanText);
-  }
-
-  function interruptSpeechFor(text) {
-    const cleanText = text.trim();
-    if (!cleanText) return;
-    window.speechSynthesis?.cancel?.();
-    speechRunRef.current += 1;
-    streamQueueRef.current = [];
-    streamSpeakingRef.current = false;
-    streamAfterRef.current = null;
-    clearInterval(speakingTimer.current);
-    clearTimeout(mouthCloseTimer.current);
-    setMouthOpen(false);
-    statusRef.current = 'listening';
-    setStatus('listening');
-    setTranscript(cleanText);
-    setDebug('interrupted speech for new voice input');
-    handleUserUtterance(cleanText);
-  }
-
-  function shouldInterruptSpeech(heard, spokenText) {
-    const cleanHeard = heard.trim().toLowerCase();
-    if (cleanHeard.length < 5) return false;
-    const words = cleanHeard.split(/\s+/).filter(Boolean);
-    if (words.length < 2) return false;
-    const cleanSpoken = plainSpeechText(spokenText || currentSpeechTextRef.current).toLowerCase();
-    if (cleanSpoken && cleanSpoken.includes(cleanHeard)) return false;
-    return true;
-  }
-
-  function startBargeInListener(speechRun, spokenText) {
-    if (!activatedRef.current || !SpeechRecognition) return;
-    try { recognitionRef.current?.abort?.(); } catch {}
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
-    recognition.onresult = (event) => {
-      if (speechRun !== speechRunRef.current || !['speaking', 'building'].includes(statusRef.current)) return;
-      let finalText = '';
-      let interim = '';
-      for (let i = event.resultIndex; i < event.results.length; i += 1) {
-        const resultText = event.results[i][0].transcript;
-        if (event.results[i].isFinal) finalText += resultText;
-        else interim += resultText;
-      }
-      const heard = (finalText || interim).trim();
-      if (shouldInterruptSpeech(heard, spokenText)) interruptSpeechFor(heard);
-    };
-    recognition.onerror = () => {};
-    recognition.onend = () => {
-      if (speechRun !== speechRunRef.current || !['speaking', 'building'].includes(statusRef.current)) return;
-      window.setTimeout(() => startBargeInListener(speechRun, spokenText), 180);
-    };
-    recognitionRef.current = recognition;
-    try { recognition.start(); } catch {}
   }
 
   function shouldUpdateAvatar(text) {
@@ -700,8 +643,6 @@ function DemoApp() {
       mouthCloseTimer.current = setTimeout(() => setMouthOpen(false), 48);
     };
     utterance.onstart = () => {
-      currentSpeechTextRef.current = chunk.text;
-      startBargeInListener(speechRun, chunk.text);
       pulseMouth();
       clearInterval(speakingTimer.current);
       speakingTimer.current = setInterval(pulseMouth, 118);
@@ -783,8 +724,6 @@ function DemoApp() {
         utterance.lang = 'en-US';
       }
       utterance.onstart = () => {
-        currentSpeechTextRef.current = chunk.text;
-        startBargeInListener(speechRun, chunk.text);
         pulseMouth();
         clearInterval(speakingTimer.current);
         speakingTimer.current = setInterval(pulseMouth, 118);
