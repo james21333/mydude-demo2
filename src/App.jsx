@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Mic, RotateCcw, Sparkles } from 'lucide-react';
+import { Mic } from 'lucide-react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 
@@ -794,43 +794,16 @@ function DemoApp() {
     setLog(items => [item, ...items].slice(0, 5));
   }
 
-  return <main className="demo-page" style={{ '--start': colors.start, '--mid': colors.mid, '--end': colors.end, '--accent': colors.accent }}>
-    <section className="demo-hero compact">
-      <p className="eyebrow"><Sparkles size={16}/> My Dude</p>
-      <div className={`status-pill ${status}`}>{status}</div>
-    </section>
-
-    <section className="stage">
+  return <main className="demo-page avatar-fullscreen" style={{ '--start': colors.start, '--mid': colors.mid, '--end': colors.end, '--accent': colors.accent }}>
+    <section className="stage fullscreen-stage">
       <CartoonAvatar avatar={avatar} mouthOpen={mouthOpen} status={status} voiceTheme={avatarVoiceTheme} />
-      <div className="voice-panel controls-below compact-controls">
-        <div className="control-copy">
-          <p>{message}</p>
-          <div className="transcript live-transcript"><strong>I heard:</strong> <span>{transcript || 'waiting for voice...'}</span></div>
-          <div className="listener-debug"><strong>Mic:</strong> {debug}<br/><strong>Voice:</strong> {voiceStatus}{BRAIN_ENABLED && <><br/><strong>Brain:</strong> {brainStatus}</>}</div>
-        </div>
+      <div className="voice-panel compact-controls fullscreen-controls" aria-live="polite">
         {status === 'building' && <div className="progress"><span style={{ width: `${buildProgress}%` }} /></div>}
-        <div className="actions">
+        <div className="actions single-action">
           {!activated ? <button className="primary" onClick={activate}><Mic size={16}/> Start</button> : <button className="primary" onClick={startListening}><Mic size={16}/> Listen</button>}
-          <button className="secondary" onClick={resetDemo}><RotateCcw size={16}/> Reset</button>
         </div>
       </div>
     </section>
-
-    {VOICE_DEBUG_ENABLED && <section className="voice-inventory-panel">
-      <div className="voice-inventory-header">
-        <strong>Voice inventory</strong>
-        <span>{voiceInventory.length} browser voices exposed on {voiceChoice?.platform || detectVoicePlatform()}</span>
-      </div>
-      <div className="voice-choice">{voiceChoice?.manual ? 'Selected' : 'Auto-picked'}: {voiceChoice ? `${voiceChoice.name} (${voiceChoice.lang || 'unknown'})` : 'browser default fallback'}</div>
-      <div className="voice-list">
-        {voiceInventory.map((voice, index) => <button type="button" className={voice.name === voiceChoice?.name && voice.lang === voiceChoice?.lang ? 'selected' : ''} onClick={() => selectVoice(voice)} key={`${voice.name}-${voice.lang}-${index}`}>
-          <span>{voice.name || 'Unnamed voice'}</span>
-          <small>{voice.lang || 'unknown'} · {voice.localService ? 'local' : 'network/unknown'}{voice.default ? ' · default' : ''}</small>
-        </button>)}
-      </div>
-    </section>}
-
-    <section className="log-panel">{log.map((item, index) => <div key={`${item}-${index}`}>{item}</div>)}</section>
   </main>;
 }
 
