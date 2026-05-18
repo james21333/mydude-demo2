@@ -11,7 +11,7 @@ const ACTIVE_PROJECTS = [
 ];
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-const BRAIN_ENABLED = new URLSearchParams(window.location.search).get('brain') === '1';
+const BRAIN_ENABLED = new URLSearchParams(window.location.search).get('brain') !== '0';
 const VOICE_DEBUG_ENABLED = ['1', 'true'].includes(new URLSearchParams(window.location.search).get('voices'));
 const BRIDGE_WS_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'ws://127.0.0.1:8787/speak'
