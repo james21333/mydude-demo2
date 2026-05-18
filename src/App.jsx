@@ -332,18 +332,12 @@ function DemoApp() {
   async function activate() {
     activatedRef.current = true;
     setActivated(true);
-    setMessage("Hey, what's up?");
-    setTranscript('Greeting… then I will listen.');
-    setDebug('start clicked — greeting first, listener next');
-    appendLog('Live mode activated. Greeting from the click before listener starts.');
-    speak("Hey, what's up?", {
-      rate: 1.02,
-      after: () => {
-        setTranscript('Listening… say something now.');
-        startListening();
-        startAudioMeter();
-      },
-    });
+    setMessage('Listening now. Say anything.');
+    setTranscript('Listening… say something now.');
+    setDebug('start clicked — listener starting');
+    appendLog('Live mode activated. Listener starts from the Start tap.');
+    startAudioMeter();
+    startListening();
   }
 
   async function startAudioMeter() {
@@ -422,7 +416,7 @@ function DemoApp() {
       setDebug(`listener error: ${error}`);
       appendLog(`Speech listener error: ${error}`);
       if (error === 'not-allowed' || error === 'service-not-allowed') {
-        setMessage('Chrome is blocking microphone/speech. Click the lock icon in the address bar and allow Microphone, then press Listen.');
+        setMessage('Chrome is blocking microphone/speech. Click the lock icon in the address bar and allow Microphone, then press Start again.');
       }
       setStatus('idle');
     };
@@ -446,7 +440,7 @@ function DemoApp() {
       recognition.start();
     } catch (error) {
       setDebug(`start failed: ${error.message || 'unknown'}`);
-      setMessage('Chrome did not start the listener. Press Listen again.');
+      setMessage('Chrome did not start the listener. Press Start again.');
       setStatus('idle');
     }
   }
@@ -800,7 +794,7 @@ function DemoApp() {
       <div className="voice-panel compact-controls fullscreen-controls" aria-live="polite">
         {status === 'building' && <div className="progress"><span style={{ width: `${buildProgress}%` }} /></div>}
         <div className="actions single-action">
-          {!activated ? <button className="primary" onClick={activate}><Mic size={16}/> Start</button> : <button className="primary" onClick={startListening}><Mic size={16}/> Listen</button>}
+          {!activated && <button className="primary" onClick={activate}><Mic size={16}/> Start</button>}
         </div>
       </div>
     </section>
