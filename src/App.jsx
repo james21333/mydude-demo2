@@ -220,7 +220,7 @@ function avatarThemeForVoice(voiceChoice) {
 
 function App() {
   const subdomain = getSubdomain();
-  if (subdomain === 'demo' || window.location.search.includes('demo=1')) return <DemoApp />;
+  if (subdomain === 'demo' || subdomain === 'demo2' || window.location.search.includes('demo=1')) return <DemoApp />;
   if (!subdomain) return <RootLanding />;
   return <ProjectPage subdomain={subdomain} />;
 }
