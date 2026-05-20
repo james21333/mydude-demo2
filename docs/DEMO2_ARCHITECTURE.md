@@ -120,6 +120,12 @@ Defines higher-level preset scenes that can short-circuit transform prompts like
 
 Browser and bridge both use the same preset data so the prompt can map to the same structure on either side.
 
+## Speech/listener regression guardrail
+
+Before changing SpeechRecognition, SpeechSynthesis, streamed speech queueing, mouth timers, barge-in, or latency behavior, read `docs/DEMO2_LISTENER_SPEECH_GUARDRAILS.md`.
+
+Core lesson: listener stability beats lipsync/latency. Do not bundle listener lifecycle changes with speech queue, mouth animation, or barge-in tuning. Keep changes small, browser-test listener behavior, and add git notes.
+
 ## Speech recognition flow
 
 - `SpeechRecognition` is the browser listener

@@ -9,6 +9,7 @@ This repo intentionally carries its own copy of the finished live avatar code so
 Before changing anything related to listener/speaker/mouth/websocket/transform/scene+drawing/shared JSON:
 
 - `AGENTS.md` (repo rules)
+- `docs/DEMO2_LISTENER_SPEECH_GUARDRAILS.md` (mandatory before listener/speaker/mouth/barge-in/latency changes)
 - `docs/DEMO2_ARCHITECTURE.md`
 - `docs/DEMO2_TRANSFORM_PIPELINE.md`
 - `docs/DEMO2_PHASE1_IMPLEMENTATION_PLAN.md` (durable rollout plan)
