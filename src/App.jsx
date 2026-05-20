@@ -3,6 +3,7 @@ import { Mic, RotateCcw, Sparkles } from 'lucide-react';
 import { createRoot } from 'react-dom/client';
 import drawingGrammar from '../shared/avatar-drawing-grammar.json';
 import qualityPresets from '../shared/avatar-quality-presets.json';
+import { generatePhase1SceneSpec } from '../shared/phase1/phase1-avatar-engine.mjs';
 import './styles.css';
 
 const ROOT_DOMAIN = 'mydude.live';
@@ -1033,6 +1034,25 @@ function DemoApp() {
     else finish();
   }
 
+  function phase1SeedForPrompt(prompt = '') {
+    const value = `${sessionIdRef.current}\n${String(prompt || '')}`;
+    let h = 2166136261;
+    for (let i = 0; i < value.length; i += 1) {
+      h ^= value.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+
+  function makeAvatar(prompt) {
+    if (PHASE1_BROWSER_ENABLED) {
+      const seed = phase1SeedForPrompt(prompt);
+      const phase1Spec = generatePhase1SceneSpec({ prompt, seed, qualityPresetId: null });
+      return sanitizeSceneSpec(phase1Spec, prompt);
+    }
+    return sanitizeSceneSpec({}, prompt);
+  }
+
   function buildAvatar(prompt) {
     statusRef.current = 'building';
     setStatus('building');
@@ -1652,10 +1672,6 @@ function Shape3D({ shape, material = 'glossyBlue', mouthPhase = 0 }) {
   if (shape === 'question') return <text y="30" textAnchor="middle" fontSize="112" fontWeight="900" fill="url(#shine-neon)" stroke="#0f172a" strokeWidth="3">?</text>;
   if (shape === 'microphone') return <g><rect x="-20" y="-60" width="40" height="82" rx="20" fill="url(#shine-chrome)" stroke="#64748b" strokeWidth="4"/><path d="M0 20 V74 M-34 74 H34" stroke="#cbd5e1" strokeWidth="8" strokeLinecap="round"/></g>;
   return <g><ellipse cx="0" cy="8" rx="70" ry="58" {...common}/><ellipse cx="-24" cy="-18" rx="30" ry="13" fill="#fff" opacity=".22" stroke="none"/></g>;
-}
-
-function makeAvatar(prompt) {
-  return sanitizeSceneSpec({}, prompt);
 }
 
 function makeLegacyAvatar(prompt) {
