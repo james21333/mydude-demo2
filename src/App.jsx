@@ -112,9 +112,13 @@ function pickBestVoice(voices, platform = detectVoicePlatform()) {
 }
 
 const DEFAULT_PROSODY = Object.freeze({ rate: 1.08, pitch: 1.08, volume: 1, pauseAfter: 0 });
-const MOUTH_PULSE_MS = 150;
-const MOUTH_CLOSE_MS = 130;
-const MOUTH_SEQUENCE = Object.freeze([2, 1, 0, 1, 2, 1, 0, 0]);
+const MOUTH_PULSE_MS = 115;
+const MOUTH_CLOSE_MS = 90;
+const MOUTH_SEQUENCE = Object.freeze([1, 2, 1, 0, 2, 1, 0]);
+const MOUTH_BOUNDARY_MIN_GAP_MS = 48;
+const BARGE_IN_MIN_SPEECH_MS = 1000;
+const BARGE_IN_VOLUME_THRESHOLD = 0.12;
+const BARGE_IN_REQUIRED_FRAMES = 8;
 const STANDARD_MOUTH_SCALE = Object.freeze({ x: 0.38, y: 0.2 });
 const DIRECTOR_PRESETS = Object.freeze({
   normal: { rate: 1.08, pitch: 1.08, volume: 1, pauseAfter: 0 },
@@ -706,7 +710,7 @@ function DemoApp() {
     const safeRate = Math.max(0.72, Math.min(1.35, Number(rate) || 1));
     const estimatedSpeechMs = Math.max(800, (words / 2.45) * 1000 / safeRate);
     const syllableMs = estimatedSpeechMs / Math.max(1, syllables);
-    return Math.max(105, Math.min(210, syllableMs));
+    return Math.max(82, Math.min(170, syllableMs));
   }
 
   function estimateUtteranceMs(text = '', rate = 1) {
@@ -845,10 +849,10 @@ function DemoApp() {
         const avg = data.reduce((sum, v) => sum + v, 0) / data.length / 255;
         setVolume(Math.max(0.08, Math.min(1, avg * 2.8)));
         if (statusRef.current === 'speaking' && activatedRef.current) {
-          const speakingLongEnough = performance.now() - speechStartedAtRef.current > 650;
-          const loudEnoughForBargeIn = avg > 0.075;
+          const speakingLongEnough = performance.now() - speechStartedAtRef.current > BARGE_IN_MIN_SPEECH_MS;
+          const loudEnoughForBargeIn = avg > BARGE_IN_VOLUME_THRESHOLD;
           bargeInFramesRef.current = speakingLongEnough && loudEnoughForBargeIn ? bargeInFramesRef.current + 1 : 0;
-          if (bargeInFramesRef.current >= 4) stopSpeakingAndListen('user started talking');
+          if (bargeInFramesRef.current >= BARGE_IN_REQUIRED_FRAMES) stopSpeakingAndListen('user started talking');
         } else {
           bargeInFramesRef.current = 0;
         }
@@ -1055,7 +1059,7 @@ function DemoApp() {
     setBrainStatus('speaker agent: connecting');
     statusRef.current = 'speaking';
     setStatus('speaking');
-    speechStartedAtRef.current = performance.now();
+    speechStartedAtRef.current = Number.POSITIVE_INFINITY;
     bargeInFramesRef.current = 0;
     streamQueueRef.current = [];
     streamSpeakingRef.current = false;
@@ -1071,7 +1075,7 @@ function DemoApp() {
     const instruction = `Answer naturally as My Dude. Do not force avatar-appearance questions or ask what you should look like. If the user asks you to change personality, vibe, or way of talking, adopt it and keep it until Reset. Use speech-director tags only when useful.`;
 
     const flushPending = (force = false) => {
-      const match = pending.match(/^([\s\S]*?[.!?…—]|[\s\S]{80,}?[ ,;:])/);
+      const match = pending.match(/^([\s\S]*?[.!?…—]|[\s\S]{38,}?[ ,;:])/);
       if (!force && !match) return;
       const chunk = (force ? pending : match[0]).trim();
       pending = force ? '' : pending.slice(match[0].length);
@@ -1121,8 +1125,10 @@ function DemoApp() {
         if (payload.type === 'thinking') setBrainStatus(`speaker agent: thinking (${payload.model || 'haiku'})`);
         if (payload.type === 'delta' && typeof payload.text === 'string') {
           fullText += payload.text;
+          pending += payload.text;
           const display = plainSpeechText(fullText);
           if (display) setMessage(display);
+          flushPending(false);
         }
         if (payload.type === 'scene' && payload.sceneSpec) {
           const nextScene = sanitizeSceneSpec(payload.sceneSpec, prompt);
@@ -1144,17 +1150,26 @@ function DemoApp() {
             appendLog(`Scene built: ${nextScene.summary}`);
           }
           const display = plainSpeechText(fullText || payload.text || fallback) || fallback;
-          pending = '';
-          streamQueueRef.current = [];
-          streamSpeakingRef.current = false;
-          streamAfterRef.current = null;
           if (speakerSocketRef.current === socket) speakerSocketRef.current = null;
           setBrainStatus(`speaker agent: final speech in ${payload.elapsedMs || Math.round(performance.now() - started)}ms`);
-          if (display) {
+          if (firstSpoken) {
+            flushPending(true);
+            setMessage(display || 'Listening now. Say anything.');
+            if (display) appendLog(`Speaker agent: ${display}`);
+            finishStreamWhenQuiet(speechRun);
+          } else if (display) {
+            pending = '';
+            streamQueueRef.current = [];
+            streamSpeakingRef.current = false;
+            streamAfterRef.current = null;
             setMessage(display);
             appendLog(`Speaker agent: ${display}`);
             speak(display, { after });
           } else {
+            pending = '';
+            streamQueueRef.current = [];
+            streamSpeakingRef.current = false;
+            streamAfterRef.current = null;
             setMessage('Listening now. Say anything.');
             after?.();
           }
@@ -1217,7 +1232,7 @@ function DemoApp() {
     const chunk = streamQueueRef.current.shift();
     if (!chunk) return;
     streamSpeakingRef.current = true;
-    speechStartedAtRef.current = performance.now();
+    speechStartedAtRef.current = Number.POSITIVE_INFINITY;
     bargeInFramesRef.current = 0;
     if (chunk.type === 'pause') {
       setMouthPhase(0);
@@ -1237,16 +1252,19 @@ function DemoApp() {
     } else {
       utterance.lang = 'en-US';
     }
-    const pulseMouth = () => pulseMouthFrame(false, 90);
+    const pulseMouth = () => pulseMouthFrame(false, 82);
     const startMouthPulse = () => {
       const pulseMs = mouthPulseMsForText(chunk.text, utterance.rate || 1);
       pulseMouthFrame(true);
       clearInterval(speakingTimer.current);
       speakingTimer.current = setInterval(pulseMouth, Math.max(MOUTH_PULSE_MS, pulseMs));
     };
-    utterance.onstart = startMouthPulse;
+    utterance.onstart = () => {
+      speechStartedAtRef.current = performance.now();
+      startMouthPulse();
+    };
     utterance.onboundary = (event) => {
-      if (event.name === 'word' || event.charIndex >= 0) pulseMouth();
+      if (event.name === 'word' || event.charIndex >= 0) pulseMouthFrame(false, MOUTH_BOUNDARY_MIN_GAP_MS);
     };
     let finished = false;
     let watchdog = null;
@@ -1265,7 +1283,6 @@ function DemoApp() {
     };
     utterance.onend = done;
     utterance.onerror = done;
-    startMouthPulse();
     watchdog = window.setTimeout(done, estimateUtteranceMs(chunk.text, utterance.rate || 1) + 1800);
     window.speechSynthesis.speak(utterance);
   }
@@ -1300,14 +1317,14 @@ function DemoApp() {
     clearTimeout(mouthCloseTimer.current);
     const speechRun = speechRunRef.current + 1;
     speechRunRef.current = speechRun;
-    speechStartedAtRef.current = performance.now();
+    speechStartedAtRef.current = Number.POSITIVE_INFINITY;
     bargeInFramesRef.current = 0;
     const speechPlan = options.speechPlan || compileSpeechPlan(text, options);
     const chunks = speechPlan.chunks.length ? speechPlan.chunks : [{ type: 'speak', text: plainSpeechText(text), ...DEFAULT_PROSODY }];
     setStatus('speaking');
     if (speechPlan.displayText && speechPlan.displayText !== text) appendLog(`Speech directed: ${speechPlan.displayText}`);
 
-    const pulseMouth = () => pulseMouthFrame(false, 90);
+    const pulseMouth = () => pulseMouthFrame(false, 82);
     const startMouthPulse = (text = '', rate = 1) => {
       const pulseMs = mouthPulseMsForText(text, rate);
       pulseMouthFrame(true);
@@ -1331,7 +1348,7 @@ function DemoApp() {
         return;
       }
       const utterance = new SpeechSynthesisUtterance(chunk.text);
-      speechStartedAtRef.current = performance.now();
+      speechStartedAtRef.current = Number.POSITIVE_INFINITY;
       bargeInFramesRef.current = 0;
       utterance.rate = chunk.rate || options.rate || 1.08;
       utterance.pitch = chunk.pitch || 1.08;
@@ -1342,9 +1359,12 @@ function DemoApp() {
       } else {
         utterance.lang = 'en-US';
       }
-      utterance.onstart = () => startMouthPulse(chunk.text, utterance.rate || 1);
+      utterance.onstart = () => {
+        speechStartedAtRef.current = performance.now();
+        startMouthPulse(chunk.text, utterance.rate || 1);
+      };
       utterance.onboundary = (event) => {
-        if (event.name === 'word' || event.charIndex >= 0) pulseMouth();
+        if (event.name === 'word' || event.charIndex >= 0) pulseMouthFrame(false, MOUTH_BOUNDARY_MIN_GAP_MS);
       };
       let finished = false;
       let watchdog = null;
@@ -1360,7 +1380,6 @@ function DemoApp() {
       };
       utterance.onend = () => finishChunk();
       utterance.onerror = () => finishChunk(80);
-      startMouthPulse(chunk.text, utterance.rate || 1);
       watchdog = window.setTimeout(() => finishChunk(), estimateUtteranceMs(chunk.text, utterance.rate || 1) + 1800);
       window.speechSynthesis.speak(utterance);
     };
