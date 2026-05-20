@@ -7,6 +7,11 @@ import path from 'node:path';
 const PORT = Number(process.env.PORT || 8788);
 const ALLOWED_ORIGIN = process.env.MYDUDE_ALLOWED_ORIGIN || 'https://demo2.mydude.live';
 const MODEL = 'gpt-4o-mini';
+function isPhase1BridgeEnabled() {
+  return process.env.MYDUDE_PHASE1 === '1';
+}
+const PHASE1_BRIDGE_ENABLED = isPhase1BridgeEnabled();
+
 const AGENT_DIR = process.env.MYDUDE_AGENT_DIR || '/home/josh/.openclaw/bridge-demo2/mydude-speaker-agent';
 const AUTH_PROFILE = '/home/josh/.openclaw/agents/main/agent/auth-profiles.json';
 const SERVER_CONFIG_PATH = path.join(AGENT_DIR, 'server-config.json');

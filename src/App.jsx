@@ -15,6 +15,11 @@ const ACTIVE_PROJECTS = [
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const params = new URLSearchParams(window.location.search);
 const BRAIN_ENABLED = params.get('brain') !== '0';
+function isPhase1BrowserEnabled() {
+  if (params.get('phase1') === '1') return true;
+  try { return window.localStorage?.getItem('phase1') === '1'; } catch { return false; }
+}
+const PHASE1_BROWSER_ENABLED = isPhase1BrowserEnabled();
 const VOICE_DEBUG_ENABLED = ['1', 'true'].includes(params.get('voices')) || ['1', 'true'].includes(params.get('voice')) || ['1', 'true'].includes(params.get('debug'));
 const BRIDGE_WS_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'ws://127.0.0.1:8788/speak'
