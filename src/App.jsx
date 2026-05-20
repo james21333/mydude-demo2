@@ -115,6 +115,9 @@ const DEFAULT_PROSODY = Object.freeze({ rate: 1.08, pitch: 1.08, volume: 1, paus
 const MOUTH_PULSE_MS = 150;
 const MOUTH_CLOSE_MS = 130;
 const MOUTH_SEQUENCE = Object.freeze([2, 1, 0, 1, 2, 1, 0, 0]);
+const BARGE_IN_MIN_SPEECH_MS = 1000;
+const BARGE_IN_VOLUME_THRESHOLD = 0.12;
+const BARGE_IN_REQUIRED_FRAMES = 8;
 const STANDARD_MOUTH_SCALE = Object.freeze({ x: 0.38, y: 0.2 });
 const DIRECTOR_PRESETS = Object.freeze({
   normal: { rate: 1.08, pitch: 1.08, volume: 1, pauseAfter: 0 },
@@ -845,10 +848,10 @@ function DemoApp() {
         const avg = data.reduce((sum, v) => sum + v, 0) / data.length / 255;
         setVolume(Math.max(0.08, Math.min(1, avg * 2.8)));
         if (statusRef.current === 'speaking' && activatedRef.current) {
-          const speakingLongEnough = performance.now() - speechStartedAtRef.current > 650;
-          const loudEnoughForBargeIn = avg > 0.075;
+          const speakingLongEnough = performance.now() - speechStartedAtRef.current > BARGE_IN_MIN_SPEECH_MS;
+          const loudEnoughForBargeIn = avg > BARGE_IN_VOLUME_THRESHOLD;
           bargeInFramesRef.current = speakingLongEnough && loudEnoughForBargeIn ? bargeInFramesRef.current + 1 : 0;
-          if (bargeInFramesRef.current >= 4) stopSpeakingAndListen('user started talking');
+          if (bargeInFramesRef.current >= BARGE_IN_REQUIRED_FRAMES) stopSpeakingAndListen('user started talking');
         } else {
           bargeInFramesRef.current = 0;
         }
@@ -1265,7 +1268,6 @@ function DemoApp() {
     };
     utterance.onend = done;
     utterance.onerror = done;
-    startMouthPulse();
     watchdog = window.setTimeout(done, estimateUtteranceMs(chunk.text, utterance.rate || 1) + 1800);
     window.speechSynthesis.speak(utterance);
   }
@@ -1360,7 +1362,6 @@ function DemoApp() {
       };
       utterance.onend = () => finishChunk();
       utterance.onerror = () => finishChunk(80);
-      startMouthPulse(chunk.text, utterance.rate || 1);
       watchdog = window.setTimeout(() => finishChunk(), estimateUtteranceMs(chunk.text, utterance.rate || 1) + 1800);
       window.speechSynthesis.speak(utterance);
     };
