@@ -19,7 +19,8 @@ You must read:
 
 1) `docs/DEMO2_ARCHITECTURE.md`
 2) `docs/DEMO2_TRANSFORM_PIPELINE.md`
-3) `docs/DEMO2_PHASES_MASTER_PROMPT.md`
+3) `docs/DEMO2_PHASE1_IMPLEMENTATION_PLAN.md`
+4) `docs/DEMO2_PHASES_MASTER_PROMPT.md`
 
 ## Phase 1 replacement rule (non-negotiable)
 

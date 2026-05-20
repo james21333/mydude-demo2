@@ -11,6 +11,7 @@ Before changing anything related to listener/speaker/mouth/websocket/transform/s
 - `AGENTS.md` (repo rules)
 - `docs/DEMO2_ARCHITECTURE.md`
 - `docs/DEMO2_TRANSFORM_PIPELINE.md`
+- `docs/DEMO2_PHASE1_IMPLEMENTATION_PLAN.md` (durable rollout plan)
 
 ## Routes
 
