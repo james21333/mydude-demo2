@@ -2,7 +2,7 @@
   "name": "mydude-demo2",
   "version": "0.2.0",
   "private": true,
-  "description": "Demo2 My Dude fork from v1.4 for alternate create/turn-into experiments.",
+  "description": "Finished My Dude live avatar version, deployed separately at demo2.mydude.live.",
   "type": "module",
   "scripts": {
     "build": "vite build && node scripts/validate.mjs",
