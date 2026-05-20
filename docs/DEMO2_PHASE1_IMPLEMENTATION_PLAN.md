@@ -24,8 +24,14 @@ Phase 1 replaces the **internal scene/avatar planning** logic with a determinist
 
 - Browser detects transform-like utterances via `shouldUpdateAvatar()` / `handleUserUtterance()` routing and calls an avatar/scene planner.
 - Bridge may generate a scene spec via `askSceneBrain()` (currently via Copilot JSON prompting) and streams back over websocket.
-- Browser must tolerate `scene` mid-stream and keeps the stable websocket message contract:
-  - `ready / thinking / delta / scene / reply / pong / reset / error`.
+- Browser must tolerate `scene` mid-stream and must preserve the **exact websocket ordering contract** for each utterance:
+  - Bridge → browser: `ready`
+  - Browser → bridge: `say`
+  - Bridge → browser: `thinking`
+  - Bridge → browser: `delta` (0+ times)
+  - Bridge → browser: `scene` (optional; may arrive mid-stream)
+  - Bridge → browser: `reply` (final)
+  - (Also supported out-of-band: `pong`, `reset`, `error`)
 - Output must remain valid under:
   - `sanitizeSceneSpec()` / `sanitizeDrawingLayers()`
   - `shared/avatar-drawing-grammar.json` (canonical grammar)
@@ -134,6 +140,14 @@ generatePhase1SceneSpec({
   - otherwise: preserve legacy behavior.
 - Do **not** change websocket usage; browser still accepts later bridge scene updates.
 
+**Mixed-flag rollout rule (deterministic precedence, Phase 1 Step 1):**
+
+- If the browser builds a **local Phase 1** `SceneSpec` for a given utterance, it may render that scene immediately as a **provisional** scene for that utterance.
+- If the bridge later sends a `scene` (or `reply.sceneSpec`) for that **same** utterance, the browser treats the **first** bridge-provided scene that arrives after the `say` as **authoritative** and may replace the provisional local scene **at most once**.
+- Any additional bridge `scene` messages for that same utterance (after the first authoritative replacement) should be ignored until the next utterance begins.
+
+This keeps the contract deterministic and avoids flicker/repeated swaps during mixed-flag rollout.
+
 **Acceptance criteria:**
 
 - “turn into a cow” works under `?phase1=1`.
@@ -190,7 +204,13 @@ generatePhase1SceneSpec({
 
 - **Listener/speaker:** never listen while speaking/building; anti-feedback token/routing pattern remains.
 - **Mouth:** `mouthPhase` is the *only* speaking signal; exactly one mouth layer with `role:"mouth"` attached to `head.mouth`.
-- **Websocket:** keep message `type` values/order/payload names stable (`ready/thinking/delta/scene/reply/pong/reset/error`), and keep “scene mid-stream tolerance”.
+- **Websocket:** keep message `type` values/order/payload names stable, and keep “scene mid-stream tolerance”.
+
+  Concretely, for each utterance we must preserve the ordering contract:
+
+  `ready → say → thinking → delta* → (scene) → reply`
+
+  (Also supported out-of-band: `pong`, `reset`, `error`)
 - **Triggers:** preserve legacy transform triggers; do not change `shouldUpdateAvatar()` or `wantsSceneSpec()` behavior initially.
 - **Contracts:** keep shared grammar/presets canonical; generator must attach via sockets/anchors (no free-positioned anatomy).
 
