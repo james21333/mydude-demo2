@@ -68,7 +68,7 @@ The demo app lives in `src/App.jsx`.
 
 - `talkWithBrain()` sets speaking state and streams a spoken reply
 - `buildAvatar()` also streams a reply, but first creates a local avatar spec with `makeAvatar()`
-- Brain mode opens `wss://bridge.mydude.live/speak`
+- Brain mode opens `wss://bridge2.mydude.live/speak`
 - The browser consumes streamed `delta`, `scene`, `reply`, `thinking`, and `reset` messages
 
 ### Reset flow
