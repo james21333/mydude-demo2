@@ -19,6 +19,24 @@ You must read:
 
 1) `docs/DEMO2_ARCHITECTURE.md`
 2) `docs/DEMO2_TRANSFORM_PIPELINE.md`
+3) `docs/DEMO2_PHASES_MASTER_PROMPT.md`
+
+## Phase 1 replacement rule (non-negotiable)
+
+We are starting **Phase 1** of the saved demo2 master prompt.
+
+- Phase 1 work is expected to **REPLACE the current** "turn into a" / "change into" style **transform pipeline**.
+- Phase 1 must **NOT** replace or break the demo2 **runtime contract**:
+  - listener routing + anti-feedback behavior (keep the `handleUserUtterance()` pattern: log → bump `listenTokenRef` → abort recognition → route reset/build/talk)
+  - never listen while speaking/building
+  - browser ↔ bridge websocket protocol compatibility (`ready → say → thinking → delta* → (optional scene) → reply`, plus `pong/reset/error`; browser must tolerate `scene` mid-stream)
+  - `mouthPhase` remains the *single* speaking signal driving mouth visuals; timer cleanup must remain correct on stop/reset/barge-in
+  - scene avatars must contain **exactly one** mouth layer with `role:"mouth"` (prefer `attach.socket:"head.mouth"`)
+- Browser `shouldUpdateAvatar()` and bridge `wantsSceneSpec()` must remain aligned (or the divergence must be explicitly documented).
+- Phase 1 output must remain valid under the existing shared contracts + sanitizers/renderer expectations unless you are explicitly migrating those contracts:
+  - `shared/avatar-drawing-grammar.json`
+  - `shared/avatar-quality-presets.json`
+
 
 ## Non-negotiable invariants
 

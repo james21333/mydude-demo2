@@ -18,6 +18,41 @@ This is the most fragile path in demo2 because it crosses:
 - mouth animation
 - reset / barge-in behavior
 
+## Phase 1 replacement guardrails (REPLACES the current "turn into / change into" pipeline)
+
+Phase 1 may replace *how* avatar/scene specs are generated, but it **MUST preserve** the demo2 runtime contract:
+
+- **Listener routing + anti-feedback:** keep the `handleUserUtterance()` pattern (log → bump `listenTokenRef` → abort recognition → route reset/build/talk). The abort/token bump prevents hearing-itself loops.
+- **Never listen while speaking/building.**
+- **Browser ↔ bridge websocket protocol compatibility:** `ready → say → thinking → delta* → (optional scene) → reply`, plus `pong/reset/error`. Browser must tolerate `scene` arriving mid-stream.
+- **Mouth/lip-sync contract:** `mouthPhase` remains the single speaking signal; stop/reset/barge-in must clear timers correctly.
+- **Single mouth layer invariant:** scene avatars must contain **exactly one** mouth layer with `role: "mouth"` (prefer `attach.socket: "head.mouth"`).
+- **Shared contracts stay authoritative:** Phase 1 output must survive existing sanitizers/renderer expectations unless you are explicitly migrating those contracts: `shared/avatar-drawing-grammar.json` + `shared/avatar-quality-presets.json`.
+
+### Phase 1 fragile seams to keep aligned
+
+If you touch any of these, treat it as a contract migration and update docs/tests accordingly:
+
+- browser gate: `shouldUpdateAvatar()`
+- utterance router: `handleUserUtterance()`
+- transform entrypoint: `buildAvatar()` / `makeAvatar()`
+- talk entrypoint: `talkWithBrain()`
+- browser sanitizers: `sanitizeSceneSpec()` / `sanitizeDrawingLayers()`
+- speaker streaming + mouth timers: `speak()` / `startStreamingSpeakerReply()`
+- lifecycle resets: `resetDemo()` / `stopSpeakingAndListen()`
+- bridge gate + scene builder: `wantsSceneSpec()` / `askSceneBrain()`
+- bridge sanitizers: `sanitizeSceneSpec()` (bridge side)
+- mouth placement: `role: "mouth"` + preferred `head.mouth` attachment
+
+### Phase 1 rollout checklist
+
+- [ ] Re-read `docs/DEMO2_ARCHITECTURE.md` before changing any Phase 1 code.
+- [ ] Confirm browser `shouldUpdateAvatar()` and bridge `wantsSceneSpec()` remain aligned (or document why they diverge).
+- [ ] Keep websocket message `type` names and ordering backward-compatible unless explicitly migrating.
+- [ ] Confirm the browser keeps speaking streamed text while the avatar can update mid-stream.
+- [ ] Confirm scene specs remain valid under the existing sanitizers and shared grammar/presets contracts.
+- [ ] Confirm exactly one mouth layer remains after sanitization and it still animates via `mouthPhase`.
+
 ## End-to-end path
 
 ### 1) Detection in the browser

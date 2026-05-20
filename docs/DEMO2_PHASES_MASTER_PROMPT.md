@@ -10,6 +10,13 @@ This file stores the user-provided master prompt/reference for **demo2.mydude.li
 - Final captured line: `production ready`
 - Preserve prompt text verbatim in captured sections
 
+## Implementation note for this repo (Phase 1)
+
+Phase 1 work in demo2 is expected to **replace the existing** "turn into a / change into" transform pipeline, but must **not** break the demo2 runtime contract (listener routing/anti-feedback, speaker streaming, websocket compatibility, and `mouthPhase`-driven mouth animation). Before Phase 1 changes, read:
+
+- `docs/DEMO2_ARCHITECTURE.md`
+- `docs/DEMO2_TRANSFORM_PIPELINE.md`
+
 
 ---
 
