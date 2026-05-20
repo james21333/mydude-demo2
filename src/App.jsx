@@ -646,6 +646,9 @@ function DemoApp() {
   const bargeInFramesRef = useRef(0);
   const bargeInCooldownRef = useRef(0);
   const personalityRef = useRef(null);
+  const utteranceSeqRef = useRef(0);
+  const sceneLatchRef = useRef({ utteranceSeq: 0, bridgeLatched: false });
+  const provisionalAvatarTimerRef = useRef(null);
 
   const avatarSeed = avatar?.prompt || 'voice-orb';
   const colors = useMemo(() => colorsFromName(avatarSeed), [avatarSeed]);
@@ -1072,7 +1075,9 @@ function DemoApp() {
     [28, 54, 78, 100].forEach((progress, index) => {
       setTimeout(() => setBuildProgress(progress), 120 + index * 160);
     });
-    setTimeout(() => {
+    clearTimeout(provisionalAvatarTimerRef.current);
+    provisionalAvatarTimerRef.current = setTimeout(() => {
+      if (sceneLatchRef.current.bridgeLatched) return;
       setAvatar(built);
       setMessage(current => current === 'Thinking…' ? `Built: ${built.summary}` : current);
       appendLog(`Avatar built: ${built.summary}`);
@@ -1080,6 +1085,8 @@ function DemoApp() {
   }
 
   function startStreamingSpeakerReply(prompt, built, fallback, after) {
+    const utteranceSeq = ++utteranceSeqRef.current;
+    sceneLatchRef.current = { utteranceSeq, bridgeLatched: false };
     setBrainStatus('speaker agent: connecting');
     statusRef.current = 'speaking';
     setStatus('speaking');
@@ -1097,6 +1104,21 @@ function DemoApp() {
     let firstSpoken = false;
     const started = performance.now();
     const instruction = `Answer naturally as My Dude. Do not force avatar-appearance questions or ask what you should look like. If the user asks you to change personality, vibe, or way of talking, adopt it and keep it until Reset. Use speech-director tags only when useful.`;
+
+    const maybeApplyBridgeScene = (sceneSpec, source) => {
+      if (!sceneSpec) return;
+      const latch = sceneLatchRef.current;
+      if (latch.utteranceSeq !== utteranceSeq) return;
+      if (latch.bridgeLatched) return;
+      latch.bridgeLatched = true;
+      sceneLatchRef.current = latch;
+      clearTimeout(provisionalAvatarTimerRef.current);
+      provisionalAvatarTimerRef.current = null;
+      const nextScene = sanitizeSceneSpec(sceneSpec, prompt);
+      setAvatar(nextScene);
+      setMessage(current => current === 'Thinking…' ? `Built: ${nextScene.summary}` : current);
+      appendLog(`Scene built (${source}): ${nextScene.summary}`);
+    };
 
     const flushPending = (force = false) => {
       const match = pending.match(/^([\s\S]*?[.!?…—]|[\s\S]{80,}?[ ,;:])/);
@@ -1152,12 +1174,7 @@ function DemoApp() {
           const display = plainSpeechText(fullText);
           if (display) setMessage(display);
         }
-        if (payload.type === 'scene' && payload.sceneSpec) {
-          const nextScene = sanitizeSceneSpec(payload.sceneSpec, prompt);
-          setAvatar(nextScene);
-          setMessage(current => current === 'Thinking…' ? `Built: ${nextScene.summary}` : current);
-          appendLog(`Scene built: ${nextScene.summary}`);
-        }
+        if (payload.type === 'scene' && payload.sceneSpec) maybeApplyBridgeScene(payload.sceneSpec, 'scene');
         if (payload.type === 'reply' && !settled) {
           settled = true;
           window.clearTimeout(timeout);
@@ -1166,11 +1183,7 @@ function DemoApp() {
             pending = payload.text;
           }
           if (payload.personality) personalityRef.current = payload.personality;
-          if (payload.sceneSpec) {
-            const nextScene = sanitizeSceneSpec(payload.sceneSpec, prompt);
-            setAvatar(nextScene);
-            appendLog(`Scene built: ${nextScene.summary}`);
-          }
+          if (payload.sceneSpec) maybeApplyBridgeScene(payload.sceneSpec, 'reply');
           const display = plainSpeechText(fullText || payload.text || fallback) || fallback;
           pending = '';
           streamQueueRef.current = [];
