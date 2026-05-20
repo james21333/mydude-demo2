@@ -4,6 +4,8 @@ import fs from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
+import { generatePhase1SceneSpec } from '../shared/phase1/phase1-avatar-engine.mjs';
+
 const PORT = Number(process.env.PORT || 8788);
 const ALLOWED_ORIGIN = process.env.MYDUDE_ALLOWED_ORIGIN || 'https://demo2.mydude.live';
 const MODEL = 'gpt-4o-mini';
@@ -201,6 +203,16 @@ function sanitizeSceneSpec(raw, text = '') {
 
 async function askSceneBrain(userText, sessionId = 'demo') {
   if (!wantsSceneSpec(userText)) return null;
+
+  if (PHASE1_BRIDGE_ENABLED) {
+    const seed = crypto.createHash('sha1')
+      .update(`${String(sessionId).slice(0, 64)}\n${String(userText).slice(0, 900)}`)
+      .digest()
+      .readUInt32BE(0);
+    const raw = generatePhase1SceneSpec({ prompt: userText, seed });
+    return sanitizeSceneSpec(raw, userText);
+  }
+
   const token = await getCopilotToken();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 5_000);
