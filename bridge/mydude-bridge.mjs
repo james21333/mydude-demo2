@@ -4,10 +4,10 @@ import fs from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
-const PORT = Number(process.env.PORT || 8787);
+const PORT = Number(process.env.PORT || 8788);
 const ALLOWED_ORIGIN = process.env.MYDUDE_ALLOWED_ORIGIN || 'https://demo2.mydude.live';
 const MODEL = 'gpt-4o-mini';
-const AGENT_DIR = '/home/josh/.openclaw/bridge/mydude-speaker-agent';
+const AGENT_DIR = process.env.MYDUDE_AGENT_DIR || '/home/josh/.openclaw/bridge-demo2/mydude-speaker-agent';
 const AUTH_PROFILE = '/home/josh/.openclaw/agents/main/agent/auth-profiles.json';
 const SERVER_CONFIG_PATH = path.join(AGENT_DIR, 'server-config.json');
 
@@ -527,7 +527,7 @@ const server = http.createServer(async (req, res) => {
     await ensureAgentFiles();
     const body = JSON.stringify({
       ok: true,
-      service: 'mydude-openclaw-bridge',
+      service: 'mydude-demo2-openclaw-bridge',
       status: 'phase-4-open-conversation-online',
       brain: `github-copilot/${MODEL}`,
       agentDir: AGENT_DIR,
