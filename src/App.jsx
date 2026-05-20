@@ -577,10 +577,217 @@ function inferEyes(text = '') { const l=text.toLowerCase(); if(/car/.test(l)) re
 function inferMouth(text = '') { const l=text.toLowerCase(); if(/computer|screen/.test(l)) return 'mouth_screen'; if(/car/.test(l)) return 'mouth_grille'; if(/bird/.test(l)) return 'mouth_beak'; if(/cow|dog|pig/.test(l)) return 'mouth_snout'; if(/funny|joke|silly/.test(l)) return 'mouth_grin'; return 'mouth_smile'; }
 
 function App() {
+  // Additive URL-driven debug surface.
+  // Hard rule: no behavior change unless `?imageOnly=1` is present.
+  if (params.get('imageOnly') === '1') return <ImageOnlyDebug />;
   const subdomain = getSubdomain();
   if (subdomain === 'demo2' || window.location.search.includes('demo=1')) return <DemoApp />;
   if (!subdomain) return <RootLanding />;
   return <ProjectPage subdomain={subdomain} />;
+}
+
+function ImageOnlyDebug() {
+  const search = window.location.search;
+  const query = useMemo(() => new URLSearchParams(search), [search]);
+  const initialPrompt = query.get('prompt') || '';
+  const initialSource = (query.get('source') || 'local').toLowerCase();
+  const showJson = query.get('showJson') === '1';
+  const auto = query.get('auto') === '1';
+  const phase1 = query.get('phase1') === '1';
+
+  const [prompt, setPrompt] = useState(initialPrompt);
+  const [source, setSource] = useState(['local', 'bridge'].includes(initialSource) ? initialSource : 'local');
+  const [status, setStatus] = useState('idle');
+  const [message, setMessage] = useState('imageOnly mode — no mic, no speech.');
+  const [scene, setScene] = useState(null);
+  const [sceneJson, setSceneJson] = useState('');
+  const [bridgeText, setBridgeText] = useState('');
+  const socketRef = useRef(null);
+
+  function parseUint32(value) {
+    if (value == null || value === '') return null;
+    const num = Number(value);
+    if (!Number.isFinite(num)) return null;
+    return (num >>> 0);
+  }
+
+  function seedFromPrompt(value) {
+    const text = String(value || '');
+    let h = 2166136261;
+    for (let i = 0; i < text.length; i += 1) {
+      h ^= text.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+
+  const seed = useMemo(() => {
+    const fromQuery = parseUint32(query.get('seed'));
+    return fromQuery ?? seedFromPrompt(prompt);
+  }, [query, prompt]);
+
+  function updateScene(nextScene, why = 'local') {
+    if (!nextScene) return;
+    setScene(nextScene);
+    try {
+      setSceneJson(JSON.stringify(nextScene, null, 2));
+    } catch {
+      setSceneJson('');
+    }
+    setMessage(`Scene loaded (${why}).`);
+  }
+
+  function stopBridge() {
+    try { socketRef.current?.close?.(); } catch {}
+    socketRef.current = null;
+  }
+
+  async function runLocal() {
+    setStatus('building');
+    setMessage('Building local scene…');
+    setBridgeText('');
+    stopBridge();
+
+    if (!phase1) {
+      const sanitized = sanitizeSceneSpec({}, prompt);
+      updateScene(sanitized, 'local (legacy)');
+      setStatus('done');
+      return;
+    }
+
+    const phase1Spec = generatePhase1SceneSpec({ prompt, seed, qualityPresetId: null });
+    const sanitized = sanitizeSceneSpec(phase1Spec, prompt);
+    updateScene(sanitized, 'local (phase1)');
+    setStatus('done');
+  }
+
+  async function runBridge() {
+    setStatus('connecting');
+    setMessage('Connecting to bridge…');
+    setBridgeText('');
+    stopBridge();
+
+    const sessionId = window.crypto?.randomUUID?.() || `imageOnly-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const instruction = 'imageOnly debug mode: return normal reply, may include sceneSpec; do not change websocket contract.';
+    let latched = false;
+
+    try {
+      const socket = new WebSocket(BRIDGE_WS_URL);
+      socketRef.current = socket;
+
+      socket.onmessage = (event) => {
+        let payload;
+        try { payload = JSON.parse(event.data); } catch { return; }
+
+        if (payload.type === 'ready') {
+          setStatus('speaking');
+          setMessage('Bridge ready — sending say…');
+          socket.send(JSON.stringify({
+            type: 'say',
+            sessionId,
+            text: prompt,
+            instruction,
+            avatar: null,
+            personality: null,
+          }));
+        }
+
+        if (payload.type === 'thinking') setMessage('Bridge thinking…');
+
+        if (payload.type === 'delta' && typeof payload.text === 'string') {
+          setBridgeText((current) => (current + payload.text));
+        }
+
+        const maybeLatch = (sceneSpec, why) => {
+          if (latched) return;
+          if (!sceneSpec) return;
+          latched = true;
+          const sanitized = sanitizeSceneSpec(sceneSpec, prompt);
+          updateScene(sanitized, why);
+        };
+
+        if (payload.type === 'scene' && payload.sceneSpec) maybeLatch(payload.sceneSpec, 'bridge (scene)');
+        if (payload.type === 'reply') {
+          if (payload.sceneSpec) maybeLatch(payload.sceneSpec, 'bridge (reply.sceneSpec)');
+          setStatus('done');
+          setMessage('Bridge reply complete.');
+          try { socket.close(); } catch {}
+        }
+
+        if (payload.type === 'error') {
+          setStatus('error');
+          setMessage(`Bridge error: ${payload.message || 'unknown'}`);
+          try { socket.close(); } catch {}
+        }
+      };
+
+      socket.onerror = () => {
+        setStatus('error');
+        setMessage('Bridge connection error.');
+      };
+
+      socket.onclose = () => {
+        if (socketRef.current === socket) socketRef.current = null;
+      };
+    } catch {
+      setStatus('error');
+      setMessage('Bridge unavailable.');
+    }
+  }
+
+  async function run() {
+    if (!prompt.trim()) {
+      setMessage('Provide ?prompt=... or type a prompt.');
+      return;
+    }
+    if (source === 'bridge') return runBridge();
+    return runLocal();
+  }
+
+  useEffect(() => {
+    if (!auto) return;
+    run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => () => stopBridge(), []);
+
+  return <main className="demo-shell">
+    <section className="demo-hero compact">
+      <p className="eyebrow"><Sparkles size={16}/> My Dude</p>
+      <div className={`status-pill ${status}`}>imageOnly</div>
+    </section>
+
+    <section className="stage">
+      {scene ? <SceneAvatar scene={scene} mouthPhase={0} status="idle" /> : <div className="avatar-card scene-card drawing-card idle built" style={{ opacity: 0.85 }}>
+        <div style={{ padding: 24, color: '#e2e8f0' }}>No scene yet.</div>
+      </div>}
+      <div className="voice-panel controls-below compact-controls">
+        <div className="control-copy">
+          <p>{message}</p>
+          <div className="listener-debug"><strong>Source:</strong> {source} · <strong>phase1:</strong> {phase1 ? '1' : '0'} · <strong>seed:</strong> {seed}<br/><strong>URL:</strong> {window.location.href}</div>
+        </div>
+        <div className="actions" style={{ gap: 10, flexWrap: 'wrap' }}>
+          <input
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="prompt"
+            style={{ minWidth: 320, flex: '1 1 320px' }}
+          />
+          <select value={source} onChange={(e) => setSource(e.target.value)}>
+            <option value="local">local</option>
+            <option value="bridge">bridge</option>
+          </select>
+          <button className="primary" onClick={run}>Run</button>
+        </div>
+      </div>
+    </section>
+
+    {(showJson || bridgeText) && <section className="log-panel">
+      {bridgeText && <div style={{ whiteSpace: 'pre-wrap' }}><strong>Bridge deltas (not spoken):</strong>\n{bridgeText}</div>}
+      {showJson && <div style={{ whiteSpace: 'pre-wrap' }}><strong>Sanitized sceneSpec:</strong>\n{sceneJson || '(none)'} </div>}
+    </section>}
+  </main>;
 }
 
 function RootLanding() {
