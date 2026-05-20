@@ -20,7 +20,11 @@ This is the most fragile path in demo2 because it crosses:
 
 ## Phase 1 replacement guardrails (REPLACES the current "turn into / change into" pipeline)
 
-Phase 1 may replace *how* avatar/scene specs are generated, but it **MUST preserve** the demo2 runtime contract:
+Phase 1 may replace *how* avatar/scene specs are generated, but it **MUST preserve** the demo2 runtime contract.
+
+Also: **Phase 1 rollout must keep accepting the legacy transform utterance triggers** unless/until we explicitly decide otherwise (at minimum: "turn into", "change into", "become", and any equivalent existing trigger paths), even if the underlying avatar-generation pipeline is replaced.
+
+The runtime contract includes:
 
 - **Listener routing + anti-feedback:** keep the `handleUserUtterance()` pattern (log → bump `listenTokenRef` → abort recognition → route reset/build/talk). The abort/token bump prevents hearing-itself loops.
 - **Never listen while speaking/building.**

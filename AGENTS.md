@@ -26,6 +26,7 @@ You must read:
 We are starting **Phase 1** of the saved demo2 master prompt.
 
 - Phase 1 work is expected to **REPLACE the current** "turn into a" / "change into" style **transform pipeline**.
+- **Phase 1 rollout must keep accepting the legacy transform utterance triggers** unless/until we explicitly decide otherwise (at minimum: "turn into", "change into", "become", and any equivalent existing trigger paths), even if the underlying avatar-generation pipeline is replaced.
 - Phase 1 must **NOT** replace or break the demo2 **runtime contract**:
   - listener routing + anti-feedback behavior (keep the `handleUserUtterance()` pattern: log → bump `listenTokenRef` → abort recognition → route reset/build/talk)
   - never listen while speaking/building
