@@ -6,7 +6,8 @@ This file stores the user-provided master prompt/reference for **demo2.mydude.li
 
 - Active project: **demo2** only
 - Treat demo2 as the only active project until the user explicitly says otherwise
-- This file may be appended over time as additional prompt parts arrive
+- Current capture status: **complete as received on 2026-05-20**
+- Final captured line: `production ready`
 - Preserve prompt text verbatim in captured sections
 
 
