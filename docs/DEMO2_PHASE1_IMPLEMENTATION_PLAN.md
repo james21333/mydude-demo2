@@ -29,7 +29,7 @@ Phase 1 replaces the **internal scene/avatar planning** logic with a determinist
   - Browser → bridge: `say`
   - Bridge → browser: `thinking`
   - Bridge → browser: `delta` (0+ times)
-  - Bridge → browser: `scene` (optional; may arrive mid-stream)
+  - Bridge → browser: `scene` (optional; may arrive at any point after `thinking` and may interleave with `delta` before the final `reply`)
   - Bridge → browser: `reply` (final)
   - (Also supported out-of-band: `pong`, `reset`, `error`)
 - Output must remain valid under:
@@ -145,6 +145,8 @@ generatePhase1SceneSpec({
 - If the browser builds a **local Phase 1** `SceneSpec` for a given utterance, it may render that scene immediately as a **provisional** scene for that utterance.
 - If the bridge later sends a `scene` (or `reply.sceneSpec`) for that **same** utterance, the browser treats the **first** bridge-provided scene that arrives after the `say` as **authoritative** and may replace the provisional local scene **at most once**.
 - Any additional bridge `scene` messages for that same utterance (after the first authoritative replacement) should be ignored until the next utterance begins.
+
+**Operational definition ("same utterance"):** the active transform turn for a single request, beginning when the browser sends `say` and ending when the terminal `reply` for that request is processed. The authoritative-scene latch resets when the next transform utterance begins (i.e., on the next `say`).
 
 This keeps the contract deterministic and avoids flicker/repeated swaps during mixed-flag rollout.
 
