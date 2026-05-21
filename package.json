@@ -5,10 +5,11 @@
   "description": "Finished My Dude live avatar version, deployed separately at demo2.mydude.live.",
   "type": "module",
   "scripts": {
-    "build": "vite build && node scripts/validate.mjs",
+    "build": "vite build && node scripts/validate.mjs && node scripts/phase1-parity.mjs",
     "deploy": "wrangler deploy",
-    "test": "vite build && node scripts/validate.mjs",
-    "dev": "vite --host 0.0.0.0"
+    "test": "vite build && node scripts/validate.mjs && node scripts/phase1-parity.mjs",
+    "dev": "vite --host 0.0.0.0",
+    "phase1:parity": "node scripts/phase1-parity.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
