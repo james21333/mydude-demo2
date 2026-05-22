@@ -29,8 +29,9 @@ export default {
 };
 
 function isLocalhost(hostname) {
-  const host = (hostname || '').toLowerCase();
-  return host === 'localhost' || host === '127.0.0.1';
+  const rawHost = (hostname || '').toLowerCase();
+  const host = rawHost.startsWith('[') && rawHost.endsWith(']') ? rawHost.slice(1, -1) : rawHost;
+  return host === 'localhost' || host === '127.0.0.1' || host === '::1';
 }
 
 function renderShell(hostname) {

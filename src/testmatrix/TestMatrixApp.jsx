@@ -58,7 +58,9 @@ function usePathTestId() {
 }
 
 function Nav({ active }) {
-  const isLocalhost = ['localhost', '127.0.0.1'].includes(String(window.location.hostname || '').toLowerCase());
+  const rawHost = String(window.location.hostname || '').toLowerCase();
+  const host = rawHost.startsWith('[') && rawHost.endsWith(']') ? rawHost.slice(1, -1) : rawHost;
+  const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(host);
   const items = isLocalhost
     ? [
         { id: 'test1', label: 'test1 (client sandbox)' },
