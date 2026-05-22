@@ -7,6 +7,10 @@
 - Route: `demo2.mydude.live/*`
 - Deploy path: GitHub Actions → Cloudflare Wrangler (`.github/workflows/deploy.yml`)
 
+## Public demo vs local dev routes
+
+In production, the Worker is intentionally strict: only `/test1` is meant to be public. `/test2`–`/test4` are localhost-only developer routes and should return 404 on `demo2.mydude.live`.
+
 ## GitHub setup (required)
 
 Repository secrets:

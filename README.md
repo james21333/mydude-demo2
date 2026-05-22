@@ -20,6 +20,15 @@ Before changing anything related to listener/speaker/mouth/websocket/transform/s
 - Cloudflare Worker route: `demo2.mydude.live/*`
 - Worker name: `mydude-demo2`
 
+## Public demo vs local dev routes
+
+This repo intentionally ships both a simple public demo lane and additional local-only test harnesses.
+
+- `/test1` is the only public, prompt-first route intended to work on `demo2.mydude.live`.
+- `/test2`–`/test4` are intentionally localhost-only for development/workbench workflows and should 404 in production.
+
+Why: keep the public demo surface area small and avoid exposing internal test harnesses.
+
 ## Workflow
 
 Pushes to `main` deploy through the repo's GitHub Actions Cloudflare workflow.
