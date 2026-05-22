@@ -58,12 +58,15 @@ function usePathTestId() {
 }
 
 function Nav({ active }) {
-  const items = [
-    { id: 'test1', label: 'test1 (client sandbox)' },
-    { id: 'test4', label: 'test4 (dev-only build runner)' },
-    { id: 'test3', label: 'test3 (dev-only build+validate)' },
-    { id: 'test2', label: 'test2 (dev-only scratchpad)' },
-  ];
+  const isLocalhost = ['localhost', '127.0.0.1'].includes(String(window.location.hostname || '').toLowerCase());
+  const items = isLocalhost
+    ? [
+        { id: 'test1', label: 'test1 (client sandbox)' },
+        { id: 'test4', label: 'test4 (dev-only build runner)' },
+        { id: 'test3', label: 'test3 (dev-only build+validate)' },
+        { id: 'test2', label: 'test2 (dev-only scratchpad)' },
+      ]
+    : [{ id: 'test1', label: 'test1 (client sandbox)' }];
   return (
     <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
       {items.map((it) => (
