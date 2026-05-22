@@ -3,6 +3,7 @@ import { Mic, RotateCcw, Sparkles } from 'lucide-react';
 import { createRoot } from 'react-dom/client';
 import drawingGrammar from '../shared/avatar-drawing-grammar.json';
 import qualityPresets from '../shared/avatar-quality-presets.json';
+import TestMatrixApp from './testmatrix/TestMatrixApp.jsx';
 import './styles.css';
 
 const ROOT_DOMAIN = 'mydude.live';
@@ -1675,4 +1676,10 @@ function colorName(hex) {
   return ({ '#38bdf8': 'blue', '#34d399': 'green', '#fb7185': 'red', '#a78bfa': 'purple', '#facc15': 'gold', '#60a5fa': 'sky-blue' })[hex] || 'colorful';
 }
 
-createRoot(document.getElementById('root')).render(<App />);
+function RootRouter() {
+  const path = window.location.pathname || '/';
+  if (/^\/(test[1-4])(\/|$)/.test(path)) return <TestMatrixApp />;
+  return <App />;
+}
+
+createRoot(document.getElementById('root')).render(<RootRouter />);
