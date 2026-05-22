@@ -5,9 +5,9 @@ const API_ORIGIN = 'http://localhost:8799';
 
 const EXECUTION = Object.freeze({
   test1: { id: 'browser', label: 'browser-only (public)' },
-  test2: { id: 'local', label: 'local runner required (localhost)' },
-  test3: { id: 'local', label: 'local runner required (localhost)' },
-  test4: { id: 'local', label: 'local runner required (localhost)' },
+  test2: { id: 'local', label: 'developer-only (requires local runner on this machine)' },
+  test3: { id: 'local', label: 'developer-only (requires local runner on this machine)' },
+  test4: { id: 'local', label: 'developer-only (requires local runner on this machine)' },
 });
 
 function useRunnerHealth(enabled) {
@@ -60,9 +60,9 @@ function usePathTestId() {
 function Nav({ active }) {
   const items = [
     { id: 'test1', label: 'test1 (client sandbox)' },
-    { id: 'test4', label: 'test4 (build runner)' },
-    { id: 'test3', label: 'test3 (build+validate)' },
-    { id: 'test2', label: 'test2 (throwaway copy)' },
+    { id: 'test4', label: 'test4 (dev-only build runner)' },
+    { id: 'test3', label: 'test3 (dev-only build+validate)' },
+    { id: 'test2', label: 'test2 (dev-only scratchpad)' },
   ];
   return (
     <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
@@ -132,7 +132,10 @@ function Layout({ title, mode, children }) {
               lineHeight: 1.35,
             }}
           >
-            This route is <strong>blocked</strong> until the local runner is started: <code>node scripts/testmatrix-server.mjs</code>
+            <strong>Developer-only page (not available on public deploy):</strong> this route is intentionally blocked unless the local
+            runner is running <em>on this machine</em> at <code>{API_ORIGIN}</code>.
+            <br />Start it with: <code>node scripts/testmatrix-server.mjs</code>
+            <br />If you just want a hosted/browser-only demo, use <a href="/test1" style={{ color: 'white' }}>/test1</a>.
             {runner.error ? (
               <>
                 <br />Last error: <code>{runner.error}</code>
@@ -233,11 +236,14 @@ function PromptPanel({
           {mode === 'test1' ? (
             <>Fast lane: client-only HTML/CSS. Preview is sandboxed + sanitized.</>
           ) : mode === 'test2' ? (
-            <>Scratchpad lane: local-only + non-persistent. Uses the same prompt-first flow but intentionally does not touch git.</>
+            <>
+              Developer-only lane (not available on public deploy): scratchpad + non-persistent. Requires the local runner on this machine.
+              Does not touch git.
+            </>
           ) : mode === 'test3' ? (
-            <>Gated lane: generates an app, then fail-closed validation runs before build.</>
+            <>Developer-only lane (not available on public deploy): generates an app, then fail-closed validation runs before build.</>
           ) : (
-            <>Build lane: server-side Vite build runner. Preview/artifacts first; logs are secondary.</>
+            <>Developer-only lane (not available on public deploy): server-side Vite build runner. Preview/artifacts first; logs are secondary.</>
           )}
           {!allowPersist ? (
             <>
@@ -539,7 +545,9 @@ function BuildUi({ mode, runnerOk }) {
 
   const blocked = runnerOk !== true;
   const blockedReason =
-    runnerOk === null ? 'checking local runner…' : `start it with: node scripts/testmatrix-server.mjs (expects ${API_ORIGIN})`;
+    runnerOk === null
+      ? 'checking local runner…'
+      : `developer-only route (not available on public deploy): start the local runner on this machine with node scripts/testmatrix-server.mjs (expects ${API_ORIGIN})`;
 
   useEffect(() => {
     if (!allowPersist) return;
@@ -708,7 +716,7 @@ function BuildUi({ mode, runnerOk }) {
 
 function Test4() {
   return (
-    <Layout mode="test4" title="demo2 /test4 — server-side vite build runner">
+    <Layout mode="test4" title="demo2 /test4 — developer-only (local runner) server-side Vite build runner">
       {({ runnerOk }) => (
         <>
           <Nav active="test4" />
@@ -721,7 +729,7 @@ function Test4() {
 
 function Test3() {
   return (
-    <Layout mode="test3" title="demo2 /test3 — build runner + validation gate">
+    <Layout mode="test3" title="demo2 /test3 — developer-only (local runner) build + validation gate">
       {({ runnerOk }) => (
         <>
           <Nav active="test3" />
@@ -734,7 +742,7 @@ function Test3() {
 
 function Test2() {
   return (
-    <Layout mode="test2" title="demo2 /test2 — throwaway temp build (local-only / commitless)">
+    <Layout mode="test2" title="demo2 /test2 — developer-only scratchpad (local runner / commitless)">
       {({ runnerOk }) => (
         <>
           <Nav active="test2" />
