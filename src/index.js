@@ -94,10 +94,11 @@ function buildGenerationPrompt(prompt, seed) {
 }
 
 function normalizeGenerated(value, prompt, seed, provider) {
-  const html = clampText(value?.html || '', 20000);
-  const imageCss = clampText(value?.imageCss || value?.css || '', 20000);
   const jsx = clampText(value?.jsx || '', 30000);
   const css = clampText(value?.css || '', 20000);
+  const derivedHtml = extractSvgFromJsx(jsx);
+  const html = clampText(value?.html || derivedHtml || '', 20000);
+  const imageCss = clampText(value?.imageCss || value?.css || '', 20000);
   if (!/<svg[\s>]/i.test(html)) throw new Error('LLM did not return an SVG drawing.');
   return {
     prompt,
@@ -109,6 +110,20 @@ function normalizeGenerated(value, prompt, seed, provider) {
     html,
     imageCss,
   };
+}
+
+function extractSvgFromJsx(jsx) {
+  const text = String(jsx || '');
+  const match = text.match(/<svg[\s\S]*?<\/svg>/i);
+  if (!match) return '';
+  return match[0]
+    .replace(/className=/g, 'class=')
+    .replace(/strokeWidth=/g, 'stroke-width=')
+    .replace(/strokeLinecap=/g, 'stroke-linecap=')
+    .replace(/strokeLinejoin=/g, 'stroke-linejoin=')
+    .replace(/fillRule=/g, 'fill-rule=')
+    .replace(/clipRule=/g, 'clip-rule=')
+    .replace(/<\/?React.Fragment[^>]*>/g, '');
 }
 
 function parseJsonObject(text) {
