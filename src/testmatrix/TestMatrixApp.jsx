@@ -337,6 +337,89 @@ function promptKeywords(prompt = '') {
     .slice(0, 6);
 }
 
+function promptSubject(prompt = '') {
+  const lower = String(prompt || '').toLowerCase();
+  if (/\b(car|cars|auto|automobile|vehicle|sedan|coupe|truck|suv|van)\b/.test(lower)) return 'car';
+  if (/\b(house|home|cabin|building)\b/.test(lower)) return 'house';
+  if (/\b(cat|kitten)\b/.test(lower)) return 'cat';
+  if (/\b(dog|puppy)\b/.test(lower)) return 'dog';
+  return 'abstract';
+}
+
+function buildCarScene({ palette, seed }) {
+  const body = ['#ef4444', '#2563eb', '#f59e0b', '#10b981'][seed % 4];
+  const roof = ['#b91c1c', '#1d4ed8', '#b45309', '#047857'][seed % 4];
+  return `
+  <rect width="720" height="420" rx="34" fill="url(#g-car-${seed})" />
+  <circle cx="612" cy="82" r="78" fill="${palette.accent}" opacity=".18" />
+  <path d="M0 314 C118 286, 182 338, 302 304 S535 274, 720 322 L720 420 L0 420 Z" fill="#dbeafe" opacity=".76" />
+  <path d="M0 342 C134 318, 234 366, 368 336 S574 314, 720 354 L720 420 L0 420 Z" fill="#bfdbfe" opacity=".94" />
+  <g filter="url(#shadow-car-${seed})">
+    <path d="M134 266 C154 214, 204 180, 274 178 L406 178 C474 178, 530 214, 562 266 Z" fill="${roof}" />
+    <path d="M188 192 L272 192 C253 218, 239 240, 229 262 L150 262 C158 232, 172 210, 188 192 Z" fill="#e0f2fe" opacity=".92" />
+    <path d="M286 192 L400 192 C444 194, 482 222, 511 262 L250 262 C258 238, 270 214, 286 192 Z" fill="#dbeafe" opacity=".94" />
+    <path d="M116 260 C126 232, 162 216, 210 216 L504 216 C560 216, 612 252, 626 304 L640 356 C642 366, 634 376, 622 376 L106 376 C91 376, 82 363, 88 350 Z" fill="${body}" />
+    <path d="M132 274 C174 258, 254 252, 366 254 C486 256, 574 276, 616 310 L626 338 L101 338 L116 294 C119 286, 124 280, 132 274 Z" fill="#ffffff" opacity=".10" />
+    <rect x="550" y="292" width="58" height="28" rx="14" fill="#fde68a" opacity=".98" />
+    <rect x="100" y="292" width="48" height="26" rx="13" fill="#fee2e2" opacity=".98" />
+    <rect x="292" y="278" width="74" height="10" rx="5" fill="rgba(15,23,42,.28)" />
+    <circle cx="198" cy="374" r="50" fill="#0f172a" />
+    <circle cx="198" cy="374" r="25" fill="#94a3b8" />
+    <circle cx="198" cy="374" r="10" fill="#f8fafc" />
+    <circle cx="520" cy="374" r="50" fill="#0f172a" />
+    <circle cx="520" cy="374" r="25" fill="#94a3b8" />
+    <circle cx="520" cy="374" r="10" fill="#f8fafc" />
+    <path d="M66 376 H654" stroke="#0f172a" stroke-width="10" stroke-linecap="round" opacity=".20" />
+  </g>`;
+}
+
+function buildHouseScene({ palette, seed }) {
+  const wall = ['#fde68a', '#bfdbfe', '#fecdd3', '#bbf7d0'][seed % 4];
+  return `
+  <rect width="720" height="420" rx="34" fill="url(#g-house-${seed})" />
+  <circle cx="596" cy="80" r="58" fill="#fef08a" opacity=".75" />
+  <path d="M0 322 C138 292, 247 346, 372 318 S575 300, 720 340 L720 420 L0 420 Z" fill="#bbf7d0" />
+  <g filter="url(#shadow-house-${seed})">
+    <path d="M166 232 L360 96 L554 232 Z" fill="#7c2d12" />
+    <rect x="210" y="224" width="300" height="150" rx="18" fill="${wall}" />
+    <rect x="330" y="284" width="60" height="90" rx="12" fill="#92400e" />
+    <rect x="246" y="262" width="58" height="48" rx="10" fill="#e0f2fe" />
+    <rect x="416" y="262" width="58" height="48" rx="10" fill="#e0f2fe" />
+  </g>`;
+}
+
+function buildPetScene({ palette, seed, kind }) {
+  const isCat = kind === 'cat';
+  return `
+  <rect width="720" height="420" rx="34" fill="url(#g-pet-${seed})" />
+  <circle cx="610" cy="78" r="82" fill="${palette.accent}" opacity=".22" />
+  <g filter="url(#shadow-pet-${seed})" transform="translate(0 8)">
+    <ellipse cx="360" cy="252" rx="160" ry="112" fill="#f8fafc" />
+    ${isCat ? '<path d="M244 164 L284 80 L328 176 Z" fill="#f8fafc"/><path d="M392 176 L436 80 L476 164 Z" fill="#f8fafc"/>' : '<ellipse cx="230" cy="178" rx="48" ry="72" fill="#e2e8f0"/><ellipse cx="490" cy="178" rx="48" ry="72" fill="#e2e8f0"/>'}
+    <circle cx="306" cy="238" r="16" fill="#0f172a" />
+    <circle cx="414" cy="238" r="16" fill="#0f172a" />
+    <path d="M350 274 Q360 286 370 274" fill="none" stroke="#0f172a" stroke-width="8" stroke-linecap="round" />
+    <path d="M330 306 Q360 328 390 306" fill="none" stroke="#0f172a" stroke-width="8" stroke-linecap="round" />
+  </g>`;
+}
+
+function buildAbstractScene({ palette, safeId, title, mode, chipText, dots }) {
+  return `
+  <rect width="720" height="420" rx="34" fill="url(#g-${safeId})" />
+  <circle cx="610" cy="78" r="82" fill="${palette.accent}" opacity=".22" />
+  <circle cx="92" cy="356" r="118" fill="#fff" opacity=".10" />
+  <g filter="url(#shadow-${safeId})">
+    <rect x="62" y="70" width="596" height="242" rx="30" fill="rgba(255,255,255,.16)" stroke="rgba(255,255,255,.28)" />
+    <path d="M126 272 C190 170, 260 225, 320 146 S454 106, 590 262" fill="none" stroke="${palette.accent}" stroke-width="22" stroke-linecap="round" opacity=".92" />
+    <circle cx="196" cy="152" r="46" fill="#fff" opacity=".88" />
+    <rect x="392" y="136" width="132" height="104" rx="24" fill="#fff" opacity=".84" />
+    ${dots}
+  </g>
+  <text x="64" y="48" class="modeText">${escapeHtml(mode.toUpperCase())} GENERATED IMAGE</text>
+  <text x="70" y="374" class="titleText">${title}</text>
+  ${chipText}`;
+}
+
 function buildPromptImage({ mode, prompt, seed, stylePick }) {
   const words = promptKeywords(prompt);
   const title = escapeHtml((String(prompt || '').trim() || `${mode} generated image`).slice(0, 90));
@@ -352,6 +435,14 @@ function buildPromptImage({ mode, prompt, seed, stylePick }) {
   const dots = chips
     .map((_, i) => `<circle cx="${96 + i * 86}" cy="252" r="${16 + ((seed + i * 7) % 16)}" class="dot dot${i % 3}" />`)
     .join('\n');
+  const subject = promptSubject(prompt);
+  const scene = subject === 'car'
+    ? buildCarScene({ palette, seed })
+    : subject === 'house'
+      ? buildHouseScene({ palette, seed })
+      : subject === 'cat' || subject === 'dog'
+        ? buildPetScene({ palette, seed, kind: subject })
+        : buildAbstractScene({ palette, safeId, title, mode, chipText, dots });
   const svg = `
 <svg class="generatedImage" viewBox="0 0 720 420" role="img" aria-label="Generated image for ${title}">
   <defs>
@@ -359,26 +450,29 @@ function buildPromptImage({ mode, prompt, seed, stylePick }) {
       <stop offset="0" stop-color="${palette.bg1}" />
       <stop offset="1" stop-color="${palette.bg2}" />
     </linearGradient>
+    <linearGradient id="g-car-${seed}" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#e0f2fe" />
+      <stop offset="1" stop-color="#f8fafc" />
+    </linearGradient>
+    <linearGradient id="g-house-${seed}" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#dbeafe" />
+      <stop offset="1" stop-color="#f8fafc" />
+    </linearGradient>
+    <linearGradient id="g-pet-${seed}" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#fef3c7" />
+      <stop offset="1" stop-color="#f8fafc" />
+    </linearGradient>
     <filter id="shadow-${safeId}" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="14" stdDeviation="18" flood-opacity=".32"/></filter>
+    <filter id="shadow-car-${seed}" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="16" stdDeviation="20" flood-opacity=".26"/></filter>
+    <filter id="shadow-house-${seed}" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="16" stdDeviation="20" flood-opacity=".24"/></filter>
+    <filter id="shadow-pet-${seed}" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="16" stdDeviation="20" flood-opacity=".22"/></filter>
   </defs>
-  <rect width="720" height="420" rx="34" fill="url(#g-${safeId})" />
-  <circle cx="610" cy="78" r="82" fill="${palette.accent}" opacity=".22" />
-  <circle cx="92" cy="356" r="118" fill="#fff" opacity=".10" />
-  <g filter="url(#shadow-${safeId})">
-    <rect x="62" y="70" width="596" height="242" rx="30" fill="rgba(255,255,255,.16)" stroke="rgba(255,255,255,.28)" />
-    <path d="M126 272 C190 170, 260 225, 320 146 S454 106, 590 262" fill="none" stroke="${palette.accent}" stroke-width="22" stroke-linecap="round" opacity=".92" />
-    <circle cx="196" cy="152" r="46" fill="#fff" opacity=".88" />
-    <rect x="392" y="136" width="132" height="104" rx="24" fill="#fff" opacity=".84" />
-    ${dots}
-  </g>
-  <text x="64" y="48" class="modeText">${escapeHtml(mode.toUpperCase())} GENERATED IMAGE</text>
-  <text x="70" y="374" class="titleText">${title}</text>
-  ${chipText}
-</svg>`;
+  ${scene}
+</svg>`
   const css = `
 :root{color-scheme:light}
 body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:#eef2ff;color:#0f172a}
-.wrap{min-height:100vh;display:grid;place-items:center;padding:28px;background:radial-gradient(circle at 30% 10%,#dbeafe,#f8fafc 48%,#e0e7ff)}
+.wrap{min-height:100svh;display:grid;place-items:center;padding:28px;background:radial-gradient(circle at 30% 10%,#dbeafe,#f8fafc 48%,#e0e7ff);box-sizing:border-box}
 .frame{width:min(940px,100%);display:grid;gap:16px}
 .generatedImage{display:block;width:100%;height:auto;border-radius:28px;box-shadow:0 24px 70px rgba(15,23,42,.22);background:white}
 .modeText{font:700 15px system-ui;letter-spacing:.14em;fill:${palette.fg};opacity:.92}
@@ -386,6 +480,7 @@ body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Aria
 .chipText{font:700 13px system-ui;fill:${palette.fg};opacity:.9}
 .dot{fill:white;opacity:.74}.dot1{fill:${palette.accent};opacity:.82}.dot2{fill:#0f172a;opacity:.22}
 .caption{font-size:14px;line-height:1.45;color:#334155;background:rgba(255,255,255,.72);border:1px solid rgba(148,163,184,.28);padding:12px 14px;border-radius:16px}
+@media (max-width:640px){.wrap{place-items:start center;padding:18px 14px 24px}.frame{gap:12px}.generatedImage{border-radius:24px;box-shadow:0 16px 46px rgba(15,23,42,.18)}.caption{font-size:13px;padding:11px 12px}}
 `;
   const html = `
 <div class="wrap">
