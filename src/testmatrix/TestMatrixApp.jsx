@@ -321,22 +321,92 @@ function escapeJsxText(s) {
   return String(s).replaceAll('{', '').replaceAll('}', '').replaceAll('`', '');
 }
 
+
+function isPublicHost() {
+  const rawHost = String(window.location.hostname || '').toLowerCase();
+  const host = rawHost.startsWith('[') && rawHost.endsWith(']') ? rawHost.slice(1, -1) : rawHost;
+  return !['localhost', '127.0.0.1', '::1'].includes(host);
+}
+
+function promptKeywords(prompt = '') {
+  return String(prompt || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .split(/\s+/)
+    .filter((w) => w.length > 2)
+    .slice(0, 6);
+}
+
+function buildPromptImage({ mode, prompt, seed, stylePick }) {
+  const words = promptKeywords(prompt);
+  const title = escapeHtml((String(prompt || '').trim() || `${mode} generated image`).slice(0, 90));
+  const palette = [
+    { bg1: '#0ea5e9', bg2: '#312e81', fg: '#ffffff', accent: '#fef08a' },
+    { bg1: '#22c55e', bg2: '#064e3b', fg: '#ecfdf5', accent: '#f97316' },
+    { bg1: '#a855f7', bg2: '#111827', fg: '#f5f3ff', accent: '#38bdf8' },
+    { bg1: '#fb7185', bg2: '#7f1d1d', fg: '#fff1f2', accent: '#34d399' },
+  ][stylePick % 4];
+  const safeId = `${mode}-${seed}`.replace(/[^a-z0-9-]/gi, '');
+  const chips = words.length ? words : ['prompt', 'image', mode];
+  const chipText = chips.map((word, i) => `<text x="${70 + i * 88}" y="330" class="chipText">${escapeHtml(word.slice(0, 10))}</text>`).join('\n');
+  const dots = chips
+    .map((_, i) => `<circle cx="${96 + i * 86}" cy="252" r="${16 + ((seed + i * 7) % 16)}" class="dot dot${i % 3}" />`)
+    .join('\n');
+  const svg = `
+<svg class="generatedImage" viewBox="0 0 720 420" role="img" aria-label="Generated image for ${title}">
+  <defs>
+    <linearGradient id="g-${safeId}" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="${palette.bg1}" />
+      <stop offset="1" stop-color="${palette.bg2}" />
+    </linearGradient>
+    <filter id="shadow-${safeId}" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="14" stdDeviation="18" flood-opacity=".32"/></filter>
+  </defs>
+  <rect width="720" height="420" rx="34" fill="url(#g-${safeId})" />
+  <circle cx="610" cy="78" r="82" fill="${palette.accent}" opacity=".22" />
+  <circle cx="92" cy="356" r="118" fill="#fff" opacity=".10" />
+  <g filter="url(#shadow-${safeId})">
+    <rect x="62" y="70" width="596" height="242" rx="30" fill="rgba(255,255,255,.16)" stroke="rgba(255,255,255,.28)" />
+    <path d="M126 272 C190 170, 260 225, 320 146 S454 106, 590 262" fill="none" stroke="${palette.accent}" stroke-width="22" stroke-linecap="round" opacity=".92" />
+    <circle cx="196" cy="152" r="46" fill="#fff" opacity=".88" />
+    <rect x="392" y="136" width="132" height="104" rx="24" fill="#fff" opacity=".84" />
+    ${dots}
+  </g>
+  <text x="64" y="48" class="modeText">${escapeHtml(mode.toUpperCase())} GENERATED IMAGE</text>
+  <text x="70" y="374" class="titleText">${title}</text>
+  ${chipText}
+</svg>`;
+  const css = `
+:root{color-scheme:light}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:#eef2ff;color:#0f172a}
+.wrap{min-height:100vh;display:grid;place-items:center;padding:28px;background:radial-gradient(circle at 30% 10%,#dbeafe,#f8fafc 48%,#e0e7ff)}
+.frame{width:min(940px,100%);display:grid;gap:16px}
+.generatedImage{display:block;width:100%;height:auto;border-radius:28px;box-shadow:0 24px 70px rgba(15,23,42,.22);background:white}
+.modeText{font:700 15px system-ui;letter-spacing:.14em;fill:${palette.fg};opacity:.92}
+.titleText{font:800 28px system-ui;fill:${palette.fg};letter-spacing:-.03em}
+.chipText{font:700 13px system-ui;fill:${palette.fg};opacity:.9}
+.dot{fill:white;opacity:.74}.dot1{fill:${palette.accent};opacity:.82}.dot2{fill:#0f172a;opacity:.22}
+.caption{font-size:14px;line-height:1.45;color:#334155;background:rgba(255,255,255,.72);border:1px solid rgba(148,163,184,.28);padding:12px 14px;border-radius:16px}
+`;
+  const html = `
+<div class="wrap">
+  <div class="frame">
+    ${svg}
+    <div class="caption"><strong>Prompt rendered as image.</strong> Seed ${seed}. This is a browser-safe generated visual, not just text output.</div>
+  </div>
+</div>`;
+  return { html, css };
+}
+
 function generateFromPrompt({ mode, prompt, seed, deterministic }) {
   const s = deterministic ? (seed >>> 0) : ((seed ^ (Date.now() & 0xffffffff)) >>> 0);
   const rnd = mulberry32(s || 1);
   const stylePick = Math.floor(rnd() * 4);
   const safeText = String(prompt || '').trim() || (mode === 'test1' ? 'Hello from test1.' : 'Hello from demo2 testmatrix.');
 
+  const image = buildPromptImage({ mode, prompt: safeText, seed: s, stylePick });
+
   if (mode === 'test1') {
-    const palette = [
-      { bg: '#0ea5e9', fg: 'white' },
-      { bg: '#a78bfa', fg: '#0b1220' },
-      { bg: '#34d399', fg: '#052e2b' },
-      { bg: '#fb7185', fg: '#0b1220' },
-    ][stylePick];
-    const html = `\n<div class="wrap">\n  <div class="card">\n    <div class="badge">test1</div>\n    <h2>${escapeHtml(safeText.slice(0, 140))}</h2>\n    <p>Client-side HTML/CSS only. No scripts, no fetch.</p>\n  </div>\n</div>\n`;
-    const css = `\n:root{color-scheme:light}\nbody{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}\n.wrap{min-height:100vh;display:grid;place-items:center;background:#f8fafc}\n.card{max-width:720px;margin:24px;padding:22px 20px;border-radius:18px;background:${palette.bg};color:${palette.fg};box-shadow:0 12px 40px rgba(2,6,23,.18)}\n.badge{display:inline-block;font-size:12px;opacity:.9;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28)}\nh2{margin:14px 0 8px;line-height:1.1;letter-spacing:-.02em}\np{margin:0;opacity:.9;line-height:1.45}\n`;
-    return { html, css };
+    return image;
   }
 
   const theme = [
@@ -361,8 +431,9 @@ function generateFromPrompt({ mode, prompt, seed, deterministic }) {
     </div>\n  );\n}\n`;
 
   const css = `:root{color-scheme:dark}body{margin:0}`;
-  return { jsx, css };
+  return { jsx, css, html: image.html, imageCss: image.css };
 }
+
 
 function IframePreview({ html, css }) {
   const srcDoc = useMemo(() => {
@@ -528,6 +599,7 @@ async function callBuild(endpoint, payload) {
 }
 
 function BuildUi({ mode, runnerOk }) {
+  const publicHosted = isPublicHost();
   const allowPersist = mode !== 'test2';
   const storageKey = `demo2_testmatrix_${mode}_history_v1`;
   const [prompt, setPrompt] = useState(`A small ${mode} demo app that makes it obvious the prompt worked.`);
@@ -537,6 +609,8 @@ function BuildUi({ mode, runnerOk }) {
   const [jobUrl, setJobUrl] = useState('');
   const [jsx, setJsx] = useState('');
   const [css, setCss] = useState('');
+  const [html, setHtml] = useState('');
+  const [imageCss, setImageCss] = useState('');
   const [history, setHistory] = useState(() => {
     if (!allowPersist) return [];
     try {
@@ -548,7 +622,7 @@ function BuildUi({ mode, runnerOk }) {
     }
   });
 
-  const blocked = runnerOk !== true;
+  const blocked = !publicHosted && runnerOk !== true;
   const blockedReason =
     runnerOk === null
       ? 'checking local runner…'
@@ -571,6 +645,27 @@ function BuildUi({ mode, runnerOk }) {
       const out = generateFromPrompt({ mode, prompt, seed: seedUsed, deterministic: deterministicUsed });
       setJsx(out.jsx);
       setCss(out.css);
+      setHtml(out.html || '');
+      setImageCss(out.imageCss || '');
+
+      if (publicHosted) {
+        setStatus('ok: rendered browser image');
+        const rec = {
+          id: nowId(),
+          createdAt: Date.now(),
+          prompt,
+          seed: seedUsed,
+          deterministic: deterministicUsed,
+          jsx: out.jsx,
+          css: out.css,
+          html: out.html,
+          imageCss: out.imageCss,
+          jobUrl: '',
+          jobId: 'browser-image',
+        };
+        setHistory((h) => [rec, ...h].slice(0, 24));
+        return;
+      }
 
       setStatus('building…');
       const json = await callBuild(`/api/${mode}/build`, { jsx: out.jsx, css: out.css });
@@ -621,6 +716,8 @@ function BuildUi({ mode, runnerOk }) {
     setDeterministic(Boolean(h.deterministic));
     setJsx(h.jsx || '');
     setCss(h.css || '');
+    setHtml(h.html || '');
+    setImageCss(h.imageCss || '');
     setJobUrl(h.jobUrl || '');
     setStatus('restored');
   }
@@ -630,6 +727,8 @@ function BuildUi({ mode, runnerOk }) {
       const out = generateFromPrompt({ mode, prompt, seed, deterministic });
       setJsx(out.jsx);
       setCss(out.css);
+      setHtml(out.html || '');
+      setImageCss(out.imageCss || '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -691,7 +790,9 @@ function BuildUi({ mode, runnerOk }) {
           </details>
         </div>
         <div>
-          {jobUrl ? (
+          {publicHosted ? (
+            <IframePreview html={html} css={imageCss} />
+          ) : jobUrl ? (
             <iframe
               sandbox="allow-scripts"
               referrerPolicy="no-referrer"
