@@ -61,8 +61,12 @@ async function generateWithWorkerAi({ env, prompt, seed }) {
       temperature: 0.35,
     });
     const text = result?.response || result?.text || result?.content || '';
-    const parsed = parseJsonObject(text);
-    return normalizeGenerated(parsed, prompt, seed, 'cloudflare-workers-ai');
+    try {
+      const parsed = parseJsonObject(text);
+      return normalizeGenerated(parsed, prompt, seed, 'cloudflare-workers-ai');
+    } catch (err) {
+      throw new Error(`${err?.message || 'LLM parse failed'} raw=${clampText(text, 900)}`);
+    }
   }
 
   if (env.OPENAI_API_KEY) {
