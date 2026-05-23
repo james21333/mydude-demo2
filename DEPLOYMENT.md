@@ -9,7 +9,9 @@
 
 ## Public demo vs local dev routes
 
-In production, the Worker is intentionally strict: only `/test1` is meant to be public. `/test2`–`/test4` are localhost-only developer routes and should return 404 on `demo2.mydude.live`.
+In production, `/test1` is the public, prompt-first route.
+
+`/test2`–`/test4` are developer-oriented harness routes and remain reachable on `demo2.mydude.live`, but they require a local runner for full functionality; when the runner is unavailable, the UI should show an honest blocked/dev-only state with command guidance.
 
 ## GitHub setup (required)
 

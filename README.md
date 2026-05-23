@@ -22,12 +22,12 @@ Before changing anything related to listener/speaker/mouth/websocket/transform/s
 
 ## Public demo vs local dev routes
 
-This repo intentionally ships both a simple public demo lane and additional local-only test harnesses.
+This repo intentionally ships both a simple public demo lane and additional developer-oriented test harnesses.
 
-- `/test1` is the only public, prompt-first route intended to work on `demo2.mydude.live`.
-- `/test2`–`/test4` are intentionally localhost-only for development/workbench workflows and should 404 in production.
+- `/test1` is the public, prompt-first route intended to work on `demo2.mydude.live`.
+- `/test2`–`/test4` are reachable on `demo2.mydude.live`, but they are **developer-oriented** and require a **local runner** for full functionality. When the runner is unavailable, the UI should show an honest blocked/dev-only state with command guidance.
 
-Why: keep the public demo surface area small and avoid exposing internal test harnesses.
+Why: keep the public demo surface area small while still allowing the four-test setup to be reachable for validation.
 
 ## Workflow
 

@@ -9,17 +9,11 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    // Public demo posture: only /test1 is reachable in production.
-    // Keep /test2-/test4 available for localhost/dev workflows.
-    if (/^\/test[2-4](\/|$)/.test(url.pathname) && !isLocalhost(url.hostname)) {
-      return new Response('Not Found', {
-        status: 404,
-        headers: {
-          'content-type': 'text/plain; charset=utf-8',
-          'cache-control': 'no-store'
-        }
-      });
-    }
+    // Public demo posture:
+    // - /test1 is the public, prompt-first route.
+    // - /test2-/test4 are developer-oriented harness routes.
+    //   They remain reachable on hosted deploys, but the UI should clearly indicate
+    //   when a local runner is required/unavailable.
     const assetResponse = await env.ASSETS?.fetch(request);
     if (assetResponse && assetResponse.status !== 404) return assetResponse;
     return new Response(renderShell(url.hostname.toLowerCase()), {
@@ -27,12 +21,6 @@ export default {
     });
   }
 };
-
-function isLocalhost(hostname) {
-  const rawHost = (hostname || '').toLowerCase();
-  const host = rawHost.startsWith('[') && rawHost.endsWith(']') ? rawHost.slice(1, -1) : rawHost;
-  return host === 'localhost' || host === '127.0.0.1' || host === '::1';
-}
 
 function renderShell(hostname) {
   const subdomain = getSubdomain(hostname);
