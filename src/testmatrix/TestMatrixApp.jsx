@@ -347,30 +347,32 @@ function promptSubject(prompt = '') {
 }
 
 function buildCarScene({ palette, seed }) {
-  const body = ['#ef4444', '#2563eb', '#f59e0b', '#10b981'][seed % 4];
-  const roof = ['#b91c1c', '#1d4ed8', '#b45309', '#047857'][seed % 4];
+  const body = ['#e11d48', '#2563eb', '#f97316', '#059669'][seed % 4];
+  const darkBody = ['#9f1239', '#1d4ed8', '#c2410c', '#047857'][seed % 4];
   return `
   <rect width="720" height="420" rx="34" fill="url(#g-car-${seed})" />
-  <circle cx="612" cy="82" r="78" fill="${palette.accent}" opacity=".18" />
-  <path d="M0 314 C118 286, 182 338, 302 304 S535 274, 720 322 L720 420 L0 420 Z" fill="#dbeafe" opacity=".76" />
-  <path d="M0 342 C134 318, 234 366, 368 336 S574 314, 720 354 L720 420 L0 420 Z" fill="#bfdbfe" opacity=".94" />
+  <circle cx="590" cy="74" r="64" fill="#fde68a" opacity=".95" />
+  <path d="M0 296 C120 270, 204 314, 318 292 S540 266, 720 306 L720 420 L0 420 Z" fill="#dbeafe" opacity=".9" />
+  <rect x="0" y="336" width="720" height="84" fill="#475569" />
+  <path d="M40 378 H680" stroke="#f8fafc" stroke-width="10" stroke-linecap="round" stroke-dasharray="54 34" opacity=".9" />
   <g filter="url(#shadow-car-${seed})">
-    <path d="M134 266 C154 214, 204 180, 274 178 L406 178 C474 178, 530 214, 562 266 Z" fill="${roof}" />
-    <path d="M188 192 L272 192 C253 218, 239 240, 229 262 L150 262 C158 232, 172 210, 188 192 Z" fill="#e0f2fe" opacity=".92" />
-    <path d="M286 192 L400 192 C444 194, 482 222, 511 262 L250 262 C258 238, 270 214, 286 192 Z" fill="#dbeafe" opacity=".94" />
-    <path d="M116 260 C126 232, 162 216, 210 216 L504 216 C560 216, 612 252, 626 304 L640 356 C642 366, 634 376, 622 376 L106 376 C91 376, 82 363, 88 350 Z" fill="${body}" />
-    <path d="M132 274 C174 258, 254 252, 366 254 C486 256, 574 276, 616 310 L626 338 L101 338 L116 294 C119 286, 124 280, 132 274 Z" fill="#ffffff" opacity=".10" />
-    <rect x="550" y="292" width="58" height="28" rx="14" fill="#fde68a" opacity=".98" />
-    <rect x="100" y="292" width="48" height="26" rx="13" fill="#fee2e2" opacity=".98" />
-    <rect x="292" y="278" width="74" height="10" rx="5" fill="rgba(15,23,42,.28)" />
-    <circle cx="198" cy="374" r="50" fill="#0f172a" />
-    <circle cx="198" cy="374" r="25" fill="#94a3b8" />
-    <circle cx="198" cy="374" r="10" fill="#f8fafc" />
-    <circle cx="520" cy="374" r="50" fill="#0f172a" />
-    <circle cx="520" cy="374" r="25" fill="#94a3b8" />
-    <circle cx="520" cy="374" r="10" fill="#f8fafc" />
-    <path d="M66 376 H654" stroke="#0f172a" stroke-width="10" stroke-linecap="round" opacity=".20" />
-  </g>`;
+    <path d="M108 288 C124 246, 164 224, 224 224 H492 C556 224, 610 260, 636 310 L650 338 C656 351, 646 366, 630 366 H98 C82 366, 72 350, 80 336 Z" fill="${body}" />
+    <path d="M208 224 C230 172, 280 146, 354 146 H422 C466 146, 506 176, 540 224 Z" fill="${darkBody}" />
+    <path d="M250 164 H348 V218 H206 C216 194, 230 176, 250 164 Z" fill="#e0f2fe" />
+    <path d="M366 164 H420 C450 164, 478 184, 504 218 H366 Z" fill="#dbeafe" />
+    <path d="M358 160 V224" stroke="rgba(15,23,42,.28)" stroke-width="8" stroke-linecap="round" />
+    <path d="M124 296 C196 276, 328 270, 470 280 C546 286, 600 306, 628 334 H92 C96 316, 106 304, 124 296 Z" fill="#ffffff" opacity=".16" />
+    <rect x="588" y="300" width="44" height="22" rx="11" fill="#fde047" />
+    <rect x="86" y="306" width="34" height="20" rx="10" fill="#fecaca" />
+    <rect x="318" y="254" width="80" height="12" rx="6" fill="rgba(15,23,42,.35)" />
+    <circle cx="198" cy="362" r="52" fill="#020617" />
+    <circle cx="198" cy="362" r="31" fill="#94a3b8" />
+    <circle cx="198" cy="362" r="13" fill="#f8fafc" />
+    <circle cx="522" cy="362" r="52" fill="#020617" />
+    <circle cx="522" cy="362" r="31" fill="#94a3b8" />
+    <circle cx="522" cy="362" r="13" fill="#f8fafc" />
+  </g>
+  <text x="44" y="58" class="modeText">CAR</text>`;
 }
 
 function buildHouseScene({ palette, seed }) {
