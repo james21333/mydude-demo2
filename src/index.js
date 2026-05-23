@@ -90,7 +90,7 @@ async function generateWithWorkerAi({ env, prompt, seed }) {
 }
 
 function buildGenerationPrompt(prompt, seed) {
-  return `Create a recognizable browser-rendered drawing for this prompt: ${JSON.stringify(prompt)}.\nSeed: ${seed}.\n\nReturn ONLY JSON with keys:\n{\n  "jsx": "React component source string; no imports except optional React; no fetch/eval/network",\n  "css": "CSS string",\n  "html": "safe HTML string containing one inline <svg> drawing that visually satisfies the prompt",\n  "imageCss": "CSS string for the html/svg preview",\n  "summary": "one short sentence"\n}\n\nRules:\n- The html must include an inline SVG drawing, not just text.\n- For simple prompts like car, dog, house, make the subject obvious at a glance.\n- No scripts, no event handlers, no external URLs, no images, no data URLs, no network calls.\n- Use only HTML/CSS/SVG that works in a sandboxed iframe.\n- Keep each string under 20k characters.`;
+  return `Create a recognizable browser-rendered drawing for this prompt: ${JSON.stringify(prompt)}.\nSeed: ${seed}.\n\nReturn ONLY strict JSON with double-quoted keys and JSON-escaped string values. Do not use markdown fences. Do not use JavaScript template literals/backticks. Keys:\n{\n  "jsx": "React component source string; no imports except optional React; no fetch/eval/network",\n  "css": "CSS string",\n  "html": "safe HTML string containing one inline <svg> drawing that visually satisfies the prompt",\n  "imageCss": "CSS string for the html/svg preview",\n  "summary": "one short sentence"\n}\n\nRules:\n- The html must include an inline SVG drawing, not just text.\n- For simple prompts like car, dog, house, make the subject obvious at a glance.\n- No scripts, no event handlers, no external URLs, no images, no data URLs, no network calls.\n- Use only HTML/CSS/SVG that works in a sandboxed iframe.\n- Keep each string under 20k characters.`;
 }
 
 function normalizeGenerated(value, prompt, seed, provider) {
@@ -120,8 +120,28 @@ function parseJsonObject(text) {
   }
   const start = raw.indexOf('{');
   const end = raw.lastIndexOf('}');
-  if (start >= 0 && end > start) return JSON.parse(raw.slice(start, end + 1));
+  if (start >= 0 && end > start) {
+    const objectText = raw.slice(start, end + 1);
+    try { return JSON.parse(objectText); } catch {}
+    const loose = parseLooseLlmObject(objectText);
+    if (loose) return loose;
+  }
+  const loose = parseLooseLlmObject(raw);
+  if (loose) return loose;
   throw new Error('LLM did not return valid JSON.');
+}
+
+function parseLooseLlmObject(raw) {
+  const out = {};
+  for (const key of ['jsx', 'css', 'html', 'imageCss', 'summary']) {
+    const template = raw.match(new RegExp(`["']?${key}["']?\\s*:\\s*` + '`' + `([\\s\\S]*?)` + '`', 'i'));
+    if (template) { out[key] = template[1]; continue; }
+    const quoted = raw.match(new RegExp(`["']?${key}["']?\\s*:\\s*"((?:\\\\.|[^"\\\\])*)"`, 'i'));
+    if (quoted) {
+      try { out[key] = JSON.parse(`"${quoted[1]}"`); } catch { out[key] = quoted[1]; }
+    }
+  }
+  return out.html || out.jsx || out.css ? out : null;
 }
 
 function jsonResponse(value, status = 200) {
