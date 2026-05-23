@@ -31,5 +31,7 @@ Why: keep the public demo surface area small and avoid exposing internal test ha
 
 ## Workflow
 
-Pushes to `main` deploy through the repo's GitHub Actions Cloudflare workflow.
+- The initial publish must push/merge to `main` so GitHub registers `.github/workflows/deploy.yml` on the remote default branch.
+- After that bootstrap merge, pushes to `main` deploy via GitHub Actions → Cloudflare Wrangler, and `workflow_dispatch` becomes available for future manual runs.
+
 Do not edit the frozen demo baseline repo for demo2 changes.

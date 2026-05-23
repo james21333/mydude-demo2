@@ -13,9 +13,31 @@ In production, the Worker is intentionally strict: only `/test1` is meant to be 
 
 ## GitHub setup (required)
 
-Repository secrets:
+### First publish (bootstrap note)
+
+GitHub will not offer **Run workflow** / `workflow_dispatch` until the workflow file exists on the remote default branch.
+
+So the **first** approved publish must push/merge this branch to `main` so GitHub registers:
+
+- `.github/workflows/deploy.yml`
+
+After that initial merge, deploys will happen on the `push` trigger to `main`, and future manual runs via `workflow_dispatch` will be available.
+
+### Repository secrets
+
+Set these GitHub repository secrets:
+
 - `CLOUDFLARE_API_TOKEN`
-- `CLOUDFLARE_ACCOUNT_ID`
+- `CLOUDFLARE_ACCOUNT_ID` (Cloudflare dashboard → your account)
+
+#### Cloudflare token requirements
+
+The `CLOUDFLARE_API_TOKEN` must be an API token that can:
+
+- deploy/update the `mydude-demo2` Worker (Workers access)
+- manage the route/zone needed to bind `demo2.mydude.live/*`
+
+Use the Cloudflare dashboard to generate a token with the minimal permissions that cover those two capabilities.
 
 Optional:
 - Create a GitHub Environment named `production` (the workflow targets it) and apply protection rules if desired.
