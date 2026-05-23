@@ -5,7 +5,7 @@ const API_ORIGIN = 'http://localhost:8799';
 
 const EXECUTION = Object.freeze({
   test1: { id: 'browser', label: 'browser-only (public)' },
-  test2: { id: 'local', label: 'developer-only (requires local runner on this machine)' },
+  test2: { id: 'browser', label: 'browser-only scratchpad (public)' },
   test3: { id: 'local', label: 'developer-only (requires local runner on this machine)' },
   test4: { id: 'local', label: 'developer-only (requires local runner on this machine)' },
 });
@@ -66,9 +66,12 @@ function Nav({ active }) {
         { id: 'test1', label: 'test1 (client sandbox)' },
         { id: 'test4', label: 'test4 (dev-only build runner)' },
         { id: 'test3', label: 'test3 (dev-only build+validate)' },
-        { id: 'test2', label: 'test2 (dev-only scratchpad)' },
+        { id: 'test2', label: 'test2 (browser scratchpad)' },
       ]
-    : [{ id: 'test1', label: 'test1 (client sandbox)' }];
+    : [
+        { id: 'test1', label: 'test1 (client sandbox)' },
+        { id: 'test2', label: 'test2 (browser scratchpad)' },
+      ];
   return (
     <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
       {items.map((it) => (
@@ -92,7 +95,7 @@ function Nav({ active }) {
 }
 
 function Layout({ title, mode, children }) {
-  const requiresRunner = mode !== 'test1';
+  const requiresRunner = mode !== 'test1' && mode !== 'test2';
   const runner = useRunnerHealth(requiresRunner);
   const exec = EXECUTION[mode] || { id: 'unknown', label: 'unknown' };
 
@@ -242,8 +245,7 @@ function PromptPanel({
             <>Fast lane: client-only HTML/CSS. Preview is sandboxed + sanitized.</>
           ) : mode === 'test2' ? (
             <>
-              Developer-only lane (not available on public deploy): scratchpad + non-persistent. Requires the local runner on this machine.
-              Does not touch git.
+              Browser-only scratchpad. Works on the public site and does not touch git.
             </>
           ) : mode === 'test3' ? (
             <>Developer-only lane (not available on public deploy): generates an app, then fail-closed validation runs before build.</>
@@ -719,11 +721,12 @@ function BuildUi({ mode, runnerOk }) {
     }
   });
 
-  const blocked = !publicHosted && runnerOk !== true;
+  const needsLocalBuild = mode === 'test3' || mode === 'test4';
+  const blocked = needsLocalBuild && runnerOk !== true;
   const blockedReason =
     runnerOk === null
       ? 'checking local runner…'
-      : `developer-only route (not available on public deploy): start the local runner on this machine with node scripts/testmatrix-server.mjs (expects ${API_ORIGIN})`;
+      : `developer-only build route: start the local runner on this machine with node scripts/testmatrix-server.mjs (expects ${API_ORIGIN})`;
 
   useEffect(() => {
     if (!allowPersist) return;
@@ -745,7 +748,7 @@ function BuildUi({ mode, runnerOk }) {
       setHtml(out.html || '');
       setImageCss(out.imageCss || '');
 
-      if (publicHosted) {
+      if (publicHosted || mode === 'test2') {
         setStatus('ok: rendered browser image');
         const rec = {
           id: nowId(),
@@ -862,21 +865,27 @@ function BuildUi({ mode, runnerOk }) {
                 <button onClick={() => navigator.clipboard?.writeText(css || '')} style={btnStyleTiny}>
                   Copy CSS
                 </button>
-                <button
-                  onClick={onBuildCurrentSource}
-                  disabled={blocked}
-                  style={{ ...btnStyleTiny, opacity: blocked ? 0.55 : 1, cursor: blocked ? 'not-allowed' : 'pointer' }}
-                  title={blocked ? blockedReason : ''}
-                >
-                  Build current source
-                </button>
+                {mode !== 'test2' ? (
+                  <button
+                    onClick={onBuildCurrentSource}
+                    disabled={blocked}
+                    style={{ ...btnStyleTiny, opacity: blocked ? 0.55 : 1, cursor: blocked ? 'not-allowed' : 'pointer' }}
+                    title={blocked ? blockedReason : ''}
+                  >
+                    Build current source
+                  </button>
+                ) : null}
               </div>
               <label style={{ fontSize: 12, opacity: 0.85 }}>JSX (exports default component)</label>
               <textarea value={jsx} onChange={(e) => setJsx(clampText(e.target.value))} style={taStyle} rows={16} />
               <label style={{ fontSize: 12, opacity: 0.85 }}>CSS</label>
               <textarea value={css} onChange={(e) => setCss(clampText(e.target.value))} style={taStyle} rows={10} />
               <div style={{ fontSize: 12, opacity: 0.75, lineHeight: 1.35 }}>
-                Requires local server <code>node scripts/testmatrix-server.mjs</code>. Writes under <code>.demo2/testmatrix</code> only.
+                {mode === 'test2' ? (
+                  <>Browser-only on the public site. Editing source here is for inspection/copying; Render regenerates the preview from the prompt.</>
+                ) : (
+                  <>Requires local server <code>node scripts/testmatrix-server.mjs</code>. Writes under <code>.demo2/testmatrix</code> only.</>
+                )}
                 {mode === 'test3' ? (
                   <>
                     <br />Validation is fail-closed; errors show in the status line.
@@ -945,12 +954,12 @@ function Test3() {
 
 function Test2() {
   return (
-    <Layout mode="test2" title="demo2 /test2 — developer-only scratchpad (local runner / commitless)">
+    <Layout mode="test2" title="demo2 /test2 — browser scratchpad">
       {({ runnerOk }) => (
         <>
           <Nav active="test2" />
           <div style={{ opacity: 0.9, lineHeight: 1.45, maxWidth: 920, marginBottom: 12 }}>
-            <strong>Warning:</strong> highest contamination-risk path. This is intentionally local-only and does not touch git.
+            Prompt sandbox: browser-only, public, and safe. It does not touch git or require a local runner.
           </div>
           <BuildUi mode="test2" runnerOk={runnerOk} />
         </>

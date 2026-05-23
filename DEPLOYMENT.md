@@ -9,9 +9,9 @@
 
 ## Public demo vs local dev routes
 
-In production, `/test1` is the public, prompt-first route.
+In production, `/test1` and `/test2` are public browser-only prompt routes. They must not mention localhost, Node scripts, local runners, or developer-only blockers.
 
-`/test2`–`/test4` are developer-oriented harness routes and remain reachable on `demo2.mydude.live`, but they require a local runner for full functionality; when the runner is unavailable, the UI should show an honest blocked/dev-only state with command guidance.
+`/test3`–`/test4` are developer-oriented harness routes and remain reachable on `demo2.mydude.live`, but they require a local runner for full functionality; when the runner is unavailable, the UI should show an honest blocked/dev-only state with command guidance.
 
 ## GitHub setup (required)
 
