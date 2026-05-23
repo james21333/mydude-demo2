@@ -20,7 +20,18 @@ Before changing anything related to listener/speaker/mouth/websocket/transform/s
 - Cloudflare Worker route: `demo2.mydude.live/*`
 - Worker name: `mydude-demo2`
 
+## Public demo vs local dev routes
+
+This repo intentionally ships both a simple public demo lane and additional developer-oriented test harnesses.
+
+- `/test1` is the public, prompt-first route intended to work on `demo2.mydude.live`.
+- `/test2`–`/test4` are reachable on `demo2.mydude.live`, but they are **developer-oriented** and require a **local runner** for full functionality. When the runner is unavailable, the UI should show an honest blocked/dev-only state with command guidance.
+
+Why: keep the public demo surface area small while still allowing the four-test setup to be reachable for validation.
+
 ## Workflow
 
-Pushes to `main` deploy through the repo's GitHub Actions Cloudflare workflow.
+- The initial publish must push/merge to `main` so GitHub registers `.github/workflows/deploy.yml` on the remote default branch.
+- After that bootstrap merge, pushes to `main` deploy via GitHub Actions → Cloudflare Wrangler, and `workflow_dispatch` becomes available for future manual runs.
+
 Do not edit the frozen demo baseline repo for demo2 changes.

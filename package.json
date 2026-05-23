@@ -9,7 +9,8 @@
     "deploy": "wrangler deploy",
     "test": "vite build && node scripts/validate.mjs && node scripts/phase1-parity.mjs",
     "dev": "vite --host 0.0.0.0",
-    "phase1:parity": "node scripts/phase1-parity.mjs"
+    "phase1:parity": "node scripts/phase1-parity.mjs",
+    "testmatrix:server": "node scripts/testmatrix-server.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

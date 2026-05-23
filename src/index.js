@@ -8,6 +8,12 @@ const CSS_FILES = ENTRY?.css || [];
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    // Public demo posture:
+    // - /test1 is the public, prompt-first route.
+    // - /test2-/test4 are developer-oriented harness routes.
+    //   They remain reachable on hosted deploys, but the UI should clearly indicate
+    //   when a local runner is required/unavailable.
     const assetResponse = await env.ASSETS?.fetch(request);
     if (assetResponse && assetResponse.status !== 404) return assetResponse;
     return new Response(renderShell(url.hostname.toLowerCase()), {
