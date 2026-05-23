@@ -9,7 +9,7 @@
 
 ## Public demo vs local dev routes
 
-In production, `/test1` and `/test2` are public browser-only prompt routes. They must not mention localhost, Node scripts, local runners, or developer-only blockers.
+In production, `/test1` is a public browser-only prompt route. `/test2` is a public hosted-LLM React/SVG generator route: it must call a hosted backend and must not mention localhost, Node scripts, local runners, or developer-only blockers.
 
 `/test3`–`/test4` are developer-oriented harness routes and remain reachable on `demo2.mydude.live`, but they require a local runner for full functionality; when the runner is unavailable, the UI should show an honest blocked/dev-only state with command guidance.
 

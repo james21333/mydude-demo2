@@ -9,9 +9,13 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
+    if (url.pathname === '/api/test2/generate' && request.method === 'POST') {
+      return handleTest2Generate(request, env);
+    }
+
     // Public demo posture:
-    // - /test1 is the public, prompt-first route.
-    // - /test2-/test4 are developer-oriented harness routes.
+    // - /test1 and /test2 are public prompt-first routes.
+    // - /test3-/test4 are developer-oriented harness routes.
     //   They remain reachable on hosted deploys, but the UI should clearly indicate
     //   when a local runner is required/unavailable.
     const assetResponse = await env.ASSETS?.fetch(request);
@@ -21,6 +25,113 @@ export default {
     });
   }
 };
+
+async function handleTest2Generate(request, env) {
+  let body = {};
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ error: 'Expected JSON body.' }, 400);
+  }
+
+  const prompt = clampText(body.prompt || '', 1200).trim();
+  const seed = Number.isFinite(Number(body.seed)) ? Number(body.seed) : 1;
+  if (!prompt) return jsonResponse({ error: 'Prompt is required.' }, 400);
+
+  try {
+    const generated = await generateWithWorkerAi({ env, prompt, seed });
+    return jsonResponse(generated, 200);
+  } catch (err) {
+    return jsonResponse({
+      error: err?.message || 'LLM generation failed.',
+      hint: 'test2 requires a hosted LLM backend. Configure a Cloudflare Workers AI binding named AI or an OPENAI_API_KEY secret.',
+    }, 502);
+  }
+}
+
+async function generateWithWorkerAi({ env, prompt, seed }) {
+  if (env.AI?.run) {
+    const aiPrompt = buildGenerationPrompt(prompt, seed);
+    const result = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+      messages: [
+        { role: 'system', content: 'You generate safe, self-contained React/SVG/CSS drawings. Return only valid JSON.' },
+        { role: 'user', content: aiPrompt },
+      ],
+      max_tokens: 2400,
+      temperature: 0.35,
+    });
+    const text = result?.response || result?.text || result?.content || '';
+    const parsed = parseJsonObject(text);
+    return normalizeGenerated(parsed, prompt, seed, 'cloudflare-workers-ai');
+  }
+
+  if (env.OPENAI_API_KEY) {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${env.OPENAI_API_KEY}` },
+      body: JSON.stringify({
+        model: env.OPENAI_MODEL || 'gpt-4o-mini',
+        temperature: 0.35,
+        max_tokens: 2400,
+        messages: [
+          { role: 'system', content: 'You generate safe, self-contained React/SVG/CSS drawings. Return only valid JSON.' },
+          { role: 'user', content: buildGenerationPrompt(prompt, seed) },
+        ],
+      }),
+    });
+    if (!res.ok) throw new Error(`OpenAI generation failed: HTTP ${res.status}`);
+    const json = await res.json();
+    const text = json?.choices?.[0]?.message?.content || '';
+    const parsed = parseJsonObject(text);
+    return normalizeGenerated(parsed, prompt, seed, 'openai');
+  }
+
+  throw new Error('No hosted LLM backend is configured for test2.');
+}
+
+function buildGenerationPrompt(prompt, seed) {
+  return `Create a recognizable browser-rendered drawing for this prompt: ${JSON.stringify(prompt)}.\nSeed: ${seed}.\n\nReturn ONLY JSON with keys:\n{\n  "jsx": "React component source string; no imports except optional React; no fetch/eval/network",\n  "css": "CSS string",\n  "html": "safe HTML string containing one inline <svg> drawing that visually satisfies the prompt",\n  "imageCss": "CSS string for the html/svg preview",\n  "summary": "one short sentence"\n}\n\nRules:\n- The html must include an inline SVG drawing, not just text.\n- For simple prompts like car, dog, house, make the subject obvious at a glance.\n- No scripts, no event handlers, no external URLs, no images, no data URLs, no network calls.\n- Use only HTML/CSS/SVG that works in a sandboxed iframe.\n- Keep each string under 20k characters.`;
+}
+
+function normalizeGenerated(value, prompt, seed, provider) {
+  const html = clampText(value?.html || '', 20000);
+  const imageCss = clampText(value?.imageCss || value?.css || '', 20000);
+  const jsx = clampText(value?.jsx || '', 30000);
+  const css = clampText(value?.css || '', 20000);
+  if (!/<svg[\s>]/i.test(html)) throw new Error('LLM did not return an SVG drawing.');
+  return {
+    prompt,
+    seed,
+    provider,
+    summary: clampText(value?.summary || 'Generated React/SVG drawing.', 500),
+    jsx: jsx || `export default function App(){ return <div dangerouslySetInnerHTML={{__html:${JSON.stringify(html)}}} />; }`,
+    css,
+    html,
+    imageCss,
+  };
+}
+
+function parseJsonObject(text) {
+  const raw = String(text || '').trim();
+  try { return JSON.parse(raw); } catch {}
+  const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/i)?.[1];
+  if (fenced) {
+    try { return JSON.parse(fenced); } catch {}
+  }
+  const start = raw.indexOf('{');
+  const end = raw.lastIndexOf('}');
+  if (start >= 0 && end > start) return JSON.parse(raw.slice(start, end + 1));
+  throw new Error('LLM did not return valid JSON.');
+}
+
+function jsonResponse(value, status = 200) {
+  return new Response(JSON.stringify(value), {
+    status,
+    headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
+  });
+}
+
+function clampText(value, max) { const text = String(value ?? ''); return text.length > max ? text.slice(0, max) : text; }
 
 function renderShell(hostname) {
   const subdomain = getSubdomain(hostname);

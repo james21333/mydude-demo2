@@ -8,6 +8,9 @@
     "directory": "./dist",
     "binding": "ASSETS"
   },
+  "ai": {
+    "binding": "AI"
+  },
   "workers_dev": true,
   "routes": [
     {

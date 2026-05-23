@@ -5,7 +5,7 @@ const API_ORIGIN = 'http://localhost:8799';
 
 const EXECUTION = Object.freeze({
   test1: { id: 'browser', label: 'browser-only (public)' },
-  test2: { id: 'browser', label: 'browser-only scratchpad (public)' },
+  test2: { id: 'llm', label: 'hosted LLM React/SVG generator' },
   test3: { id: 'local', label: 'developer-only (requires local runner on this machine)' },
   test4: { id: 'local', label: 'developer-only (requires local runner on this machine)' },
 });
@@ -66,11 +66,11 @@ function Nav({ active }) {
         { id: 'test1', label: 'test1 (client sandbox)' },
         { id: 'test4', label: 'test4 (dev-only build runner)' },
         { id: 'test3', label: 'test3 (dev-only build+validate)' },
-        { id: 'test2', label: 'test2 (browser scratchpad)' },
+        { id: 'test2', label: 'test2 (LLM generator)' },
       ]
     : [
         { id: 'test1', label: 'test1 (client sandbox)' },
-        { id: 'test2', label: 'test2 (browser scratchpad)' },
+        { id: 'test2', label: 'test2 (LLM generator)' },
       ];
   return (
     <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
@@ -245,7 +245,7 @@ function PromptPanel({
             <>Fast lane: client-only HTML/CSS. Preview is sandboxed + sanitized.</>
           ) : mode === 'test2' ? (
             <>
-              Browser-only scratchpad. Works on the public site and does not touch git.
+              Hosted LLM lane: generates React/JSX plus CSS/SVG from your prompt and renders it in a sandbox. Does not touch git.
             </>
           ) : mode === 'test3' ? (
             <>Developer-only lane (not available on public deploy): generates an app, then fail-closed validation runs before build.</>
@@ -697,6 +697,28 @@ async function callBuild(endpoint, payload) {
   }
 }
 
+async function callTest2Generate(payload) {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), 90_000);
+  try {
+    const res = await fetch('/api/test2/generate', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json?.error || json?.hint || `HTTP ${res.status}`);
+    return json;
+  } catch (err) {
+    if (err?.name === 'AbortError') throw new Error('LLM generation timed out');
+    throw err;
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+
 function BuildUi({ mode, runnerOk }) {
   const publicHosted = isPublicHost();
   const allowPersist = mode !== 'test2';
@@ -742,14 +764,16 @@ function BuildUi({ mode, runnerOk }) {
     setStatus('generating…');
     setJobUrl('');
     try {
-      const out = generateFromPrompt({ mode, prompt, seed: seedUsed, deterministic: deterministicUsed });
-      setJsx(out.jsx);
-      setCss(out.css);
+      const out = mode === 'test2'
+        ? await callTest2Generate({ prompt, seed: seedUsed, deterministic: deterministicUsed })
+        : generateFromPrompt({ mode, prompt, seed: seedUsed, deterministic: deterministicUsed });
+      setJsx(out.jsx || '');
+      setCss(out.css || '');
       setHtml(out.html || '');
-      setImageCss(out.imageCss || '');
+      setImageCss(out.imageCss || out.css || '');
 
       if (publicHosted || mode === 'test2') {
-        setStatus('ok: rendered browser image');
+        setStatus(mode === 'test2' ? `ok: LLM rendered via ${out.provider || 'hosted backend'}` : 'ok: rendered browser image');
         const rec = {
           id: nowId(),
           createdAt: Date.now(),
@@ -823,7 +847,7 @@ function BuildUi({ mode, runnerOk }) {
   }
 
   useEffect(() => {
-    if (!jsx && !css) {
+    if (!jsx && !css && mode !== 'test2') {
       const out = generateFromPrompt({ mode, prompt, seed, deterministic });
       setJsx(out.jsx);
       setCss(out.css);
@@ -882,7 +906,7 @@ function BuildUi({ mode, runnerOk }) {
               <textarea value={css} onChange={(e) => setCss(clampText(e.target.value))} style={taStyle} rows={10} />
               <div style={{ fontSize: 12, opacity: 0.75, lineHeight: 1.35 }}>
                 {mode === 'test2' ? (
-                  <>Browser-only on the public site. Editing source here is for inspection/copying; Render regenerates the preview from the prompt.</>
+                  <>Hosted LLM generation. Render asks the backend to create React/JSX plus CSS/SVG from the prompt, then shows the sandboxed preview here.</>
                 ) : (
                   <>Requires local server <code>node scripts/testmatrix-server.mjs</code>. Writes under <code>.demo2/testmatrix</code> only.</>
                 )}
@@ -954,12 +978,12 @@ function Test3() {
 
 function Test2() {
   return (
-    <Layout mode="test2" title="demo2 /test2 — browser scratchpad">
+    <Layout mode="test2" title="demo2 /test2 — LLM React/SVG generator">
       {({ runnerOk }) => (
         <>
           <Nav active="test2" />
           <div style={{ opacity: 0.9, lineHeight: 1.45, maxWidth: 920, marginBottom: 12 }}>
-            Prompt sandbox: browser-only, public, and safe. It does not touch git or require a local runner.
+            Prompt → hosted LLM → React/JSX + CSS/SVG → sandboxed preview. No local runner required.
           </div>
           <BuildUi mode="test2" runnerOk={runnerOk} />
         </>

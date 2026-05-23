@@ -24,8 +24,9 @@ Before changing anything related to listener/speaker/mouth/websocket/transform/s
 
 This repo intentionally ships both a simple public demo lane and additional developer-oriented test harnesses.
 
-- `/test1` is the public, prompt-first route intended to work on `demo2.mydude.live`.
-- `/test2`–`/test4` are reachable on `demo2.mydude.live`, but they are **developer-oriented** and require a **local runner** for full functionality. When the runner is unavailable, the UI should show an honest blocked/dev-only state with command guidance.
+- `/test1` is the public, prompt-first browser-only route intended to work on `demo2.mydude.live`.
+- `/test2` is the public hosted-LLM React/SVG generator route. It should send the prompt to the Worker backend and render returned JSX/CSS/SVG in the sandbox.
+- `/test3`–`/test4` are reachable on `demo2.mydude.live`, but they are **developer-oriented** and require a **local runner** for full functionality. When the runner is unavailable, the UI should show an honest blocked/dev-only state with command guidance.
 
 Why: keep the public demo surface area small while still allowing the four-test setup to be reachable for validation.
 
