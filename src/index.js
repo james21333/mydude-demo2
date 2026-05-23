@@ -61,8 +61,22 @@ async function generateWithWorkerAi({ env, prompt, seed }) {
       temperature: 0.35,
     });
     const text = result?.response || result?.text || result?.content || '';
-    const parsed = parseJsonObject(text);
-    return normalizeGenerated(parsed, prompt, seed, 'cloudflare-workers-ai');
+    try {
+      const parsed = parseJsonObject(text);
+      return normalizeGenerated(parsed, prompt, seed, 'cloudflare-workers-ai');
+    } catch (firstErr) {
+      const repaired = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+        messages: [
+          { role: 'system', content: 'Return only strict JSON. No markdown. No commentary.' },
+          { role: 'user', content: buildRepairPrompt(prompt, seed, text) },
+        ],
+        max_tokens: 2400,
+        temperature: 0.1,
+      });
+      const repairedText = repaired?.response || repaired?.text || repaired?.content || '';
+      const parsed = parseJsonObject(repairedText);
+      return normalizeGenerated(parsed, prompt, seed, 'cloudflare-workers-ai');
+    }
   }
 
   if (env.OPENAI_API_KEY) {
@@ -91,6 +105,10 @@ async function generateWithWorkerAi({ env, prompt, seed }) {
 
 function buildGenerationPrompt(prompt, seed) {
   return `Create a recognizable browser-rendered drawing for this prompt: ${JSON.stringify(prompt)}.\nSeed: ${seed}.\n\nReturn ONLY strict JSON with double-quoted keys and JSON-escaped string values. Do not use markdown fences. Do not use JavaScript template literals/backticks. Keys:\n{\n  "jsx": "React component source string; no imports except optional React; no fetch/eval/network",\n  "css": "CSS string",\n  "html": "safe HTML string containing one inline <svg> drawing that visually satisfies the prompt",\n  "imageCss": "CSS string for the html/svg preview",\n  "summary": "one short sentence"\n}\n\nRules:\n- The html must include an inline <svg>...</svg> drawing, not just text. Never write <vg>; the tag must be exactly <svg>.\n- For simple prompts like car, dog, house, make the subject obvious at a glance.\n- Use a 720x420 SVG viewBox and at least 8 visible shapes for the main subject.\n- If the prompt is car/vehicle: include a clear side-profile car body, roof, windshield/glass panels, two large circular wheels, headlights, and a road.\n- No scripts, no event handlers, no external URLs, no images, no data URLs, no network calls.\n- Use only HTML/CSS/SVG that works in a sandboxed iframe.\n- Keep each string under 20k characters.`;
+}
+
+function buildRepairPrompt(prompt, seed, previous) {
+  return `The previous LLM output was not usable. Convert or recreate it as STRICT JSON only. Prompt: ${JSON.stringify(prompt)}. Seed: ${seed}. Previous output: ${JSON.stringify(clampText(previous, 1800))}. Required JSON keys: jsx, css, html, imageCss, summary. html MUST contain inline <svg viewBox="0 0 720 420">...</svg>. If prompt is car, include car body, roof, windshield/glass panels, two circular wheels, headlights, and road. No markdown, no backticks outside JSON strings.`;
 }
 
 function normalizeGenerated(value, prompt, seed, provider) {
