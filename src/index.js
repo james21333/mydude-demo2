@@ -61,12 +61,8 @@ async function generateWithWorkerAi({ env, prompt, seed }) {
       temperature: 0.35,
     });
     const text = result?.response || result?.text || result?.content || '';
-    try {
-      const parsed = parseJsonObject(text);
-      return normalizeGenerated(parsed, prompt, seed, 'cloudflare-workers-ai');
-    } catch (err) {
-      throw new Error(`${err?.message || 'LLM parse failed'} raw=${clampText(text, 900)}`);
-    }
+    const parsed = parseJsonObject(text);
+    return normalizeGenerated(parsed, prompt, seed, 'cloudflare-workers-ai');
   }
 
   if (env.OPENAI_API_KEY) {
@@ -94,14 +90,14 @@ async function generateWithWorkerAi({ env, prompt, seed }) {
 }
 
 function buildGenerationPrompt(prompt, seed) {
-  return `Create a recognizable browser-rendered drawing for this prompt: ${JSON.stringify(prompt)}.\nSeed: ${seed}.\n\nReturn ONLY strict JSON with double-quoted keys and JSON-escaped string values. Do not use markdown fences. Do not use JavaScript template literals/backticks. Keys:\n{\n  "jsx": "React component source string; no imports except optional React; no fetch/eval/network",\n  "css": "CSS string",\n  "html": "safe HTML string containing one inline <svg> drawing that visually satisfies the prompt",\n  "imageCss": "CSS string for the html/svg preview",\n  "summary": "one short sentence"\n}\n\nRules:\n- The html must include an inline SVG drawing, not just text.\n- For simple prompts like car, dog, house, make the subject obvious at a glance.\n- No scripts, no event handlers, no external URLs, no images, no data URLs, no network calls.\n- Use only HTML/CSS/SVG that works in a sandboxed iframe.\n- Keep each string under 20k characters.`;
+  return `Create a recognizable browser-rendered drawing for this prompt: ${JSON.stringify(prompt)}.\nSeed: ${seed}.\n\nReturn ONLY strict JSON with double-quoted keys and JSON-escaped string values. Do not use markdown fences. Do not use JavaScript template literals/backticks. Keys:\n{\n  "jsx": "React component source string; no imports except optional React; no fetch/eval/network",\n  "css": "CSS string",\n  "html": "safe HTML string containing one inline <svg> drawing that visually satisfies the prompt",\n  "imageCss": "CSS string for the html/svg preview",\n  "summary": "one short sentence"\n}\n\nRules:\n- The html must include an inline <svg>...</svg> drawing, not just text. Never write <vg>; the tag must be exactly <svg>.\n- For simple prompts like car, dog, house, make the subject obvious at a glance.\n- No scripts, no event handlers, no external URLs, no images, no data URLs, no network calls.\n- Use only HTML/CSS/SVG that works in a sandboxed iframe.\n- Keep each string under 20k characters.`;
 }
 
 function normalizeGenerated(value, prompt, seed, provider) {
   const jsx = clampText(value?.jsx || '', 30000);
   const css = clampText(value?.css || '', 20000);
   const derivedHtml = extractSvgFromJsx(jsx);
-  const html = clampText(value?.html || derivedHtml || '', 20000);
+  const html = repairSvgTypos(clampText(value?.html || derivedHtml || '', 20000));
   const imageCss = clampText(value?.imageCss || value?.css || '', 20000);
   if (!/<svg[\s>]/i.test(html)) throw new Error('LLM did not return an SVG drawing.');
   return {
@@ -114,6 +110,12 @@ function normalizeGenerated(value, prompt, seed, provider) {
     html,
     imageCss,
   };
+}
+
+function repairSvgTypos(html) {
+  return String(html || '')
+    .replace(/<vg(\s|>)/gi, '<svg viewBox="0 0 150 100" xmlns="http://www.w3.org/2000/svg"$1')
+    .replace(/<\/vg>/gi, '</svg>');
 }
 
 function extractSvgFromJsx(jsx) {
