@@ -1,0 +1,733 @@
+{
+  "prompt": "Duck with wings that is an angel with a sword",
+  "userPrompt": "Duck with wings that is an angel with a sword",
+  "createdAt": "2026-05-25T11:16:57.801Z",
+  "provider": "github-copilot/gpt-4o-mini + github-copilot/gpt-4o-mini + github-copilot/gpt-4o-mini",
+  "expandedPrompt": "A cute angelic duck character with a soft, rounded silhouette. The duck has large, fluffy wings that are slightly translucent with a soft glow. Its feathers are a bright yellow with white accents, and it has a cheerful expression, featuring big, sparkling eyes and a small smile. The duck holds a small, ornate sword with a golden hilt, and it wears a tiny halo above its head. The character has small, pink blush markings on its cheeks and sparkles around the wings to enhance the angelic theme.",
+  "designBrief": {
+    "title": "Angel Duck Warrior",
+    "expandedPrompt": "A cute angelic duck character with a soft, rounded silhouette. The duck has large, fluffy wings that are slightly translucent with a soft glow. Its feathers are a bright yellow with white accents, and it has a cheerful expression, featuring big, sparkling eyes and a small smile. The duck holds a small, ornate sword with a golden hilt, and it wears a tiny halo above its head. The character has small, pink blush markings on its cheeks and sparkles around the wings to enhance the angelic theme.",
+    "subject": "angelic duck with wings and a sword",
+    "mood": "playful and heroic",
+    "palettePlan": {
+      "primary": "bright yellow",
+      "secondary": "white",
+      "accent": "gold"
+    },
+    "styleTags": [
+      "cute mascot",
+      "glossy SVG",
+      "blue-avatar quality"
+    ],
+    "visualChecklist": [
+      "fluffy yellow body",
+      "large translucent wings",
+      "small ornate sword",
+      "tiny halo above head",
+      "big sparkling eyes",
+      "pink blush markings",
+      "soft glow around wings",
+      "cheerful smile",
+      "gold accents on sword",
+      "sparkles around character"
+    ],
+    "requiredDetails": [
+      "fluffy body with yellow feathers",
+      "translucent wings with a soft glow",
+      "cheerful expression with sparkling eyes",
+      "small ornate sword with a golden hilt"
+    ],
+    "requiredRenderableDetails": [
+      {
+        "id": "wings",
+        "label": "wings",
+        "acceptableShapes": [
+          "wing"
+        ],
+        "acceptableSockets": [
+          "body.leftShoulder",
+          "body.rightShoulder"
+        ],
+        "minimumCount": 2
+      }
+    ],
+    "forbiddenDetails": [
+      "raw SVG",
+      "HTML",
+      "unvalidated custom shapes",
+      "external images"
+    ],
+    "qualityConstraints": [
+      "oversized expressive head",
+      "compact connected body",
+      "readable silhouette",
+      "valid renderer sockets only"
+    ]
+  },
+  "visualChecklist": [
+    "fluffy yellow body",
+    "large translucent wings",
+    "small ornate sword",
+    "tiny halo above head",
+    "big sparkling eyes",
+    "pink blush markings",
+    "soft glow around wings",
+    "cheerful smile",
+    "gold accents on sword",
+    "sparkles around character"
+  ],
+  "requiredDetails": [
+    "fluffy body with yellow feathers",
+    "translucent wings with a soft glow",
+    "cheerful expression with sparkling eyes",
+    "small ornate sword with a golden hilt"
+  ],
+  "expandedContent": "{\n  \"title\": \"Angel Duck Warrior\",\n  \"expandedPrompt\": \"A cute angelic duck character with a soft, rounded silhouette. The duck has large, fluffy wings that are slightly translucent with a soft glow. Its feathers are a bright yellow with white accents, and it has a cheerful expression, featuring big, sparkling eyes and a small smile. The duck holds a small, ornate sword with a golden hilt, and it wears a tiny halo above its head. The character has small, pink blush markings on its cheeks and sparkles around the wings to enhance the angelic theme.\",\n  \"subject\": \"angelic duck with wings and a sword\",\n  \"mood\": \"playful and heroic\",\n  \"palettePlan\": { \"primary\": \"bright yellow\", \"secondary\": \"white\", \"accent\": \"gold\" },\n  \"styleTags\": [\"cute mascot\", \"glossy SVG\", \"blue-avatar quality\"],\n  \"visualChecklist\": [\n    \"fluffy yellow body\",\n    \"large translucent wings\",\n    \"small ornate sword\",\n    \"tiny halo above head\",\n    \"big sparkling eyes\",\n    \"pink blush markings\",\n    \"soft glow around wings\",\n    \"cheerful smile\",\n    \"gold accents on sword\",\n    \"sparkles around character\"\n  ],\n  \"requiredDetails\": [\n    \"fluffy body with yellow feathers\",\n    \"translucent wings with a soft glow\",\n    \"cheerful expression with sparkling eyes\",\n    \"small ornate sword with a golden hilt\"\n  ],\n  \"requiredRenderableDetails\": [\n    { \"id\": \"wings\", \"label\": \"fluffy wings\", \"acceptableShapes\": [\"wingShape\"], \"acceptableSockets\": [\"socket.wing\"], \"minimumCount\": 2 },\n    { \"id\": \"sword\", \"label\": \"ornate sword\", \"acceptableShapes\": [\"swordShape\"], \"acceptableSockets\": [\"socket.holding\"], \"minimumCount\": 1 },\n    { \"id\": \"halo\", \"label\": \"tiny halo\", \"acceptableShapes\": [\"haloShape\"], \"acceptableSockets\": [\"socket.head\"], \"minimumCount\": 1 },\n    { \"id\": \"blush\", \"label\": \"pink blush markings\", \"acceptableShapes\": [\"blushShape\"], \"acceptableSockets\": [\"socket.face\"], \"minimumCount\": 2 }\n  ],\n  \"forbiddenDetails\": [\"raw SVG\", \"HTML\", \"unvalidated custom shapes\", \"external images\"],\n  \"qualityConstraints\": [\"oversized expressive head\", \"compact connected body\", \"readable silhouette\", \"valid renderer sockets only\"]\n}",
+  "rawContent": "{\n  \"title\": \"Angel Duck Warrior\",\n  \"summary\": \"A cute angelic duck character with fluffy wings and a small sword, embodying a playful and heroic spirit.\",\n  \"palette\": \"yellow\",\n  \"scene\": \"scene_farm\",\n  \"body\": \"body_blob\",\n  \"head\": \"head_round\",\n  \"eyes\": \"eyes_star\",\n  \"mouth\": \"mouth_smile\",\n  \"primitives\": {\n    \"wings\": \"body_flame\",\n    \"sword\": \"body_lightbulb\",\n    \"halo\": \"body_circle\"\n  },\n  \"layers\": [\n    {\"shape\":\"blob\",\"anchor\":\"free\",\"x\":0,\"y\":0,\"scale\":[0.6,0.5],\"rotate\":0,\"material\":\"glossyYellow\",\"role\":\"part\",\"z\":2,\"attach\":{\"socket\":\"body.center\"}},\n    {\"shape\":\"roundedBox\",\"anchor\":\"free\",\"x\":0,\"y\":0,\"scale\":[0.1,0.3],\"rotate\":0,\"material\":\"glossyGold\",\"role\":\"part\",\"z\":3,\"attach\":{\"socket\":\"body.rightHand\"}},\n    {\"shape\":\"wing\",\"anchor\":\"free\",\"x\":-20,\"y\":-10,\"scale\":[0.5,0.5],\"rotate\":-15,\"material\":\"cloud\",\"role\":\"part\",\"z\":4,\"attach\":{\"socket\":\"body.leftShoulder\"}},\n    {\"shape\":\"wing\",\"anchor\":\"free\",\"x\":20,\"y\":-10,\"scale\":[0.5,0.5],\"rotate\":15,\"material\":\"cloud\",\"role\":\"part\",\"z\":4,\"attach\":{\"socket\":\"body.rightShoulder\"}},\n    {\"shape\":\"halo\",\"anchor\":\"free\",\"x\":0,\"y\":20,\"scale\":[0.1,0.1],\"rotate\":0,\"material\":\"glossyGold\",\"role\":\"part\",\"z\":5,\"attach\":{\"socket\":\"head.top\"}},\n    {\"shape\":\"cuteEye\",\"anchor\":\"free\",\"x\":-10,\"y\":-10,\"scale\":[0.2,0.2],\"rotate\":0,\"material\":\"softWhite\",\"role\":\"eye\",\"z\":6,\"attach\":{\"socket\":\"head.leftEye\"}},\n    {\"shape\":\"cuteEye\",\"anchor\":\"free\",\"x\":10,\"y\":-10,\"scale\":[0.2,0.2],\"rotate\":0,\"material\":\"softWhite\",\"role\":\"eye\",\"z\":6,\"attach\":{\"socket\":\"head.rightEye\"}},\n    {\"shape\":\"mouthSmile\",\"anchor\":\"free\",\"x\":0,\"y\":10,\"scale\":[0.3,0.1],\"rotate\":0,\"material\":\"charcoalRubber\",\"role\":\"mouth\",\"z\":7,\"attach\":{\"socket\":\"head.mouth\"}},\n    {\"shape\":\"spark\",\"anchor\":\"free\",\"x\":-30,\"y\":-20,\"scale\":[0.1,0.1],\"rotate\":0,\"material\":\"glossyGold\",\"role\":\"part\",\"z\":8,\"attach\":{\"socket\":\"body.leftShoulder\"}},\n    {\"shape\":\"spark\",\"anchor\":\"free\",\"x\":30,\"y\":-20,\"scale\":[0.1,0.1],\"rotate\":0,\"material\":\"glossyGold\",\"role\":\"part\",\"z\":8,\"attach\":{\"socket\":\"body.rightShoulder\"}}\n  ]\n}",
+  "rawSceneSpec": {
+    "title": "Angel Duck Warrior",
+    "summary": "A cute angelic duck character with fluffy wings and a small sword, embodying a playful and heroic spirit.",
+    "palette": "yellow",
+    "scene": "scene_farm",
+    "body": "body_blob",
+    "head": "head_round",
+    "eyes": "eyes_star",
+    "mouth": "mouth_smile",
+    "primitives": {
+      "wings": "body_flame",
+      "sword": "body_lightbulb",
+      "halo": "body_circle"
+    },
+    "layers": [
+      {
+        "shape": "blob",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.6,
+          0.5
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "role": "part",
+        "z": 2,
+        "attach": {
+          "socket": "body.center"
+        }
+      },
+      {
+        "shape": "roundedBox",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.1,
+          0.3
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "role": "part",
+        "z": 3,
+        "attach": {
+          "socket": "body.rightHand"
+        }
+      },
+      {
+        "shape": "wing",
+        "anchor": "free",
+        "x": -20,
+        "y": -10,
+        "scale": [
+          0.5,
+          0.5
+        ],
+        "rotate": -15,
+        "material": "cloud",
+        "role": "part",
+        "z": 4,
+        "attach": {
+          "socket": "body.leftShoulder"
+        }
+      },
+      {
+        "shape": "wing",
+        "anchor": "free",
+        "x": 20,
+        "y": -10,
+        "scale": [
+          0.5,
+          0.5
+        ],
+        "rotate": 15,
+        "material": "cloud",
+        "role": "part",
+        "z": 4,
+        "attach": {
+          "socket": "body.rightShoulder"
+        }
+      },
+      {
+        "shape": "halo",
+        "anchor": "free",
+        "x": 0,
+        "y": 20,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": -10,
+        "y": -10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "role": "eye",
+        "z": 6,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": 10,
+        "y": -10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "role": "eye",
+        "z": 6,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "shape": "mouthSmile",
+        "anchor": "free",
+        "x": 0,
+        "y": 10,
+        "scale": [
+          0.3,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "charcoalRubber",
+        "role": "mouth",
+        "z": 7,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      },
+      {
+        "shape": "spark",
+        "anchor": "free",
+        "x": -30,
+        "y": -20,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "body.leftShoulder"
+        }
+      },
+      {
+        "shape": "spark",
+        "anchor": "free",
+        "x": 30,
+        "y": -20,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "body.rightShoulder"
+        }
+      },
+      {
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "rotate": 0,
+        "opacity": 1,
+        "shape": "mascotBody",
+        "scale": [
+          0.62,
+          0.6
+        ],
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 2,
+        "attach": {
+          "socket": "body.center"
+        }
+      },
+      {
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "rotate": 0,
+        "opacity": 1,
+        "shape": "mascotHead",
+        "scale": [
+          0.94,
+          0.84
+        ],
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "head.center"
+        }
+      }
+    ]
+  },
+  "sanitizedSceneSpec": {
+    "title": "Angel Duck Warrior",
+    "summary": "A cute angelic duck character with fluffy wings and a small sword, embodying a playful and heroic spirit.",
+    "palette": "blue",
+    "scene": "scene_farm",
+    "body": "body_blob",
+    "head": "head_round",
+    "eyes": "eyes_star",
+    "mouth": "mouth_smile",
+    "primitives": [
+      "scene_sky",
+      "body_blob",
+      "head_round",
+      "eyes_cartoon",
+      "mouth_smile",
+      "object_spark"
+    ],
+    "layers": [
+      {
+        "id": "blob-0",
+        "shape": "blob",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.6,
+          0.5
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "opacity": 1,
+        "role": "part",
+        "z": 2,
+        "attach": {
+          "socket": "body.center"
+        }
+      },
+      {
+        "id": "mascotBody-10",
+        "shape": "mascotBody",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.62,
+          0.6
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 2,
+        "attach": {
+          "socket": "body.center"
+        }
+      },
+      {
+        "id": "roundedBox-1",
+        "shape": "roundedBox",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.1,
+          0.3
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "opacity": 1,
+        "role": "part",
+        "z": 3,
+        "attach": {
+          "socket": "body.rightHand"
+        }
+      },
+      {
+        "id": "wing-2",
+        "shape": "wing",
+        "anchor": "free",
+        "x": -20,
+        "y": -10,
+        "scale": [
+          0.5,
+          0.5
+        ],
+        "rotate": -15,
+        "material": "cloud",
+        "opacity": 1,
+        "role": "part",
+        "z": 4,
+        "attach": {
+          "socket": "body.leftShoulder"
+        }
+      },
+      {
+        "id": "wing-3",
+        "shape": "wing",
+        "anchor": "free",
+        "x": 20,
+        "y": -10,
+        "scale": [
+          0.5,
+          0.5
+        ],
+        "rotate": 15,
+        "material": "cloud",
+        "opacity": 1,
+        "role": "part",
+        "z": 4,
+        "attach": {
+          "socket": "body.rightShoulder"
+        }
+      },
+      {
+        "id": "halo-4",
+        "shape": "halo",
+        "anchor": "free",
+        "x": 0,
+        "y": 20,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "opacity": 1,
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "id": "cuteEye-5",
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": -10,
+        "y": -10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "eye",
+        "z": 6,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "id": "cuteEye-6",
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": 10,
+        "y": -10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "eye",
+        "z": 6,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "id": "mouthSmile-7",
+        "shape": "mouthSmile",
+        "anchor": "free",
+        "x": 0,
+        "y": 10,
+        "scale": [
+          0.3,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "charcoalRubber",
+        "opacity": 1,
+        "role": "mouth",
+        "z": 7,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      },
+      {
+        "id": "spark-8",
+        "shape": "spark",
+        "anchor": "free",
+        "x": -30,
+        "y": -20,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "opacity": 1,
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "body.leftShoulder"
+        }
+      },
+      {
+        "id": "spark-9",
+        "shape": "spark",
+        "anchor": "free",
+        "x": 30,
+        "y": -20,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "opacity": 1,
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "body.rightShoulder"
+        }
+      },
+      {
+        "id": "mascotHead-11",
+        "shape": "mascotHead",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.94,
+          0.84
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "head.center"
+        }
+      }
+    ]
+  },
+  "rawReactCssCharacterContent": "{\n  \"componentName\": \"AngelDuckWarrior\",\n  \"styleSystem\": \"my-dude-react-css-scaffold\",\n  \"title\": \"Angel Duck Warrior\",\n  \"summary\": \"A playful and heroic angelic duck character with fluffy wings and a small sword.\",\n  \"cssVariables\": {\n    \"--dude-primary\": \"#FFEA00\",\n    \"--dude-secondary\": \"#FFFFFF\",\n    \"--dude-accent\": \"#FFD700\",\n    \"--dude-eye\": \"#FFFFFF\",\n    \"--dude-panel\": \"rgba(255,255,255,.18)\",\n    \"--dude-mouth\": \"#0f172a\"\n  },\n  \"headShape\": \"rounded\",\n  \"bodyShape\": \"compact\",\n  \"expression\": \"excited\",\n  \"parts\": [\n    { \"type\": \"wing\", \"side\": \"left\", \"label\": \"fluffy wing\", \"tone\": \"primary\" },\n    { \"type\": \"wing\", \"side\": \"right\", \"label\": \"fluffy wing\", \"tone\": \"primary\" },\n    { \"type\": \"halo\", \"label\": \"tiny halo\", \"tone\": \"accent\" },\n    { \"type\": \"sword\", \"label\": \"ornate sword\", \"tone\": \"accent\" },\n    { \"type\": \"blush\", \"side\": \"left\", \"label\": \"pink blush\", \"tone\": \"accent\" },\n    { \"type\": \"blush\", \"side\": \"right\", \"label\": \"pink blush\", \"tone\": \"accent\" },\n    { \"type\": \"sparkle\", \"label\": \"wing sparkle\", \"tone\": \"secondary\" }\n  ],\n  \"notes\": [\n    \"Features a fluffy yellow body with white accents.\",\n    \"Wings are large and translucent with a soft glow.\",\n    \"Cheerful expression with big sparkling eyes.\",\n    \"Includes a small ornate sword with a golden hilt.\",\n    \"Tiny halo above head and pink blush markings on cheeks.\"\n  ]\n}",
+  "rawReactCssCharacter": {
+    "componentName": "AngelDuckWarrior",
+    "styleSystem": "my-dude-react-css-scaffold",
+    "title": "Angel Duck Warrior",
+    "summary": "A playful and heroic angelic duck character with fluffy wings and a small sword.",
+    "cssVariables": {
+      "--dude-primary": "#FFEA00",
+      "--dude-secondary": "#FFFFFF",
+      "--dude-accent": "#FFD700",
+      "--dude-eye": "#FFFFFF",
+      "--dude-panel": "rgba(255,255,255,.18)",
+      "--dude-mouth": "#0f172a"
+    },
+    "headShape": "rounded",
+    "bodyShape": "compact",
+    "expression": "excited",
+    "parts": [
+      {
+        "type": "wing",
+        "side": "left",
+        "label": "fluffy wing",
+        "tone": "primary"
+      },
+      {
+        "type": "wing",
+        "side": "right",
+        "label": "fluffy wing",
+        "tone": "primary"
+      },
+      {
+        "type": "halo",
+        "label": "tiny halo",
+        "tone": "accent"
+      },
+      {
+        "type": "sword",
+        "label": "ornate sword",
+        "tone": "accent"
+      },
+      {
+        "type": "blush",
+        "side": "left",
+        "label": "pink blush",
+        "tone": "accent"
+      },
+      {
+        "type": "blush",
+        "side": "right",
+        "label": "pink blush",
+        "tone": "accent"
+      },
+      {
+        "type": "sparkle",
+        "label": "wing sparkle",
+        "tone": "secondary"
+      }
+    ],
+    "notes": [
+      "Features a fluffy yellow body with white accents.",
+      "Wings are large and translucent with a soft glow.",
+      "Cheerful expression with big sparkling eyes.",
+      "Includes a small ornate sword with a golden hilt.",
+      "Tiny halo above head and pink blush markings on cheeks."
+    ]
+  },
+  "reactCssCharacter": {
+    "kind": "react-css-character",
+    "componentName": "AngelDuckWarrior",
+    "styleSystem": "my-dude-react-css-scaffold",
+    "title": "Angel Duck Warrior",
+    "summary": "A playful and heroic angelic duck character with fluffy wings and a small sword.",
+    "cssVariables": {
+      "--dude-primary": "#FFEA00",
+      "--dude-secondary": "#FFFFFF",
+      "--dude-accent": "#FFD700",
+      "--dude-eye": "#FFFFFF",
+      "--dude-panel": "rgba(255,255,255,.18)",
+      "--dude-mouth": "#0f172a"
+    },
+    "headShape": "rounded",
+    "bodyShape": "compact",
+    "expression": "excited",
+    "parts": [
+      {
+        "type": "wing",
+        "side": "left",
+        "tone": "primary",
+        "label": "fluffy wing"
+      },
+      {
+        "type": "wing",
+        "side": "right",
+        "tone": "primary",
+        "label": "fluffy wing"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "accent",
+        "label": "tiny halo"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "accent",
+        "label": "ornate sword"
+      },
+      {
+        "type": "badge",
+        "side": "left",
+        "tone": "accent",
+        "label": "pink blush"
+      },
+      {
+        "type": "badge",
+        "side": "right",
+        "tone": "accent",
+        "label": "pink blush"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "secondary",
+        "label": "wing sparkle"
+      },
+      {
+        "type": "antenna",
+        "side": "center",
+        "tone": "accent",
+        "label": "glowing antenna"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "accent",
+        "label": "prompt badge"
+      }
+    ],
+    "notes": [
+      "Features a fluffy yellow body with white accents.",
+      "Wings are large and translucent with a soft glow.",
+      "Cheerful expression with big sparkling eyes.",
+      "Includes a small ornate sword with a golden hilt.",
+      "Tiny halo above head and pink blush markings on cheeks."
+    ]
+  },
+  "validation": {
+    "ok": true,
+    "errors": []
+  },
+  "coverage": {
+    "ok": true,
+    "checks": [
+      {
+        "id": "wings",
+        "label": "wings",
+        "ok": true,
+        "count": 2,
+        "minimumCount": 2,
+        "layers": [
+          "wing-2",
+          "wing-3"
+        ]
+      }
+    ],
+    "missingRequiredDetails": []
+  },
+  "enrichments": [],
+  "options": {
+    "enrichmentEnabled": true,
+    "coverageMode": "enforced",
+    "commitRequested": true
+  },
+  "repairs": 0
+}
