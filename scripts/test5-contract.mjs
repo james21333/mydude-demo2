@@ -14,11 +14,16 @@ assert(/function Test5AvatarLab\s*\(/.test(app), 'frontend Test5AvatarLab compon
 assert(/\/test5\(\\\/\|\$\)/.test(app) || /test5/.test(app), 'RootRouter does not expose /test5');
 assert(/\/test5\/avatar/.test(app), 'frontend does not call the test5 avatar endpoint');
 assert(/<SceneAvatar\s+scene=\{scene\}/.test(app), 'frontend does not render returned SceneSpec with SceneAvatar');
+assert(/expandedPrompt|designBrief|visualChecklist/.test(app), 'frontend does not expose expanded prompt/design brief receipts');
 assert(/function generateTest5Avatar\s*\(/.test(bridge), 'bridge generateTest5Avatar is missing');
 assert(/req\.method === 'POST' && req\.url\?\.startsWith\('\/test5\/avatar'\)/.test(bridge), 'bridge POST /test5/avatar route is missing');
+assert(/function expandTest5Prompt\s*\(/.test(bridge), 'bridge prompt expander stage is missing');
+assert(/generateTest5SceneSpec\s*\([^)]*designBrief/.test(bridge), 'SceneSpec generator must consume the expanded design brief');
 assert(/callTest5Llm/.test(bridge), 'bridge does not call an LLM for test5');
 assert(/skipPreset: true/.test(bridge), 'test5 sanitizer must skip baked quality presets to prove fresh generation');
 assert(/artifacts\/test5\/generated/.test(bridge), 'test5 artifacts are not saved under artifacts/test5/generated');
+assert(/expandedPrompt/.test(bridge) && /visualChecklist/.test(bridge), 'test5 artifacts do not save expanded prompt/checklist receipts');
 assert(/git', \['commit'/.test(bridge), 'test5 successful generations are not committed');
+assert(/TEST5_AUTO_PUSH/.test(bridge) && /git', \['push'/.test(bridge), 'test5 successful generations do not support auto-push');
 
 console.log('test5 contract passed');

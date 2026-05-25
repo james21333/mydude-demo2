@@ -256,39 +256,68 @@ function parseJsonObject(text = '') {
   throw new Error('LLM did not return a JSON object');
 }
 
-function test5SystemPrompt() {
-  return `You are the live /test5 My Dude avatar drawing engine. You dynamically create a NEW polished avatar drawing recipe for the user's prompt.
+function test5ExpanderSystemPrompt() {
+  return `You are the /test5 My Dude avatar art director. Expand a short user request into a detailed, renderer-aware avatar design brief.
+Return STRICT JSON only. No markdown, comments, HTML, SVG, CSS, JavaScript, image URLs, base64, or prose.
+The next LLM will convert your brief into controlled SceneSpec layers, so your job is to add all missing visual details while staying compatible with the My Dude renderer.
+Required JSON shape:
+{
+  "title": "Short Avatar Name",
+  "expandedPrompt": "A rich art-direction prompt with subject, silhouette, colors, expression, accessories, markings, and polish details.",
+  "subject": "main character concept",
+  "mood": "one phrase",
+  "palettePlan": { "primary": "...", "secondary": "...", "accent": "..." },
+  "styleTags": ["cute mascot", "glossy SVG", "blue-avatar quality"],
+  "visualChecklist": ["8 to 12 concrete visual details"],
+  "requiredDetails": ["at least 4 prompt-specific details"],
+  "forbiddenDetails": ["raw SVG", "HTML", "unvalidated custom shapes", "external images"],
+  "qualityConstraints": ["oversized expressive head", "compact connected body", "readable silhouette", "valid renderer sockets only"]
+}
+Rules:
+- Preserve the user's concept, but add the missing details in the background.
+- Include at least one anatomy detail, one color/material detail, one expression detail, one accessory/marking, and one accent/glow/detail layer.
+- Favor details that can be represented with simple mascot parts: horns, ears, wings, tail, patches, spots, stripes, glasses, hats, wand/staff, badge, sparkles, music notes, screen/panel, boots, hooves, claws.
+- Keep it cute, centered, and at the same polish level as the default blue My Dude avatar.`;
+}
+
+function test5SystemPrompt(designBrief = {}) {
+  const briefText = JSON.stringify(designBrief || {}, null, 2).slice(0, 5000);
+  return `You are the live /test5 My Dude avatar drawing engine. You dynamically create a NEW polished avatar drawing recipe from the expanded art direction brief.
 Return STRICT JSON only. No markdown, comments, HTML, SVG, CSS, JavaScript, image URLs, base64, or prose.
 The browser renders your JSON as glossy SVG parts. You must use the controlled drawing grammar; do not invent arbitrary geometry.
 ${SCENE_SCHEMA}
+Expanded design brief to implement:
+${briefText}
 Extra /test5 rules:
-- Do not copy a named preset. Make a fresh composition for this exact prompt.
+- Do not copy a named preset. Make a fresh composition for this exact prompt and expanded brief.
 - Keep the My Dude quality bar: oversized expressive head, compact body, connected limbs, glossy dimensional materials, readable silhouette.
+- Create a detailed avatar, not a sparse placeholder: minimum 10 layers when possible, maximum 28 layers.
+- Include the prompt-specific details from visualChecklist/requiredDetails using valid renderer parts.
 - Required layers must use exact shape names, not roles: {"shape":"mascotBody","role":"part","attach":{"socket":"body.center"}}, {"shape":"mascotHead","role":"part","attach":{"socket":"head.center"}}, two eye layers with role:"eye", and exactly one mouth layer with role:"mouth" attached to head.mouth.
 - Use exact renderer shape names only. For dragon use mascotBody+mascotHead+softHorn+wing+claw; for scientist goggles use glasses; for robot use screen/panel/pixelEye/mouthScreen. Never invent names like dragon, goggles, smile, arm, leftEye, body.
 - Accessories/details must attach to valid sockets. Prefer head.leftHorn/rightHorn for antenna/horns, head.leftEar/rightEar for ears, body.front/body.patchLeft/body.patchRight for body details.
+- If a detail such as headphones is not a single renderer part, compose it from valid shapes such as arc/ring/circle/panel/spark when available, or use glasses/antenna/spark/patch as a safe visual proxy.
 - Max 28 layers. Use x/y only as small local offsets from sockets.
-Example minimal valid layer list: [{"shape":"mascotBody","anchor":"free","x":0,"y":0,"scale":[0.62,0.6],"rotate":0,"material":"glossyPurple","role":"part","z":2,"attach":{"socket":"body.center"}},{"shape":"mascotHead","anchor":"free","x":0,"y":0,"scale":[0.94,0.84],"rotate":0,"material":"glossyPurple","role":"part","z":8,"attach":{"socket":"head.center"}},{"shape":"cuteEye","anchor":"free","x":0,"y":0,"scale":[0.24,0.24],"rotate":0,"material":"softWhite","role":"eye","z":20,"attach":{"socket":"head.leftEye"}},{"shape":"cuteEye","anchor":"free","x":0,"y":0,"scale":[0.24,0.24],"rotate":0,"material":"softWhite","role":"eye","z":20,"attach":{"socket":"head.rightEye"}},{"shape":"mouthSmile","anchor":"free","x":0,"y":18,"scale":[0.38,0.2],"rotate":0,"material":"charcoalRubber","role":"mouth","z":31,"attach":{"socket":"head.mouth"}}]`;
+Example minimal valid layer list: [{"shape":"mascotBody","anchor":"free","x":0,"y":0,"scale":[0.62,0.6],"rotate":0,"material":"glossyPurple","role":"part","z":2,"attach":{"socket":"body.center"}},{"shape":"mascotHead","anchor":"free","x":0,"y":0,"scale":[0.94,0.84],"rotate":0,"material":"glossyPurple","role":"part","z":8,"attach":{"socket":"head.center"}},{"shape":"stubbyArm","anchor":"free","x":0,"y":0,"scale":[0.22,0.46],"rotate":-10,"material":"glossyPurple","role":"part","z":5,"attach":{"socket":"body.leftHand"}},{"shape":"stubbyArm","anchor":"free","x":0,"y":0,"scale":[0.22,0.46],"rotate":10,"material":"glossyPurple","role":"part","z":5,"attach":{"socket":"body.rightHand"}},{"shape":"cuteEye","anchor":"free","x":0,"y":0,"scale":[0.24,0.24],"rotate":0,"material":"softWhite","role":"eye","z":20,"attach":{"socket":"head.leftEye"}},{"shape":"cuteEye","anchor":"free","x":0,"y":0,"scale":[0.24,0.24],"rotate":0,"material":"softWhite","role":"eye","z":20,"attach":{"socket":"head.rightEye"}},{"shape":"mouthSmile","anchor":"free","x":0,"y":18,"scale":[0.38,0.2],"rotate":0,"material":"charcoalRubber","role":"mouth","z":31,"attach":{"socket":"head.mouth"}}]`;
 }
 
-async function callTest5Llm(prompt, repairNote = '') {
-  const userContent = `${repairNote ? `Repair this previous validation failure: ${repairNote}\n\n` : ''}Prompt: ${prompt.trim().slice(0, 900)}\nReturn one JSON object now.`;
+async function callTest5Chat({ system, userContent, temperature = 0.38, maxTokens = 1800, stage = 'avatar' }) {
   if (process.env.OPENAI_API_KEY) {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
       body: JSON.stringify({
         model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
-        temperature: repairNote ? 0.12 : 0.42,
-        max_tokens: 1700,
+        temperature,
+        max_tokens: maxTokens,
         response_format: { type: 'json_object' },
         messages: [
-          { role: 'system', content: test5SystemPrompt() },
+          { role: 'system', content: system },
           { role: 'user', content: userContent },
         ],
       }),
     });
-    if (!res.ok) throw new Error(`OpenAI test5 generation failed: HTTP ${res.status}: ${(await res.text()).slice(0, 220)}`);
+    if (!res.ok) throw new Error(`OpenAI test5 ${stage} failed: HTTP ${res.status}: ${(await res.text()).slice(0, 220)}`);
     const json = await res.json();
     return { provider: `openai/${process.env.OPENAI_MODEL || 'gpt-4o-mini'}`, content: json?.choices?.[0]?.message?.content || '{}' };
   }
@@ -299,42 +328,97 @@ async function callTest5Llm(prompt, repairNote = '') {
     headers: { ...ideHeaders, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: MODEL,
-      temperature: repairNote ? 0.12 : 0.42,
-      max_tokens: 1700,
+      temperature,
+      max_tokens: maxTokens,
       messages: [
-        { role: 'system', content: test5SystemPrompt() },
+        { role: 'system', content: system },
         { role: 'user', content: userContent },
       ],
-      user: 'mydude-test5-avatar',
+      user: `mydude-test5-${stage}`,
     }),
   });
-  if (!res.ok) throw new Error(`Copilot test5 generation failed: HTTP ${res.status}: ${(await res.text()).slice(0, 220)}`);
+  if (!res.ok) throw new Error(`Copilot test5 ${stage} failed: HTTP ${res.status}: ${(await res.text()).slice(0, 220)}`);
   const json = await res.json();
   return { provider: `github-copilot/${MODEL}`, content: json?.choices?.[0]?.message?.content || '{}' };
 }
 
+function normalizeDesignBrief(raw, prompt) {
+  const fallback = {
+    title: `${prompt.split(/\s+/).slice(0, 5).join(' ') || 'Custom'} Buddy`,
+    expandedPrompt: `Create a polished My Dude-style avatar for: ${prompt}. Add a big expressive head, compact body, readable eyes, one mouth, glossy materials, connected limbs, and 4 prompt-specific visual details.`,
+    subject: prompt,
+    mood: 'playful and friendly',
+    palettePlan: { primary: 'glossy blue', secondary: 'soft white', accent: 'cyan glow' },
+    styleTags: ['cute mascot', 'glossy SVG', 'blue-avatar quality'],
+    visualChecklist: ['oversized head', 'compact body', 'two expressive eyes', 'one small smile', 'connected arms', 'connected feet', 'one accessory', 'one accent detail'],
+    requiredDetails: ['prompt-specific subject feature', 'prompt-specific color/material', 'prompt-specific accessory', 'prompt-specific marking/accent'],
+    forbiddenDetails: ['raw SVG', 'HTML', 'JavaScript', 'external images'],
+    qualityConstraints: ['oversized expressive head', 'compact connected body', 'readable silhouette', 'valid renderer sockets only'],
+  };
+  if (!raw || typeof raw !== 'object') return fallback;
+  const brief = { ...fallback, ...raw };
+  brief.title = String(brief.title || fallback.title).slice(0, 90);
+  brief.expandedPrompt = String(brief.expandedPrompt || fallback.expandedPrompt).slice(0, 1800);
+  brief.subject = String(brief.subject || prompt).slice(0, 180);
+  for (const key of ['styleTags', 'visualChecklist', 'requiredDetails', 'forbiddenDetails', 'qualityConstraints']) {
+    brief[key] = Array.isArray(brief[key]) ? brief[key].map(v => String(v).slice(0, 180)).filter(Boolean).slice(0, key === 'visualChecklist' ? 14 : 8) : fallback[key];
+  }
+  if (!brief.visualChecklist.length) brief.visualChecklist = fallback.visualChecklist;
+  if (!brief.requiredDetails.length) brief.requiredDetails = fallback.requiredDetails;
+  return brief;
+}
+
+async function expandTest5Prompt(prompt) {
+  const userContent = `User avatar request: ${prompt.trim().slice(0, 1200)}\nExpand it into the required JSON art direction brief. Add all missing details in the background.`;
+  const result = await callTest5Chat({ system: test5ExpanderSystemPrompt(), userContent, temperature: 0.52, maxTokens: 1300, stage: 'expand' });
+  const designBrief = normalizeDesignBrief(parseJsonObject(result.content), prompt);
+  return { ...result, designBrief };
+}
+
+async function callTest5Llm(prompt, designBrief, repairNote = '') {
+  const userContent = `${repairNote ? `Repair this previous validation failure: ${repairNote}\n\n` : ''}Original user prompt: ${prompt.trim().slice(0, 900)}\nExpanded prompt: ${String(designBrief?.expandedPrompt || '').slice(0, 1800)}\nVisual checklist: ${(designBrief?.visualChecklist || []).join('; ')}\nReturn one SceneSpec JSON object now.`;
+  return callTest5Chat({ system: test5SystemPrompt(designBrief), userContent, temperature: repairNote ? 0.12 : 0.36, maxTokens: 2100, stage: repairNote ? 'repair' : 'draw' });
+}
+
+async function generateTest5SceneSpec(prompt, designBrief, repairNote = '') {
+  return callTest5Llm(prompt, designBrief, repairNote);
+}
 
 function coerceTest5RawScene(raw, prompt = '') {
   if (!raw || typeof raw !== 'object') return raw;
   const shapeAliases = new Map(Object.entries({
-    body: 'mascotBody', body_blob: 'mascotBody', mascot: 'mascotBody', torso: 'mascotBody',
+    body: 'mascotBody', body_blob: 'mascotBody', mascot: 'mascotBody', torso: 'mascotBody', belly: 'bodyPatch', bellyPatch: 'bodyPatch',
     head: 'mascotHead', head_round: 'mascotHead', head_dragon: 'mascotHead', face: 'mascotHead',
-    arm: 'stubbyArm', leftArm: 'stubbyArm', rightArm: 'stubbyArm', limb_arm: 'stubbyArm',
+    arm: 'stubbyArm', leftArm: 'stubbyArm', rightArm: 'stubbyArm', limb_arm: 'stubbyArm', flipper: 'stubbyArm',
     leg: 'stubbyLeg', leftLeg: 'stubbyLeg', rightLeg: 'stubbyLeg', limb_leg: 'stubbyLeg',
-    foot: 'hoof', bootFoot: 'boot',
-    eye: 'cuteEye', eyes_cartoon: 'cuteEye', eyes_googly: 'googlyEye', eyes_pixel: 'pixelEye',
-    smile: 'mouthSmile', mouth: 'mouthSmile', mouth_smile: 'mouthSmile', mouth_grin: 'mouthGrin',
-    limb_claw: 'claw', accessory_antenna: 'antenna', accessory_goggles: 'glasses', goggles: 'glasses',
-    texture_spots: 'bodyPatch', texture_stripes: 'stripe', accessory_hat: 'topHat', accessory_crown: 'crown', accessory_wand: 'wand',
+    foot: 'hoof', feet: 'hoof', bootFoot: 'boot', boot: 'boot',
+    eye: 'cuteEye', leftEye: 'cuteEye', rightEye: 'cuteEye', eyes_cartoon: 'cuteEye', eyes_googly: 'googlyEye', eyes_pixel: 'pixelEye',
+    smile: 'mouthSmile', mouth: 'mouthSmile', mouth_smile: 'mouthSmile', mouth_grin: 'mouthGrin', beak: 'mouthSmile',
+    limb_claw: 'claw', claw: 'claw', paw: 'paw', hand: 'mitten', mittenHand: 'mitten',
+    accessory_antenna: 'antenna', antennaOrb: 'antenna', accessory_goggles: 'glasses', goggles: 'glasses', glasses: 'glasses', headphones: 'glasses', headphone: 'glasses',
+    texture_spots: 'bodyPatch', spot: 'spot', spots: 'spot', texture_stripes: 'stripe', stripe: 'stripe',
+    accessory_hat: 'topHat', hat: 'topHat', wizardHat: 'topHat', accessory_crown: 'crown', crown: 'crown', accessory_wand: 'wand', staff: 'wand', wand: 'wand',
+    musicNote: 'musicNote', music: 'musicNote', note: 'musicNote', glow: 'spark', sparkle: 'spark', star: 'star', badge: 'badge', panel: 'panel', screen: 'screen',
+    horn: 'softHorn', horns: 'softHorn', wing: 'wing', wings: 'wing', tail: 'tail', ear: 'softEar', ears: 'softEar',
+  }));
+  const materialAliases = new Map(Object.entries({
+    silver: 'chrome', gray: 'chrome', grey: 'chrome', glossyGray: 'chrome', glossyGrey: 'chrome', glossySlate: 'chrome', chrome: 'chrome', black: 'charcoalRubber', white: 'softWhite', cyan: 'neon', blue: 'glossyBlue', purple: 'glossyPurple', orange: 'glossyOrange', gold: 'glossyGold', yellow: 'glossyGold', green: 'glossyGreen', red: 'glossyRed', pink: 'glossyPink',
+  }));
+  const socketAliases = new Map(Object.entries({
+    'head.top': 'head.center', 'head.left': 'head.leftEar', 'head.right': 'head.rightEar', 'face.leftEye': 'head.leftEye', 'face.rightEye': 'head.rightEye', 'face.mouth': 'head.mouth',
+    'body.belly': 'body.front', 'body.chest': 'body.front', 'body.left': 'body.patchLeft', 'body.right': 'body.patchRight', 'leftEye': 'head.leftEye', 'rightEye': 'head.rightEye',
   }));
   const layers = Array.isArray(raw.layers) ? raw.layers.map((layer, index) => {
     const next = { ...layer };
     next.shape = shapeAliases.get(next.shape) || next.shape;
+    next.material = materialAliases.get(next.material) || next.material;
+    if (!DRAWING_MATERIALS.has(next.material)) next.material = materialForText(`${prompt} ${next.material || ''} ${next.shape || ''}`);
     if (next.role && !['eye', 'mouth'].includes(next.role)) next.role = 'part';
     if ((next.shape === 'mascotBody' || next.shape === 'mascotHead') && next.role !== 'eye' && next.role !== 'mouth') next.role = 'part';
-    const text = `${next.id || ''} ${next.anchor || ''} ${next.attach?.socket || ''} ${index}`;
+    const text = `${next.id || ''} ${next.anchor || ''} ${next.attach?.socket || ''} ${next.shape || ''} ${index}`;
     const side = /right/i.test(text) ? 'right' : /left/i.test(text) ? 'left' : index % 2 ? 'right' : 'left';
     if (!next.attach || typeof next.attach !== 'object') next.attach = {};
+    if (next.attach.socket) next.attach.socket = socketAliases.get(String(next.attach.socket)) || next.attach.socket;
     if (!ATTACHMENT_SOCKET_NAMES.has(String(next.attach.socket || ''))) delete next.attach.socket;
     if (!next.attach.socket) {
       if (next.shape === 'mascotBody') next.attach.socket = 'body.center';
@@ -343,15 +427,29 @@ function coerceTest5RawScene(raw, prompt = '') {
       else if (next.role === 'mouth' || /^mouth|snout|beak/.test(next.shape)) next.attach.socket = 'head.mouth';
       else if (/antenna|horn/i.test(next.shape)) next.attach.socket = side === 'right' ? 'head.rightHorn' : 'head.leftHorn';
       else if (/ear/i.test(next.shape)) next.attach.socket = side === 'right' ? 'head.rightEar' : 'head.leftEar';
-      else if (/arm|claw|paw|mitten/.test(next.shape)) next.attach.socket = side === 'right' ? 'body.rightHand' : 'body.leftHand';
+      else if (/arm|claw|paw|mitten|flipper/.test(next.shape)) next.attach.socket = side === 'right' ? 'body.rightHand' : 'body.leftHand';
       else if (/leg|hoof|boot/.test(next.shape)) next.attach.socket = side === 'right' ? 'body.rightFoot' : 'body.leftFoot';
-      else if (/glasses|screen|panel|button|tie|badge|wand/.test(next.shape)) next.attach.socket = 'body.front';
+      else if (/glasses|screen|panel|button|tie|badge|wand|spark/.test(next.shape)) next.attach.socket = 'body.front';
       else if (/patch|spot|stripe/.test(next.shape)) next.attach.socket = side === 'right' ? 'body.patchRight' : 'body.patchLeft';
+      else if (/wing|tail/.test(next.shape)) next.attach.socket = side === 'right' ? 'body.rightHand' : 'body.leftHand';
     }
     if (!next.attach.socket) delete next.attach;
     return next;
   }) : [];
-  return { ...raw, layers };
+  const ensured = [...layers].filter(layer => DRAWING_SHAPES.has(layer.shape));
+  const addLayer = (layer) => ensured.push({ anchor: 'free', x: 0, y: 0, rotate: 0, opacity: 1, ...layer });
+  const primaryMaterial = materialForText(prompt);
+  if (!ensured.some(l => l.shape === 'mascotBody')) addLayer({ shape: 'mascotBody', scale: [0.62, 0.6], material: primaryMaterial, role: 'part', z: 2, attach: { socket: 'body.center' } });
+  if (!ensured.some(l => l.shape === 'mascotHead')) addLayer({ shape: 'mascotHead', scale: [0.94, 0.84], material: primaryMaterial, role: 'part', z: 8, attach: { socket: 'head.center' } });
+  if (ensured.filter(l => l.role === 'eye').length < 2) {
+    addLayer({ shape: /robot|pixel|screen/i.test(prompt) ? 'pixelEye' : 'cuteEye', scale: [0.24, 0.24], material: 'softWhite', role: 'eye', z: 20, attach: { socket: 'head.leftEye' } });
+    addLayer({ shape: /robot|pixel|screen/i.test(prompt) ? 'pixelEye' : 'cuteEye', scale: [0.24, 0.24], material: 'softWhite', role: 'eye', z: 20, attach: { socket: 'head.rightEye' } });
+  }
+  if (ensured.filter(l => l.role === 'mouth').length !== 1) {
+    for (const layer of ensured.filter(l => l.role === 'mouth').slice(1)) layer.role = 'part';
+    if (!ensured.some(l => l.role === 'mouth')) addLayer({ shape: /robot|screen/i.test(prompt) ? 'mouthScreen' : 'mouthSmile', x: 0, y: 18, scale: [0.38, 0.2], material: 'charcoalRubber', role: 'mouth', z: 31, attach: { socket: 'head.mouth' } });
+  }
+  return { ...raw, title: raw.title || `${prompt.slice(0, 48)} Buddy`, layers: ensured.slice(0, 28) };
 }
 
 function validateTest5Scene(scene) {
@@ -363,6 +461,7 @@ function validateTest5Scene(scene) {
   if (!layers.some(l => l.shape === 'mascotHead')) errors.push('missing mascotHead layer');
   if (layers.filter(l => l.role === 'eye').length < 2) errors.push('need at least two role:"eye" layers');
   if (layers.filter(l => l.role === 'mouth').length !== 1) errors.push('need exactly one role:"mouth" layer');
+  if (layers.length > 28) errors.push('too many layers; max 28');
   for (const layer of layers) {
     if (!DRAWING_SHAPES.has(layer.shape)) errors.push(`invalid shape ${layer.shape}`);
     if (!DRAWING_MATERIALS.has(layer.material)) errors.push(`invalid material ${layer.material}`);
@@ -375,16 +474,31 @@ function slugify(text = '') {
   return String(text).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 56) || 'avatar';
 }
 
-async function saveTest5Artifact({ prompt, provider, rawContent, rawSceneSpec, sceneSpec, validation, repairs }) {
+async function saveTest5Artifact({ prompt, designBrief, expandedContent, provider, rawContent, rawSceneSpec, sceneSpec, validation, repairs }) {
   const createdAt = new Date().toISOString();
   const stamp = createdAt.replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
   const relPath = `artifacts/test5/generated/${stamp}-${slugify(prompt)}.json`;
   const absPath = path.join(REPO_ROOT, relPath);
   await fs.mkdir(path.dirname(absPath), { recursive: true });
-  const artifact = { prompt, createdAt, provider, rawContent, rawSceneSpec, sanitizedSceneSpec: sceneSpec, validation, repairs };
+  const artifact = {
+    prompt,
+    userPrompt: prompt,
+    createdAt,
+    provider,
+    expandedPrompt: designBrief?.expandedPrompt || '',
+    designBrief,
+    visualChecklist: designBrief?.visualChecklist || [],
+    requiredDetails: designBrief?.requiredDetails || [],
+    expandedContent,
+    rawContent,
+    rawSceneSpec,
+    sanitizedSceneSpec: sceneSpec,
+    validation,
+    repairs,
+  };
   await fs.writeFile(absPath, JSON.stringify(artifact, null, 2), 'utf8');
 
-  let commit = { attempted: false, ok: false, enabled: process.env.TEST5_AUTO_COMMIT !== '0' };
+  let commit = { attempted: false, ok: false, enabled: process.env.TEST5_AUTO_COMMIT !== '0', push: { attempted: false, ok: false, enabled: process.env.TEST5_AUTO_PUSH === '1' } };
   if (commit.enabled) {
     commit.attempted = true;
     try {
@@ -393,6 +507,16 @@ async function saveTest5Artifact({ prompt, provider, rawContent, rawSceneSpec, s
       await execFileAsync('git', ['commit', '-m', msg, '--', relPath], { cwd: REPO_ROOT, timeout: 30_000 });
       const { stdout } = await execFileAsync('git', ['rev-parse', '--short', 'HEAD'], { cwd: REPO_ROOT, timeout: 10_000 });
       commit = { ...commit, ok: true, hash: stdout.trim(), message: msg };
+      if (commit.push.enabled) {
+        commit.push.attempted = true;
+        try {
+          await execFileAsync('git', ['push', 'origin', 'HEAD:main'], { cwd: REPO_ROOT, timeout: 90_000 });
+          commit.push.ok = true;
+        } catch (error) {
+          commit.push.ok = false;
+          commit.push.error = String(error?.stderr || error?.message || error).slice(0, 500);
+        }
+      }
     } catch (error) {
       commit = { ...commit, ok: false, error: String(error?.stderr || error?.message || error).slice(0, 500) };
     }
@@ -401,18 +525,20 @@ async function saveTest5Artifact({ prompt, provider, rawContent, rawSceneSpec, s
 }
 
 async function generateTest5Avatar(prompt) {
-  let first = await callTest5Llm(prompt);
+  const expanded = await expandTest5Prompt(prompt);
+  const designBrief = expanded.designBrief;
+  let first = await generateTest5SceneSpec(prompt, designBrief);
   let rawSceneSpec = coerceTest5RawScene(parseJsonObject(first.content), prompt);
   let validation = validateTest5Scene(rawSceneSpec);
   let sceneSpec = null;
   let repairs = 0;
-  let provider = first.provider;
+  let provider = `${expanded.provider} + ${first.provider}`;
   let rawContent = first.content;
 
   if (!validation.ok) {
     repairs = 1;
-    const repaired = await callTest5Llm(prompt, validation.errors.join('; '));
-    provider = repaired.provider;
+    const repaired = await generateTest5SceneSpec(prompt, designBrief, validation.errors.join('; '));
+    provider = `${expanded.provider} + ${repaired.provider}`;
     rawContent = repaired.content;
     rawSceneSpec = coerceTest5RawScene(parseJsonObject(repaired.content), prompt);
     validation = validateTest5Scene(rawSceneSpec);
@@ -421,8 +547,8 @@ async function generateTest5Avatar(prompt) {
   sceneSpec = sanitizeSceneSpec(rawSceneSpec, prompt, { skipPreset: true });
   validation = validateTest5Scene(sceneSpec);
   if (!validation.ok) throw new Error(`Sanitized SceneSpec failed validation: ${validation.errors.join('; ')}`);
-  const saved = await saveTest5Artifact({ prompt, provider, rawContent, rawSceneSpec, sceneSpec, validation, repairs });
-  return { ok: true, prompt, provider, rawSceneSpec, sceneSpec, validation, repairs, artifactPath: saved.relPath, commit: saved.commit };
+  const saved = await saveTest5Artifact({ prompt, designBrief, expandedContent: expanded.content, provider, rawContent, rawSceneSpec, sceneSpec, validation, repairs });
+  return { ok: true, prompt, userPrompt: prompt, expandedPrompt: designBrief.expandedPrompt, designBrief, visualChecklist: designBrief.visualChecklist || [], requiredDetails: designBrief.requiredDetails || [], provider, rawSceneSpec, sceneSpec, validation, repairs, artifactPath: saved.relPath, commit: saved.commit };
 }
 
 async function readJsonBody(req, maxBytes = 64_000) {

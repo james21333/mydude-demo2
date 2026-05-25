@@ -1938,7 +1938,7 @@ function Test5AvatarLab() {
     if (!text || busy) return;
     setBusy(true);
     setError('');
-    setStatus('asking LLM for a fresh SceneSpec…');
+    setStatus('expanding prompt into a hidden art-direction brief…');
     try {
       const res = await fetch(`${test5BridgeOrigin()}/test5/avatar`, {
         method: 'POST',
@@ -1948,7 +1948,7 @@ function Test5AvatarLab() {
       const json = await res.json().catch(() => ({}));
       if (!res.ok || !json.ok) throw new Error(json.error || `HTTP ${res.status}`);
       setResult(json);
-      setStatus(`rendered + saved${json.commit?.ok ? ` + committed ${json.commit.hash}` : json.commit?.attempted ? ' (commit failed; artifact saved)' : ''}`);
+      setStatus(`rendered + saved${json.commit?.ok ? ` + committed ${json.commit.hash}${json.commit?.push?.ok ? ' + pushed' : json.commit?.push?.attempted ? ' (push failed)' : ''}` : json.commit?.attempted ? ' (commit failed; artifact saved)' : ''}`);
     } catch (err) {
       setError(String(err?.message || err));
       setStatus('failed');
@@ -1989,7 +1989,10 @@ function Test5AvatarLab() {
           <div><strong>Provider:</strong> {result.provider}</div>
           <div><strong>Artifact:</strong> {result.artifactPath}</div>
           <div><strong>Commit:</strong> {result.commit?.ok ? result.commit.hash : result.commit?.error || 'not committed'}</div>
+          <div><strong>Push:</strong> {result.commit?.push?.ok ? 'pushed to GitHub' : result.commit?.push?.attempted ? result.commit.push.error || 'push failed' : 'not pushed'}</div>
           <div><strong>Repairs:</strong> {result.repairs}</div>
+          <div style={{ marginTop: 10 }}><strong>Expanded prompt:</strong> {result.expandedPrompt}</div>
+          {result.visualChecklist?.length ? <div style={{ marginTop: 10 }}><strong>Visual checklist:</strong><ul>{result.visualChecklist.map((item, idx) => <li key={idx}>{item}</li>)}</ul></div> : null}
         </div> : null}
       </section>
 
@@ -2007,7 +2010,9 @@ function Test5AvatarLab() {
     </main>
 
     {result ? <section className="debug-box" style={{ marginTop: 18 }}>
-      <h2 style={{ marginTop: 0 }}>Sanitized SceneSpec returned by the LLM pipeline</h2>
+      <h2 style={{ marginTop: 0 }}>Expanded design brief</h2>
+      <pre style={{ whiteSpace: 'pre-wrap', overflowX: 'auto', maxHeight: 320 }}>{JSON.stringify(result.designBrief, null, 2)}</pre>
+      <h2>Sanitized SceneSpec returned by the two-stage LLM pipeline</h2>
       <pre style={{ whiteSpace: 'pre-wrap', overflowX: 'auto', maxHeight: 420 }}>{JSON.stringify(result.sceneSpec, null, 2)}</pre>
     </section> : null}
   </div>;
