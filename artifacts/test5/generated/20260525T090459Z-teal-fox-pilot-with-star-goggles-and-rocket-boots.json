@@ -1,0 +1,909 @@
+{
+  "prompt": "teal fox pilot with star goggles and rocket boots",
+  "userPrompt": "teal fox pilot with star goggles and rocket boots",
+  "createdAt": "2026-05-25T09:04:59.408Z",
+  "provider": "github-copilot/gpt-4o-mini + github-copilot/gpt-4o-mini",
+  "expandedPrompt": "A cute teal fox character designed as a pilot, featuring oversized star goggles that reflect a cosmic theme. The fox has a playful expression with a slight smirk, showcasing its adventurous spirit. It has a compact body with a fluffy tail and distinct fox ears. The character wears a stylish aviator jacket adorned with patches of stars and rockets. The rocket boots are detailed with flames and spark accents, emphasizing speed and agility. The overall silhouette is bold and readable, with a glossy finish to enhance its vibrant teal color.",
+  "designBrief": {
+    "title": "Teal Fox Pilot",
+    "expandedPrompt": "A cute teal fox character designed as a pilot, featuring oversized star goggles that reflect a cosmic theme. The fox has a playful expression with a slight smirk, showcasing its adventurous spirit. It has a compact body with a fluffy tail and distinct fox ears. The character wears a stylish aviator jacket adorned with patches of stars and rockets. The rocket boots are detailed with flames and spark accents, emphasizing speed and agility. The overall silhouette is bold and readable, with a glossy finish to enhance its vibrant teal color.",
+    "subject": "Teal fox pilot character",
+    "mood": "playful adventure",
+    "palettePlan": {
+      "primary": "teal",
+      "secondary": "dark brown",
+      "accent": "gold"
+    },
+    "styleTags": [
+      "cute mascot",
+      "glossy SVG",
+      "blue-avatar quality"
+    ],
+    "visualChecklist": [
+      "teal fur color",
+      "fluffy tail with a white tip",
+      "large star goggles with reflective lenses",
+      "playful smirk expression",
+      "aviator jacket with star patches",
+      "rocket boots with flame accents",
+      "distinctive fox ears",
+      "compact body structure"
+    ],
+    "requiredDetails": [
+      "fluffy tail with white tip",
+      "teal fur color",
+      "playful smirk expression",
+      "star goggles with spark accents"
+    ],
+    "requiredRenderableDetails": [
+      {
+        "id": "animal-ears",
+        "label": "visible animal/fox ears",
+        "acceptableShapes": [
+          "animalEar",
+          "softEar"
+        ],
+        "acceptableSockets": [
+          "head.leftEar",
+          "head.rightEar"
+        ],
+        "minimumCount": 2
+      },
+      {
+        "id": "tail",
+        "label": "visible tail",
+        "acceptableShapes": [
+          "tail"
+        ],
+        "acceptableSockets": [
+          "body.back",
+          "body.leftHand",
+          "body.rightHand"
+        ],
+        "minimumCount": 1
+      },
+      {
+        "id": "snout",
+        "label": "animal snout",
+        "acceptableShapes": [
+          "snout"
+        ],
+        "acceptableSockets": [
+          "head.mouth"
+        ],
+        "minimumCount": 1
+      },
+      {
+        "id": "eyewear",
+        "label": "visible goggles/glasses/headphones proxy",
+        "acceptableShapes": [
+          "glasses",
+          "sunglasses",
+          "panel",
+          "wire"
+        ],
+        "acceptableSockets": [
+          "head.center",
+          "head.leftEye",
+          "head.rightEye"
+        ],
+        "minimumCount": 1
+      },
+      {
+        "id": "star-accents",
+        "label": "star accents",
+        "acceptableShapes": [
+          "star",
+          "spark",
+          "starEye"
+        ],
+        "acceptableSockets": [
+          "head.leftEye",
+          "head.rightEye",
+          "head.center",
+          "body.front"
+        ],
+        "minimumCount": 2
+      },
+      {
+        "id": "boots",
+        "label": "boots on both feet",
+        "acceptableShapes": [
+          "boot"
+        ],
+        "acceptableSockets": [
+          "body.leftFoot",
+          "body.rightFoot"
+        ],
+        "minimumCount": 2
+      },
+      {
+        "id": "flame-accents",
+        "label": "rocket/flame accents",
+        "acceptableShapes": [
+          "spark",
+          "rocket"
+        ],
+        "acceptableSockets": [
+          "body.leftFoot",
+          "body.rightFoot",
+          "body.front"
+        ],
+        "minimumCount": 2
+      },
+      {
+        "id": "pilot-scarf-or-badge",
+        "label": "pilot scarf or badge",
+        "acceptableShapes": [
+          "tie",
+          "bowtie",
+          "flag",
+          "badge",
+          "rope"
+        ],
+        "acceptableSockets": [
+          "body.front"
+        ],
+        "minimumCount": 1
+      }
+    ],
+    "forbiddenDetails": [
+      "raw SVG",
+      "HTML",
+      "unvalidated custom shapes",
+      "external images"
+    ],
+    "qualityConstraints": [
+      "oversized expressive head",
+      "compact connected body",
+      "readable silhouette",
+      "valid renderer sockets only"
+    ]
+  },
+  "visualChecklist": [
+    "teal fur color",
+    "fluffy tail with a white tip",
+    "large star goggles with reflective lenses",
+    "playful smirk expression",
+    "aviator jacket with star patches",
+    "rocket boots with flame accents",
+    "distinctive fox ears",
+    "compact body structure"
+  ],
+  "requiredDetails": [
+    "fluffy tail with white tip",
+    "teal fur color",
+    "playful smirk expression",
+    "star goggles with spark accents"
+  ],
+  "expandedContent": "{\n  \"title\": \"Teal Fox Pilot\",\n  \"expandedPrompt\": \"A cute teal fox character designed as a pilot, featuring oversized star goggles that reflect a cosmic theme. The fox has a playful expression with a slight smirk, showcasing its adventurous spirit. It has a compact body with a fluffy tail and distinct fox ears. The character wears a stylish aviator jacket adorned with patches of stars and rockets. The rocket boots are detailed with flames and spark accents, emphasizing speed and agility. The overall silhouette is bold and readable, with a glossy finish to enhance its vibrant teal color.\",\n  \"subject\": \"Teal fox pilot character\",\n  \"mood\": \"playful adventure\",\n  \"palettePlan\": { \"primary\": \"teal\", \"secondary\": \"dark brown\", \"accent\": \"gold\" },\n  \"styleTags\": [\"cute mascot\", \"glossy SVG\", \"blue-avatar quality\"],\n  \"visualChecklist\": [\n    \"teal fur color\",\n    \"fluffy tail with a white tip\",\n    \"large star goggles with reflective lenses\",\n    \"playful smirk expression\",\n    \"aviator jacket with star patches\",\n    \"rocket boots with flame accents\",\n    \"distinctive fox ears\",\n    \"compact body structure\"\n  ],\n  \"requiredDetails\": [\n    \"fluffy tail with white tip\",\n    \"teal fur color\",\n    \"playful smirk expression\",\n    \"star goggles with spark accents\"\n  ],\n  \"requiredRenderableDetails\": [\n    { \"id\": \"fox_ears\", \"label\": \"fox ears\", \"acceptableShapes\": [\"earShape\"], \"acceptableSockets\": [\"head.socket\"], \"minimumCount\": 1 },\n    { \"id\": \"fox_tail\", \"label\": \"fluffy tail\", \"acceptableShapes\": [\"tailShape\"], \"acceptableSockets\": [\"body.socket\"], \"minimumCount\": 1 },\n    { \"id\": \"rocket_boots\", \"label\": \"rocket boots\", \"acceptableShapes\": [\"bootShape\"], \"acceptableSockets\": [\"feet.socket\"], \"minimumCount\": 2 },\n    { \"id\": \"star_goggles\", \"label\": \"star goggles\", \"acceptableShapes\": [\"goggleShape\"], \"acceptableSockets\": [\"head.socket\"], \"minimumCount\": 1 }\n  ],\n  \"forbiddenDetails\": [\"raw SVG\", \"HTML\", \"unvalidated custom shapes\", \"external images\"],\n  \"qualityConstraints\": [\"oversized expressive head\", \"compact connected body\", \"readable silhouette\", \"valid renderer sockets only\"]\n}",
+  "rawContent": "{\n  \"title\": \"Teal Fox Pilot\",\n  \"summary\": \"A cute teal fox character designed as a pilot, showcasing its adventurous spirit with oversized star goggles and rocket boots.\",\n  \"palette\": \"blue\",\n  \"scene\": \"scene_space\",\n  \"body\": \"body_capsule\",\n  \"head\": \"head_animal\",\n  \"eyes\": \"eyes_googly\",\n  \"mouth\": \"mouth_smile\",\n  \"primitives\": [\n    \"body_blob\",\n    \"body_triangle\",\n    \"head_hair\",\n    \"eyes_star\",\n    \"eyes_googly\",\n    \"mouth_wave\",\n    \"body_flame\",\n    \"body_boot\",\n    \"body_patch\"\n  ],\n  \"layers\": [\n    {\n      \"shape\": \"mascotBody\",\n      \"anchor\": \"free\",\n      \"x\": 0,\n      \"y\": 0,\n      \"scale\": [0.6, 0.6],\n      \"rotate\": 0,\n      \"material\": \"glossyBlue\",\n      \"role\": \"part\",\n      \"z\": 2,\n      \"attach\": {\"socket\": \"body.center\"}\n    },\n    {\n      \"shape\": \"mascotHead\",\n      \"anchor\": \"free\",\n      \"x\": 0,\n      \"y\": 0,\n      \"scale\": [0.8, 0.8],\n      \"rotate\": 0,\n      \"material\": \"glossyBlue\",\n      \"role\": \"part\",\n      \"z\": 8,\n      \"attach\": {\"socket\": \"head.center\"}\n    },\n    {\n      \"shape\": \"animalEar\",\n      \"anchor\": \"free\",\n      \"x\": -20,\n      \"y\": -20,\n      \"scale\": [0.4, 0.4],\n      \"rotate\": 0,\n      \"material\": \"glossyBlue\",\n      \"role\": \"part\",\n      \"z\": 10,\n      \"attach\": {\"socket\": \"head.leftEar\"}\n    },\n    {\n      \"shape\": \"animalEar\",\n      \"anchor\": \"free\",\n      \"x\": 20,\n      \"y\": -20,\n      \"scale\": [0.4, 0.4],\n      \"rotate\": 0,\n      \"material\": \"glossyBlue\",\n      \"role\": \"part\",\n      \"z\": 10,\n      \"attach\": {\"socket\": \"head.rightEar\"}\n    },\n    {\n      \"shape\": \"tail\",\n      \"anchor\": \"free\",\n      \"x\": 0,\n      \"y\": 40,\n      \"scale\": [0.5, 0.5],\n      \"rotate\": 0,\n      \"material\": \"glossyBlue\",\n      \"role\": \"part\",\n      \"z\": 5,\n      \"attach\": {\"socket\": \"body.back\"}\n    },\n    {\n      \"shape\": \"glasses\",\n      \"anchor\": \"free\",\n      \"x\": 0,\n      \"y\": -10,\n      \"scale\": [0.5, 0.5],\n      \"rotate\": 0,\n      \"material\": \"blackGlass\",\n      \"role\": \"part\",\n      \"z\": 15,\n      \"attach\": {\"socket\": \"head.center\"}\n    },\n    {\n      \"shape\": \"mouthSmile\",\n      \"anchor\": \"free\",\n      \"x\": 0,\n      \"y\": 10,\n      \"scale\": [0.3, 0.2],\n      \"rotate\": 0,\n      \"material\": \"charcoalRubber\",\n      \"role\": \"mouth\",\n      \"z\": 20,\n      \"attach\": {\"socket\": \"head.mouth\"}\n    },\n    {\n      \"shape\": \"boot\",\n      \"anchor\": \"free\",\n      \"x\": -20,\n      \"y\": 20,\n      \"scale\": [0.3, 0.3],\n      \"rotate\": 0,\n      \"material\": \"glossyGold\",\n      \"role\": \"part\",\n      \"z\": 12,\n      \"attach\": {\"socket\": \"body.leftFoot\"}\n    },\n    {\n      \"shape\": \"boot\",\n      \"anchor\": \"free\",\n      \"x\": 20,\n      \"y\": 20,\n      \"scale\": [0.3, 0.3],\n      \"rotate\": 0,\n      \"material\": \"glossyGold\",\n      \"role\": \"part\",\n      \"z\": 12,\n      \"attach\": {\"socket\": \"body.rightFoot\"}\n    },\n    {\n      \"shape\": \"spark\",\n      \"anchor\": \"free\",\n      \"x\": -20,\n      \"y\": 25,\n      \"scale\": [0.1, 0.1],\n      \"rotate\": 0,\n      \"material\": \"glossyGold\",\n      \"role\": \"part\",\n      \"z\": 18,\n      \"attach\": {\"socket\": \"body.leftFoot\"}\n    },\n    {\n      \"shape\": \"spark\",\n      \"anchor\": \"free\",\n      \"x\": 20,\n      \"y\": 25,\n      \"scale\": [0.1, 0.1],\n      \"rotate\": 0,\n      \"material\": \"glossyGold\",\n      \"role\": \"part\",\n      \"z\": 18,\n      \"attach\": {\"socket\": \"body.rightFoot\"}\n    },\n    {\n      \"shape\": \"badge\",\n      \"anchor\": \"free\",\n      \"x\": 0,\n      \"y\": 5,\n      \"scale\": [0.2, 0.2],\n      \"rotate\": 0,\n      \"material\": \"glossyGold\",\n      \"role\": \"part\",\n      \"z\": 16,\n      \"attach\": {\"socket\": \"body.front\"}\n    }\n  ]\n}",
+  "rawSceneSpec": {
+    "title": "Teal Fox Pilot",
+    "summary": "A cute teal fox character designed as a pilot, showcasing its adventurous spirit with oversized star goggles and rocket boots.",
+    "palette": "blue",
+    "scene": "scene_space",
+    "body": "body_capsule",
+    "head": "head_animal",
+    "eyes": "eyes_googly",
+    "mouth": "mouth_smile",
+    "primitives": [
+      "body_blob",
+      "body_triangle",
+      "head_hair",
+      "eyes_star",
+      "eyes_googly",
+      "mouth_wave",
+      "body_flame",
+      "body_boot",
+      "body_patch"
+    ],
+    "layers": [
+      {
+        "shape": "mascotBody",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.6,
+          0.6
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 2,
+        "attach": {
+          "socket": "body.center"
+        }
+      },
+      {
+        "shape": "mascotHead",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.8,
+          0.8
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "shape": "animalEar",
+        "anchor": "free",
+        "x": -20,
+        "y": -20,
+        "scale": [
+          0.4,
+          0.4
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 10,
+        "attach": {
+          "socket": "head.leftEar"
+        }
+      },
+      {
+        "shape": "animalEar",
+        "anchor": "free",
+        "x": 20,
+        "y": -20,
+        "scale": [
+          0.4,
+          0.4
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 10,
+        "attach": {
+          "socket": "head.rightEar"
+        }
+      },
+      {
+        "shape": "tail",
+        "anchor": "free",
+        "x": 0,
+        "y": 40,
+        "scale": [
+          0.5,
+          0.5
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "body.back"
+        }
+      },
+      {
+        "shape": "glasses",
+        "anchor": "free",
+        "x": 0,
+        "y": -10,
+        "scale": [
+          0.5,
+          0.5
+        ],
+        "rotate": 0,
+        "material": "blackGlass",
+        "role": "part",
+        "z": 15,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "shape": "mouthSmile",
+        "anchor": "free",
+        "x": 0,
+        "y": 10,
+        "scale": [
+          0.3,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "charcoalRubber",
+        "role": "mouth",
+        "z": 20,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      },
+      {
+        "shape": "boot",
+        "anchor": "free",
+        "x": -20,
+        "y": 20,
+        "scale": [
+          0.3,
+          0.3
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "role": "part",
+        "z": 12,
+        "attach": {
+          "socket": "body.leftFoot"
+        }
+      },
+      {
+        "shape": "boot",
+        "anchor": "free",
+        "x": 20,
+        "y": 20,
+        "scale": [
+          0.3,
+          0.3
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "role": "part",
+        "z": 12,
+        "attach": {
+          "socket": "body.rightFoot"
+        }
+      },
+      {
+        "shape": "spark",
+        "anchor": "free",
+        "x": -20,
+        "y": 25,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "role": "part",
+        "z": 18,
+        "attach": {
+          "socket": "body.leftFoot"
+        }
+      },
+      {
+        "shape": "spark",
+        "anchor": "free",
+        "x": 20,
+        "y": 25,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "role": "part",
+        "z": 18,
+        "attach": {
+          "socket": "body.rightFoot"
+        }
+      },
+      {
+        "shape": "badge",
+        "anchor": "free",
+        "x": 0,
+        "y": 5,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "role": "part",
+        "z": 16,
+        "attach": {
+          "socket": "body.front"
+        }
+      },
+      {
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "rotate": 0,
+        "opacity": 1,
+        "shape": "cuteEye",
+        "scale": [
+          0.24,
+          0.24
+        ],
+        "material": "softWhite",
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "rotate": 0,
+        "opacity": 1,
+        "shape": "cuteEye",
+        "scale": [
+          0.24,
+          0.24
+        ],
+        "material": "softWhite",
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      }
+    ]
+  },
+  "sanitizedSceneSpec": {
+    "title": "Teal Fox Pilot",
+    "summary": "A cute teal fox character designed as a pilot, showcasing its adventurous spirit with oversized star goggles and rocket boots.",
+    "palette": "blue",
+    "scene": "scene_space",
+    "body": "body_capsule",
+    "head": "head_animal",
+    "eyes": "eyes_googly",
+    "mouth": "mouth_smile",
+    "primitives": [
+      "body_blob",
+      "body_triangle",
+      "head_hair",
+      "eyes_star",
+      "eyes_googly",
+      "mouth_wave",
+      "body_flame",
+      "scene_space",
+      "body_rocket",
+      "head_round",
+      "eyes_cartoon",
+      "mouth_smile",
+      "object_spark"
+    ],
+    "layers": [
+      {
+        "id": "mascotBody-0",
+        "shape": "mascotBody",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.6,
+          0.6
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 2,
+        "attach": {
+          "socket": "body.center"
+        }
+      },
+      {
+        "id": "tail-4",
+        "shape": "tail",
+        "anchor": "free",
+        "x": 0,
+        "y": 40,
+        "scale": [
+          0.5,
+          0.5
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "body.back"
+        }
+      },
+      {
+        "id": "mascotHead-1",
+        "shape": "mascotHead",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.9,
+          0.8
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "id": "animalEar-2",
+        "shape": "animalEar",
+        "anchor": "free",
+        "x": -20,
+        "y": -20,
+        "scale": [
+          0.4,
+          0.4
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 10,
+        "attach": {
+          "socket": "head.leftEar"
+        }
+      },
+      {
+        "id": "animalEar-3",
+        "shape": "animalEar",
+        "anchor": "free",
+        "x": 20,
+        "y": -20,
+        "scale": [
+          0.4,
+          0.4
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 10,
+        "attach": {
+          "socket": "head.rightEar"
+        }
+      },
+      {
+        "id": "boot-7",
+        "shape": "boot",
+        "anchor": "free",
+        "x": -20,
+        "y": 20,
+        "scale": [
+          0.3,
+          0.3
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "opacity": 1,
+        "role": "part",
+        "z": 12,
+        "attach": {
+          "socket": "body.leftFoot"
+        }
+      },
+      {
+        "id": "boot-8",
+        "shape": "boot",
+        "anchor": "free",
+        "x": 20,
+        "y": 20,
+        "scale": [
+          0.3,
+          0.3
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "opacity": 1,
+        "role": "part",
+        "z": 12,
+        "attach": {
+          "socket": "body.rightFoot"
+        }
+      },
+      {
+        "id": "glasses-5",
+        "shape": "glasses",
+        "anchor": "free",
+        "x": 0,
+        "y": -10,
+        "scale": [
+          0.5,
+          0.5
+        ],
+        "rotate": 0,
+        "material": "blackGlass",
+        "opacity": 1,
+        "role": "part",
+        "z": 15,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "id": "badge-11",
+        "shape": "badge",
+        "anchor": "free",
+        "x": 0,
+        "y": 5,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "opacity": 1,
+        "role": "part",
+        "z": 16,
+        "attach": {
+          "socket": "body.front"
+        }
+      },
+      {
+        "id": "spark-9",
+        "shape": "spark",
+        "anchor": "free",
+        "x": -20,
+        "y": 25,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "opacity": 1,
+        "role": "part",
+        "z": 18,
+        "attach": {
+          "socket": "body.leftFoot"
+        }
+      },
+      {
+        "id": "spark-10",
+        "shape": "spark",
+        "anchor": "free",
+        "x": 20,
+        "y": 25,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "opacity": 1,
+        "role": "part",
+        "z": 18,
+        "attach": {
+          "socket": "body.rightFoot"
+        }
+      },
+      {
+        "id": "mouthSmile-6",
+        "shape": "mouthSmile",
+        "anchor": "free",
+        "x": 0,
+        "y": 10,
+        "scale": [
+          0.3,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "charcoalRubber",
+        "opacity": 1,
+        "role": "mouth",
+        "z": 20,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      },
+      {
+        "id": "cuteEye-12",
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.24,
+          0.24
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "id": "cuteEye-13",
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.24,
+          0.24
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "id": "enrich-snout-head-mouth-0--4-23",
+        "shape": "snout",
+        "anchor": "free",
+        "x": 0,
+        "y": -4,
+        "scale": [
+          0.38,
+          0.24
+        ],
+        "rotate": 0,
+        "material": "warmCream",
+        "opacity": 1,
+        "role": "part",
+        "z": 23,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      },
+      {
+        "id": "enrich-star-head-leftEye--6--14-",
+        "shape": "star",
+        "anchor": "free",
+        "x": -6,
+        "y": -14,
+        "scale": [
+          0.13,
+          0.13
+        ],
+        "rotate": -10,
+        "material": "glossyGold",
+        "opacity": 1,
+        "role": "part",
+        "z": 24,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "id": "enrich-star-head-rightEye-6--14-",
+        "shape": "star",
+        "anchor": "free",
+        "x": 6,
+        "y": -14,
+        "scale": [
+          0.13,
+          0.13
+        ],
+        "rotate": 10,
+        "material": "glossyGold",
+        "opacity": 1,
+        "role": "part",
+        "z": 24,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      }
+    ]
+  },
+  "validation": {
+    "ok": true,
+    "errors": []
+  },
+  "coverage": {
+    "ok": true,
+    "checks": [
+      {
+        "id": "animal-ears",
+        "label": "visible animal/fox ears",
+        "ok": true,
+        "count": 2,
+        "minimumCount": 2,
+        "layers": [
+          "animalEar-2",
+          "animalEar-3"
+        ]
+      },
+      {
+        "id": "tail",
+        "label": "visible tail",
+        "ok": true,
+        "count": 1,
+        "minimumCount": 1,
+        "layers": [
+          "tail-4"
+        ]
+      },
+      {
+        "id": "snout",
+        "label": "animal snout",
+        "ok": true,
+        "count": 1,
+        "minimumCount": 1,
+        "layers": [
+          "enrich-snout-head-mouth-0--4-23"
+        ]
+      },
+      {
+        "id": "eyewear",
+        "label": "visible goggles/glasses/headphones proxy",
+        "ok": true,
+        "count": 1,
+        "minimumCount": 1,
+        "layers": [
+          "glasses-5"
+        ]
+      },
+      {
+        "id": "star-accents",
+        "label": "star accents",
+        "ok": true,
+        "count": 2,
+        "minimumCount": 2,
+        "layers": [
+          "enrich-star-head-leftEye--6--14-",
+          "enrich-star-head-rightEye-6--14-"
+        ]
+      },
+      {
+        "id": "boots",
+        "label": "boots on both feet",
+        "ok": true,
+        "count": 2,
+        "minimumCount": 2,
+        "layers": [
+          "boot-7",
+          "boot-8"
+        ]
+      },
+      {
+        "id": "flame-accents",
+        "label": "rocket/flame accents",
+        "ok": true,
+        "count": 2,
+        "minimumCount": 2,
+        "layers": [
+          "spark-9",
+          "spark-10"
+        ]
+      },
+      {
+        "id": "pilot-scarf-or-badge",
+        "label": "pilot scarf or badge",
+        "ok": true,
+        "count": 1,
+        "minimumCount": 1,
+        "layers": [
+          "badge-11"
+        ]
+      }
+    ],
+    "missingRequiredDetails": []
+  },
+  "enrichments": [
+    {
+      "reason": "animal snout",
+      "shape": "snout",
+      "socket": "head.mouth",
+      "id": "enrich-snout-head-mouth-0--4-23"
+    },
+    {
+      "reason": "star accent",
+      "shape": "star",
+      "socket": "head.leftEye",
+      "id": "enrich-star-head-leftEye--6--14-24"
+    },
+    {
+      "reason": "star accent",
+      "shape": "star",
+      "socket": "head.rightEye",
+      "id": "enrich-star-head-rightEye-6--14-24"
+    }
+  ],
+  "repairs": 0
+}
