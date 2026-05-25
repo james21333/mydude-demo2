@@ -15,14 +15,20 @@ assert(/\/test5\(\\\/\|\$\)/.test(app) || /test5/.test(app), 'RootRouter does no
 assert(/\/test5\/avatar/.test(app), 'frontend does not call the test5 avatar endpoint');
 assert(/<SceneAvatar\s+scene=\{scene\}/.test(app), 'frontend does not render returned SceneSpec with SceneAvatar');
 assert(/expandedPrompt|designBrief|visualChecklist/.test(app), 'frontend does not expose expanded prompt/design brief receipts');
+assert(/coverage/.test(app) && /enrichments/.test(app), 'frontend must expose detail coverage and deterministic enrichments');
 assert(/function generateTest5Avatar\s*\(/.test(bridge), 'bridge generateTest5Avatar is missing');
 assert(/req\.method === 'POST' && req\.url\?\.startsWith\('\/test5\/avatar'\)/.test(bridge), 'bridge POST /test5/avatar route is missing');
 assert(/function expandTest5Prompt\s*\(/.test(bridge), 'bridge prompt expander stage is missing');
+assert(/requiredRenderableDetails/.test(bridge), 'prompt expander must produce required renderable detail contracts');
 assert(/generateTest5SceneSpec\s*\([^)]*designBrief/.test(bridge), 'SceneSpec generator must consume the expanded design brief');
 assert(/callTest5Llm/.test(bridge), 'bridge does not call an LLM for test5');
+assert(/function validateDetailCoverage\s*\(/.test(bridge), 'bridge must validate required detail coverage against layers');
+assert(/function ensurePromptDetails\s*\(/.test(bridge), 'bridge must add deterministic procedural layer enrichments for missing common details');
+assert(/coverage\.ok/.test(bridge) && /missingRequiredDetails/.test(bridge), 'test5 must gate acceptance on detail coverage, not just structural validity');
 assert(/skipPreset: true/.test(bridge), 'test5 sanitizer must skip baked quality presets to prove fresh generation');
 assert(/artifacts\/test5\/generated/.test(bridge), 'test5 artifacts are not saved under artifacts/test5/generated');
 assert(/expandedPrompt/.test(bridge) && /visualChecklist/.test(bridge), 'test5 artifacts do not save expanded prompt/checklist receipts');
+assert(/coverage/.test(bridge) && /enrichments/.test(bridge), 'test5 artifacts must save coverage/enrichment receipts');
 assert(/git', \['commit'/.test(bridge), 'test5 successful generations are not committed');
 assert(/TEST5_AUTO_PUSH/.test(bridge) && /git', \['push'/.test(bridge), 'test5 successful generations do not support auto-push');
 

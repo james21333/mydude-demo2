@@ -286,6 +286,7 @@ const ATTACHMENT_SOCKETS = Object.freeze({
   'body.rightFoot': () => [MASCOT_RIG.body.cx + MASCOT_RIG.body.rx * 0.24, MASCOT_RIG.body.cy + MASCOT_RIG.body.ry * 1.04],
   'body.patchLeft': () => [MASCOT_RIG.body.cx - MASCOT_RIG.body.rx * 0.24, MASCOT_RIG.body.cy + MASCOT_RIG.body.ry * 0.04],
   'body.patchRight': () => [MASCOT_RIG.body.cx + MASCOT_RIG.body.rx * 0.24, MASCOT_RIG.body.cy + MASCOT_RIG.body.ry * 0.18],
+  'body.back': () => [MASCOT_RIG.body.cx + MASCOT_RIG.body.rx * 0.64, MASCOT_RIG.body.cy + MASCOT_RIG.body.ry * 0.12],
   'head.center': () => [MASCOT_RIG.head.cx, MASCOT_RIG.head.cy],
   'head.leftEar': () => [MASCOT_RIG.head.cx - MASCOT_RIG.head.rx * 0.78, MASCOT_RIG.head.cy - MASCOT_RIG.head.ry * 0.02],
   'head.rightEar': () => [MASCOT_RIG.head.cx + MASCOT_RIG.head.rx * 0.78, MASCOT_RIG.head.cy - MASCOT_RIG.head.ry * 0.02],
@@ -308,6 +309,7 @@ const SOCKET_COMPATIBILITY = Object.freeze({
   mascotHead: ['head.center'],
   stubbyArm: ['body.leftShoulder', 'body.rightShoulder', 'body.leftHand', 'body.rightHand'],
   wing: ['body.leftShoulder', 'body.rightShoulder'], finLimb: ['body.leftShoulder', 'body.rightShoulder'],
+  tail: ['body.back', 'body.leftHand', 'body.rightHand'],
   noodleArm: ['body.leftShoulder', 'body.rightShoulder'],
   tentacle: ['body.leftShoulder', 'body.rightShoulder', 'body.leftHand', 'body.rightHand'],
   stubbyLeg: ['body.leftHip', 'body.rightHip'],
@@ -368,6 +370,7 @@ function inferSocket(shape, raw = {}, role = 'part') {
   if (/hoof|boot/.test(shape)) return sideFromRaw(raw) === 'right' ? 'body.rightFoot' : 'body.leftFoot';
   if (/stubbyLeg|\bleg\b/.test(shape)) return sideFromRaw(raw) === 'right' ? 'body.rightHip' : 'body.leftHip';
   if (/arm|mitten|paw|claw|tentacle|flipper|wing|finLimb/.test(shape)) return sideFromRaw(raw) === 'right' ? 'body.rightHand' : 'body.leftHand';
+  if (/tail/.test(shape)) return 'body.back';
   if (/patch|spot|stripe|panel|button|badge/.test(shape)) return sideFromRaw(raw) === 'right' ? 'body.patchRight' : 'body.patchLeft';
   if (/tie|bowtie/.test(shape)) return 'body.front';
   return null;
@@ -1841,6 +1844,8 @@ function Shape3D({ shape, material = 'glossyBlue', mouthPhase = 0 }) {
   if (shape === 'stubbyArm') return <g><path d="M-24 -44 C10 -58 34 -30 30 8 C26 38 0 58 -28 44 C-52 30 -56 -28 -24 -44 Z" {...common}/><ellipse cx="-5" cy="-24" rx="14" ry="7" fill="#fff" opacity=".22" stroke="none"/></g>;
   if (shape === 'stubbyLeg') return <g><path d="M-24 -30 C6 -42 30 -16 28 20 C26 48 -10 58 -30 34 C-44 12 -42 -18 -24 -30 Z" {...common}/></g>;
   if (shape === 'hoof') return <g><ellipse rx="42" ry="28" fill="url(#shine-charcoalRubber)" stroke="#020617" strokeWidth="4"/><ellipse cx="-10" cy="-10" rx="13" ry="8" fill="#fff" opacity=".26" stroke="none"/><path d="M0 -20 V16" stroke="#94a3b8" strokeWidth="3" opacity=".45"/></g>;
+  if (shape === 'boot') return <g><path d="M-34 -28 H18 C42 -24 52 -4 48 18 C18 30 -18 30 -48 18 C-52 -6 -48 -22 -34 -28 Z" fill="url(#shine-chrome)" stroke="#334155" strokeWidth="4"/><ellipse cx="-10" cy="-14" rx="14" ry="7" fill="#fff" opacity=".22" stroke="none"/></g>;
+  if (shape === 'flame') return <path d="M0 -72 C42 -24 28 34 0 66 C-30 32 -42 -8 -12 -42 C-8 -18 10 -10 0 -72 Z" fill="url(#shine-flame)" stroke="#dc2626" strokeWidth="4"/>;
   if (shape === 'cuteEye') return <g><ellipse cx="0" cy="2" rx="44" ry="42" fill="#fff" stroke="#cbd5e1" strokeWidth="4"/><circle cx="6" cy="8" r="15" fill="#020617" stroke="none"/><circle cx="0" cy="0" r="6" fill="#fff" opacity=".95" stroke="none"/><path d="M-30 -34 Q0 -52 30 -34" fill="none" stroke="#e2e8f0" strokeWidth="5" strokeLinecap="round" opacity=".75"/></g>;
   if (shape === 'bodyPatch' || shape === 'attachedSpot') return <path d="M-48 -18 C-36 -42 8 -46 40 -22 C58 -8 48 28 10 36 C-28 44 -62 12 -48 -18 Z" fill={material === 'charcoalRubber' ? '#111827' : '#334155'} stroke={material === 'charcoalRubber' ? '#020617' : '#1e293b'} strokeWidth="3" opacity=".9"/>;
   if (shape === 'stripe') return <path d="M-64 -24 C-36 -36 28 -34 64 -18 L56 4 C20 -10 -26 -8 -56 8 Z" fill="#334155" stroke="#1e293b" strokeWidth="3" opacity=".82"/>;
@@ -1871,6 +1876,7 @@ function Shape3D({ shape, material = 'glossyBlue', mouthPhase = 0 }) {
   if (shape === 'animalEar') return <path d="M-44 34 C-60 -16 -22 -62 20 -48 C54 -18 30 30 -44 34 Z" {...common}/>;
   if (shape === 'horn') return <path d="M-18 48 C-12 -18 0 -62 28 -92 C18 -28 32 22 -18 48 Z" fill="url(#shine-canvas)" stroke="#d6d3d1" strokeWidth="4"/>;
   if (shape === 'wing') return <path d="M-8 -70 C-92 -24 -108 42 -22 82 C-30 34 18 12 -8 -70 Z" {...common}/>;
+  if (shape === 'tail') return <g><path d="M-42 -20 C42 -82 112 -24 58 58 C26 104 -48 78 -18 24 C-4 0 -22 -4 -42 -20 Z" {...common}/><path d="M26 -18 C64 -28 78 -4 48 28" fill="none" stroke="#fff" strokeWidth="10" opacity=".2" strokeLinecap="round"/></g>;
   if (shape === 'fin') return <path d="M-16 -58 C34 -10 32 36 -34 70 C-18 24 -16 -18 -16 -58 Z" {...common}/>;
   if (shape === 'fender') return <path d="M-64 20 C-48 -38 50 -42 66 20 C22 2 -20 2 -64 20 Z" {...common}/>;
   if (shape === 'spot') return <ellipse rx="52" ry="34" fill="url(#shine-charcoalRubber)" stroke="#0f172a" strokeWidth="3" opacity=".9"/>;
@@ -1963,8 +1969,8 @@ function Test5AvatarLab() {
       <div className="eyebrow">/test5 dynamic avatar lab</div>
       <h1>LLM → SceneSpec → My Dude renderer → committed artifact</h1>
       <p>
-        Type a prompt. The bridge asks an LLM for a brand-new controlled drawing recipe, validates/sanitizes it,
-        saves it under <code>artifacts/test5/generated</code>, commits it, then this page renders the returned SceneSpec with the same SVG avatar renderer.
+        Type a prompt. The bridge expands it into a renderer-aware design brief, asks an LLM for a brand-new controlled drawing recipe,
+        verifies required visual detail coverage, procedurally enriches missing common details, saves/commits the artifact, then this page renders the returned SceneSpec.
       </p>
       <div className="debug-pill">bridge: {test5BridgeOrigin()}</div>
     </header>
@@ -1991,7 +1997,11 @@ function Test5AvatarLab() {
           <div><strong>Commit:</strong> {result.commit?.ok ? result.commit.hash : result.commit?.error || 'not committed'}</div>
           <div><strong>Push:</strong> {result.commit?.push?.ok ? 'pushed to GitHub' : result.commit?.push?.attempted ? result.commit.push.error || 'push failed' : 'not pushed'}</div>
           <div><strong>Repairs:</strong> {result.repairs}</div>
+          <div><strong>Coverage:</strong> {result.coverage?.ok ? 'passed' : 'failed'}{result.coverage?.missingRequiredDetails?.length ? ` — missing ${result.coverage.missingRequiredDetails.join(', ')}` : ''}</div>
+          <div><strong>Enrichments:</strong> {result.enrichments?.length ? `${result.enrichments.length} procedural layer(s) added` : 'none needed'}</div>
           <div style={{ marginTop: 10 }}><strong>Expanded prompt:</strong> {result.expandedPrompt}</div>
+          {result.coverage?.checks?.length ? <div style={{ marginTop: 10 }}><strong>Detail coverage:</strong><ul>{result.coverage.checks.map((item) => <li key={item.id}>{item.ok ? '✓' : '✗'} {item.label || item.id}: {item.count}/{item.minimumCount}</li>)}</ul></div> : null}
+          {result.enrichments?.length ? <div style={{ marginTop: 10 }}><strong>Procedural enrichments:</strong><ul>{result.enrichments.map((item, idx) => <li key={idx}>{item.reason}: {item.shape} @ {item.socket}</li>)}</ul></div> : null}
           {result.visualChecklist?.length ? <div style={{ marginTop: 10 }}><strong>Visual checklist:</strong><ul>{result.visualChecklist.map((item, idx) => <li key={idx}>{item}</li>)}</ul></div> : null}
         </div> : null}
       </section>
@@ -2012,6 +2022,8 @@ function Test5AvatarLab() {
     {result ? <section className="debug-box" style={{ marginTop: 18 }}>
       <h2 style={{ marginTop: 0 }}>Expanded design brief</h2>
       <pre style={{ whiteSpace: 'pre-wrap', overflowX: 'auto', maxHeight: 320 }}>{JSON.stringify(result.designBrief, null, 2)}</pre>
+      <h2>Coverage and enrichment receipts</h2>
+      <pre style={{ whiteSpace: 'pre-wrap', overflowX: 'auto', maxHeight: 320 }}>{JSON.stringify({ coverage: result.coverage, enrichments: result.enrichments }, null, 2)}</pre>
       <h2>Sanitized SceneSpec returned by the two-stage LLM pipeline</h2>
       <pre style={{ whiteSpace: 'pre-wrap', overflowX: 'auto', maxHeight: 420 }}>{JSON.stringify(result.sceneSpec, null, 2)}</pre>
     </section> : null}

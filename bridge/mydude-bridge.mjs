@@ -270,6 +270,7 @@ Required JSON shape:
   "styleTags": ["cute mascot", "glossy SVG", "blue-avatar quality"],
   "visualChecklist": ["8 to 12 concrete visual details"],
   "requiredDetails": ["at least 4 prompt-specific details"],
+  "requiredRenderableDetails": [{ "id": "detail_id", "label": "visible detail", "acceptableShapes": ["shapeName"], "acceptableSockets": ["socket.name"], "minimumCount": 1 }],
   "forbiddenDetails": ["raw SVG", "HTML", "unvalidated custom shapes", "external images"],
   "qualityConstraints": ["oversized expressive head", "compact connected body", "readable silhouette", "valid renderer sockets only"]
 }
@@ -277,6 +278,7 @@ Rules:
 - Preserve the user's concept, but add the missing details in the background.
 - Include at least one anatomy detail, one color/material detail, one expression detail, one accessory/marking, and one accent/glow/detail layer.
 - Favor details that can be represented with simple mascot parts: horns, ears, wings, tail, patches, spots, stripes, glasses, hats, wand/staff, badge, sparkles, music notes, screen/panel, boots, hooves, claws.
+- requiredRenderableDetails is a contract. Include only details that can be checked against layers. For star goggles, require glasses plus star/spark near eyes. For rocket boots, require two boot layers and flame/spark accents. For fox, require ears, snout, and tail.
 - Keep it cute, centered, and at the same polish level as the default blue My Dude avatar.`;
 }
 
@@ -292,7 +294,7 @@ Extra /test5 rules:
 - Do not copy a named preset. Make a fresh composition for this exact prompt and expanded brief.
 - Keep the My Dude quality bar: oversized expressive head, compact body, connected limbs, glossy dimensional materials, readable silhouette.
 - Create a detailed avatar, not a sparse placeholder: minimum 10 layers when possible, maximum 28 layers.
-- Include the prompt-specific details from visualChecklist/requiredDetails using valid renderer parts.
+- Include every prompt-specific requiredRenderableDetails item using valid renderer parts; the backend rejects recipes whose layers do not cover required details.
 - Required layers must use exact shape names, not roles: {"shape":"mascotBody","role":"part","attach":{"socket":"body.center"}}, {"shape":"mascotHead","role":"part","attach":{"socket":"head.center"}}, two eye layers with role:"eye", and exactly one mouth layer with role:"mouth" attached to head.mouth.
 - Use exact renderer shape names only. For dragon use mascotBody+mascotHead+softHorn+wing+claw; for scientist goggles use glasses; for robot use screen/panel/pixelEye/mouthScreen. Never invent names like dragon, goggles, smile, arm, leftEye, body.
 - Accessories/details must attach to valid sockets. Prefer head.leftHorn/rightHorn for antenna/horns, head.leftEar/rightEar for ears, body.front/body.patchLeft/body.patchRight for body details.
@@ -352,6 +354,7 @@ function normalizeDesignBrief(raw, prompt) {
     styleTags: ['cute mascot', 'glossy SVG', 'blue-avatar quality'],
     visualChecklist: ['oversized head', 'compact body', 'two expressive eyes', 'one small smile', 'connected arms', 'connected feet', 'one accessory', 'one accent detail'],
     requiredDetails: ['prompt-specific subject feature', 'prompt-specific color/material', 'prompt-specific accessory', 'prompt-specific marking/accent'],
+    requiredRenderableDetails: [],
     forbiddenDetails: ['raw SVG', 'HTML', 'JavaScript', 'external images'],
     qualityConstraints: ['oversized expressive head', 'compact connected body', 'readable silhouette', 'valid renderer sockets only'],
   };
@@ -365,6 +368,7 @@ function normalizeDesignBrief(raw, prompt) {
   }
   if (!brief.visualChecklist.length) brief.visualChecklist = fallback.visualChecklist;
   if (!brief.requiredDetails.length) brief.requiredDetails = fallback.requiredDetails;
+  brief.requiredRenderableDetails = normalizeRenderableDetails(brief.requiredRenderableDetails, prompt, brief);
   return brief;
 }
 
@@ -384,6 +388,117 @@ async function generateTest5SceneSpec(prompt, designBrief, repairNote = '') {
   return callTest5Llm(prompt, designBrief, repairNote);
 }
 
+function renderableDetail(id, label, acceptableShapes, acceptableSockets = [], minimumCount = 1) {
+  return { id, label, acceptableShapes, acceptableSockets, minimumCount };
+}
+
+function inferRequiredRenderableDetails(prompt = '', brief = {}) {
+  const text = `${prompt} ${brief.expandedPrompt || ''} ${(brief.visualChecklist || []).join(' ')} ${(brief.requiredDetails || []).join(' ')}`.toLowerCase();
+  const details = [];
+  const add = (detail) => { if (!details.some(d => d.id === detail.id)) details.push(detail); };
+  if (/fox|cat|dog|wolf|animal/.test(text)) add(renderableDetail('animal_ears', 'visible animal/fox ears', ['animalEar', 'softEar'], ['head.leftEar', 'head.rightEar'], 2));
+  if (/fox|dog|wolf|cat|tail/.test(text)) add(renderableDetail('tail', 'visible tail', ['tail'], ['body.back', 'body.leftHand', 'body.rightHand'], 1));
+  if (/fox|dog|wolf|cat|snout/.test(text)) add(renderableDetail('snout', 'animal snout', ['snout'], ['head.mouth'], 1));
+  if (/goggle|glasses|visor|headphone|headphones/.test(text)) add(renderableDetail('eyewear', 'visible goggles/glasses/headphones proxy', ['glasses', 'sunglasses', 'panel', 'wire'], ['head.center', 'head.leftEye', 'head.rightEye'], 1));
+  if (/star goggle|star-shaped|star goggles|star/.test(text)) add(renderableDetail('star_accents', 'star accents', ['star', 'spark', 'starEye'], ['head.leftEye', 'head.rightEye', 'head.center', 'body.front'], 2));
+  if (/rocket boot|boots|boot/.test(text)) add(renderableDetail('boots', 'boots on both feet', ['boot'], ['body.leftFoot', 'body.rightFoot'], 2));
+  if (/rocket boot|flame|jet|rocket/.test(text)) add(renderableDetail('flame_accents', 'rocket/flame accents', ['flame', 'spark', 'rocket'], ['body.leftFoot', 'body.rightFoot', 'body.front'], 2));
+  if (/pilot|aviator|scarf/.test(text)) add(renderableDetail('pilot_scarf_or_badge', 'pilot scarf or badge', ['tie', 'bowtie', 'flag', 'badge', 'rope'], ['body.front'], 1));
+  if (/wizard|magic|staff|wand/.test(text)) add(renderableDetail('magic_staff', 'wand or staff', ['wand', 'spark', 'star'], ['body.leftHand', 'body.rightHand', 'body.front'], 1));
+  if (/dj|music|drummer|song|headphone/.test(text)) add(renderableDetail('music_details', 'music notes or audio gear', ['musicNote', 'microphone', 'glasses', 'spark'], ['body.front', 'head.center', 'head.leftEye', 'head.rightEye'], 1));
+  if (/dragon|demon|horn/.test(text)) add(renderableDetail('horns', 'horns', ['softHorn', 'horn'], ['head.leftHorn', 'head.rightHorn'], 2));
+  if (/dragon|bird|bat|wing/.test(text)) add(renderableDetail('wings', 'wings', ['wing'], ['body.leftShoulder', 'body.rightShoulder'], 2));
+  return details.slice(0, 8);
+}
+
+function normalizeRenderableDetails(details = [], prompt = '', brief = {}) {
+  const inferred = inferRequiredRenderableDetails(prompt, brief);
+  const normalized = [];
+  const add = (detail) => {
+    if (!detail || typeof detail !== 'object') return;
+    const acceptableShapes = (Array.isArray(detail.acceptableShapes) ? detail.acceptableShapes : []).filter(s => DRAWING_SHAPES.has(s));
+    if (!acceptableShapes.length) return;
+    const acceptableSockets = (Array.isArray(detail.acceptableSockets) ? detail.acceptableSockets : []).filter(s => ATTACHMENT_SOCKET_NAMES.has(s));
+    const id = slugify(detail.id || detail.label || acceptableShapes.join('-'));
+    if (normalized.some(d => d.id === id)) return;
+    normalized.push({
+      id,
+      label: String(detail.label || id).slice(0, 120),
+      acceptableShapes,
+      acceptableSockets,
+      minimumCount: Math.max(1, Math.min(8, Number(detail.minimumCount) || 1)),
+    });
+  };
+  for (const detail of details) add(detail);
+  for (const detail of inferred) add(detail);
+  return normalized.slice(0, 10);
+}
+
+function validateDetailCoverage(designBrief = {}, scene = {}) {
+  const layers = Array.isArray(scene?.layers) ? scene.layers : [];
+  const required = Array.isArray(designBrief.requiredRenderableDetails) ? designBrief.requiredRenderableDetails : [];
+  const checks = required.map(detail => {
+    const matches = layers.filter(layer => {
+      const shapeOk = detail.acceptableShapes?.includes(layer.shape);
+      const socketOk = !detail.acceptableSockets?.length || detail.acceptableSockets.includes(layer.attach?.socket);
+      return shapeOk && socketOk;
+    });
+    return { id: detail.id, label: detail.label, ok: matches.length >= detail.minimumCount, count: matches.length, minimumCount: detail.minimumCount, layers: matches.map(l => l.id || `${l.shape}:${l.attach?.socket || ''}`) };
+  });
+  const missingRequiredDetails = checks.filter(c => !c.ok).map(c => c.id);
+  return { ok: missingRequiredDetails.length === 0, checks, missingRequiredDetails };
+}
+
+function test5Layer(shape, socket, material, { x = 0, y = 0, scale = [0.25, 0.25], rotate = 0, z = 14, role = 'part' } = {}) {
+  return { shape, anchor: 'free', x, y, scale, rotate, material, opacity: 1, role, z, attach: { socket }, id: `enrich-${shape}-${socket.replace(/[^a-z0-9]/gi, '-')}-${Math.round(x)}-${Math.round(y)}-${Math.round(z)}` };
+}
+
+function ensurePromptDetails(prompt = '', designBrief = {}, scene = {}) {
+  const text = `${prompt} ${designBrief.expandedPrompt || ''} ${(designBrief.visualChecklist || []).join(' ')}`.toLowerCase();
+  const next = { ...scene, layers: Array.isArray(scene.layers) ? [...scene.layers] : [] };
+  const enrichments = [];
+  const has = (shape, socket) => next.layers.some(l => l.shape === shape && (!socket || l.attach?.socket === socket));
+  const add = (reason, layer) => {
+    if (!DRAWING_SHAPES.has(layer.shape) || !DRAWING_MATERIALS.has(layer.material) || !ATTACHMENT_SOCKET_NAMES.has(layer.attach?.socket)) return;
+    if (has(layer.shape, layer.attach.socket) && ['mascotBody','mascotHead','cuteEye','mouthSmile','mouthGrin'].includes(layer.shape)) return;
+    next.layers.push(layer);
+    enrichments.push({ reason, shape: layer.shape, socket: layer.attach.socket, id: layer.id });
+  };
+  const primary = /orange|fox/.test(text) ? 'glossyOrange' : materialForText(text);
+  if (/fox|cat|dog|wolf|animal/.test(text)) {
+    if (!has('animalEar', 'head.leftEar') && !has('softEar', 'head.leftEar')) add('animal ears', test5Layer('animalEar', 'head.leftEar', primary, { scale: [0.28, 0.34], rotate: -16, z: 7 }));
+    if (!has('animalEar', 'head.rightEar') && !has('softEar', 'head.rightEar')) add('animal ears', test5Layer('animalEar', 'head.rightEar', primary, { scale: [0.28, 0.34], rotate: 16, z: 7 }));
+    if (!has('snout', 'head.mouth')) add('animal snout', test5Layer('snout', 'head.mouth', 'warmCream', { y: -4, scale: [0.38, 0.24], z: 23 }));
+  }
+  if (/fox|dog|wolf|cat|tail/.test(text) && !has('tail', 'body.back')) add('tail', test5Layer('tail', 'body.back', primary, { x: 66, y: 4, scale: [0.42, 0.72], rotate: 28, z: 1 }));
+  if (/goggle|glasses|visor|headphone|headphones/.test(text) && !has('glasses', 'head.center') && !has('sunglasses', 'head.center')) add('eyewear', test5Layer('glasses', 'head.center', 'chrome', { y: -4, scale: [0.58, 0.34], z: 22 }));
+  if (/star goggle|star-shaped|star goggles|star/.test(text)) {
+    if (!has('star', 'head.leftEye')) add('star accent', test5Layer('star', 'head.leftEye', 'glossyGold', { x: -6, y: -14, scale: [0.13, 0.13], rotate: -10, z: 24 }));
+    if (!has('star', 'head.rightEye')) add('star accent', test5Layer('star', 'head.rightEye', 'glossyGold', { x: 6, y: -14, scale: [0.13, 0.13], rotate: 10, z: 24 }));
+  }
+  if (/rocket boot|boots|boot/.test(text)) {
+    if (!has('boot', 'body.leftFoot')) add('boots', test5Layer('boot', 'body.leftFoot', 'chrome', { y: 8, scale: [0.28, 0.24], rotate: -8, z: 7 }));
+    if (!has('boot', 'body.rightFoot')) add('boots', test5Layer('boot', 'body.rightFoot', 'chrome', { y: 8, scale: [0.28, 0.24], rotate: 8, z: 7 }));
+  }
+  if (/rocket boot|flame|jet|rocket/.test(text)) {
+    if (!has('flame', 'body.leftFoot')) add('flame accents', test5Layer('flame', 'body.leftFoot', 'flame', { y: 34, scale: [0.18, 0.28], rotate: 180, z: 6 }));
+    if (!has('flame', 'body.rightFoot')) add('flame accents', test5Layer('flame', 'body.rightFoot', 'flame', { y: 34, scale: [0.18, 0.28], rotate: 180, z: 6 }));
+  }
+  if (/pilot|aviator|scarf/.test(text) && !has('tie', 'body.front') && !has('badge', 'body.front')) add('pilot scarf/badge', test5Layer('tie', 'body.front', 'glossyRed', { y: -18, scale: [0.28, 0.28], rotate: -18, z: 12 }));
+  if (/wizard|magic|staff|wand/.test(text) && !has('wand', 'body.rightHand')) add('magic staff', test5Layer('wand', 'body.rightHand', 'wood', { x: 18, y: -8, scale: [0.32, 0.5], rotate: -22, z: 13 }));
+  if (/dj|music|drummer|song|headphone/.test(text) && !next.layers.some(l => ['musicNote','microphone'].includes(l.shape))) add('music detail', test5Layer('musicNote', 'body.front', 'neon', { x: 52, y: -50, scale: [0.28, 0.28], rotate: 8, z: 15 }));
+  if (/dragon|demon|horn/.test(text)) {
+    if (!has('softHorn', 'head.leftHorn') && !has('horn', 'head.leftHorn')) add('horns', test5Layer('softHorn', 'head.leftHorn', 'warmCream', { scale: [0.24, 0.32], rotate: -12, z: 7 }));
+    if (!has('softHorn', 'head.rightHorn') && !has('horn', 'head.rightHorn')) add('horns', test5Layer('softHorn', 'head.rightHorn', 'warmCream', { scale: [0.24, 0.32], rotate: 12, z: 7 }));
+  }
+  if (/dragon|bird|bat|wing/.test(text)) {
+    if (!has('wing', 'body.leftShoulder')) add('wings', test5Layer('wing', 'body.leftShoulder', primary, { scale: [0.34, 0.38], rotate: -24, z: 1 }));
+    if (!has('wing', 'body.rightShoulder')) add('wings', test5Layer('wing', 'body.rightShoulder', primary, { scale: [0.34, 0.38], rotate: 24, z: 1 }));
+  }
+  next.layers = next.layers.slice(0, 28);
+  return { sceneSpec: next, enrichments };
+}
+
 function coerceTest5RawScene(raw, prompt = '') {
   if (!raw || typeof raw !== 'object') return raw;
   const shapeAliases = new Map(Object.entries({
@@ -399,14 +514,14 @@ function coerceTest5RawScene(raw, prompt = '') {
     texture_spots: 'bodyPatch', spot: 'spot', spots: 'spot', texture_stripes: 'stripe', stripe: 'stripe',
     accessory_hat: 'topHat', hat: 'topHat', wizardHat: 'topHat', accessory_crown: 'crown', crown: 'crown', accessory_wand: 'wand', staff: 'wand', wand: 'wand',
     musicNote: 'musicNote', music: 'musicNote', note: 'musicNote', glow: 'spark', sparkle: 'spark', star: 'star', badge: 'badge', panel: 'panel', screen: 'screen',
-    horn: 'softHorn', horns: 'softHorn', wing: 'wing', wings: 'wing', tail: 'tail', ear: 'softEar', ears: 'softEar',
+    horn: 'softHorn', horns: 'softHorn', wing: 'wing', wings: 'wing', tail: 'tail', tails: 'tail', foxTail: 'tail', scarf: 'tie', pilotScarf: 'tie', aviatorScarf: 'tie', ear: 'softEar', ears: 'softEar',
   }));
   const materialAliases = new Map(Object.entries({
     silver: 'chrome', gray: 'chrome', grey: 'chrome', glossyGray: 'chrome', glossyGrey: 'chrome', glossySlate: 'chrome', chrome: 'chrome', black: 'charcoalRubber', white: 'softWhite', cyan: 'neon', blue: 'glossyBlue', purple: 'glossyPurple', orange: 'glossyOrange', gold: 'glossyGold', yellow: 'glossyGold', green: 'glossyGreen', red: 'glossyRed', pink: 'glossyPink',
   }));
   const socketAliases = new Map(Object.entries({
     'head.top': 'head.center', 'head.left': 'head.leftEar', 'head.right': 'head.rightEar', 'face.leftEye': 'head.leftEye', 'face.rightEye': 'head.rightEye', 'face.mouth': 'head.mouth',
-    'body.belly': 'body.front', 'body.chest': 'body.front', 'body.left': 'body.patchLeft', 'body.right': 'body.patchRight', 'leftEye': 'head.leftEye', 'rightEye': 'head.rightEye',
+    'body.belly': 'body.front', 'body.chest': 'body.front', 'body.left': 'body.patchLeft', 'body.right': 'body.patchRight', 'body.tail': 'body.back', 'leftEye': 'head.leftEye', 'rightEye': 'head.rightEye',
   }));
   const layers = Array.isArray(raw.layers) ? raw.layers.map((layer, index) => {
     const next = { ...layer };
@@ -431,7 +546,8 @@ function coerceTest5RawScene(raw, prompt = '') {
       else if (/leg|hoof|boot/.test(next.shape)) next.attach.socket = side === 'right' ? 'body.rightFoot' : 'body.leftFoot';
       else if (/glasses|screen|panel|button|tie|badge|wand|spark/.test(next.shape)) next.attach.socket = 'body.front';
       else if (/patch|spot|stripe/.test(next.shape)) next.attach.socket = side === 'right' ? 'body.patchRight' : 'body.patchLeft';
-      else if (/wing|tail/.test(next.shape)) next.attach.socket = side === 'right' ? 'body.rightHand' : 'body.leftHand';
+      else if (/tail/.test(next.shape)) next.attach.socket = 'body.back';
+      else if (/wing/.test(next.shape)) next.attach.socket = side === 'right' ? 'body.rightShoulder' : 'body.leftShoulder';
     }
     if (!next.attach.socket) delete next.attach;
     return next;
@@ -474,7 +590,7 @@ function slugify(text = '') {
   return String(text).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 56) || 'avatar';
 }
 
-async function saveTest5Artifact({ prompt, designBrief, expandedContent, provider, rawContent, rawSceneSpec, sceneSpec, validation, repairs }) {
+async function saveTest5Artifact({ prompt, designBrief, expandedContent, provider, rawContent, rawSceneSpec, sceneSpec, validation, coverage, enrichments, repairs }) {
   const createdAt = new Date().toISOString();
   const stamp = createdAt.replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
   const relPath = `artifacts/test5/generated/${stamp}-${slugify(prompt)}.json`;
@@ -494,6 +610,8 @@ async function saveTest5Artifact({ prompt, designBrief, expandedContent, provide
     rawSceneSpec,
     sanitizedSceneSpec: sceneSpec,
     validation,
+    coverage,
+    enrichments,
     repairs,
   };
   await fs.writeFile(absPath, JSON.stringify(artifact, null, 2), 'utf8');
@@ -534,6 +652,8 @@ async function generateTest5Avatar(prompt) {
   let repairs = 0;
   let provider = `${expanded.provider} + ${first.provider}`;
   let rawContent = first.content;
+  let coverage = { ok: false, checks: [], missingRequiredDetails: [] };
+  let enrichments = [];
 
   if (!validation.ok) {
     repairs = 1;
@@ -547,8 +667,35 @@ async function generateTest5Avatar(prompt) {
   sceneSpec = sanitizeSceneSpec(rawSceneSpec, prompt, { skipPreset: true });
   validation = validateTest5Scene(sceneSpec);
   if (!validation.ok) throw new Error(`Sanitized SceneSpec failed validation: ${validation.errors.join('; ')}`);
-  const saved = await saveTest5Artifact({ prompt, designBrief, expandedContent: expanded.content, provider, rawContent, rawSceneSpec, sceneSpec, validation, repairs });
-  return { ok: true, prompt, userPrompt: prompt, expandedPrompt: designBrief.expandedPrompt, designBrief, visualChecklist: designBrief.visualChecklist || [], requiredDetails: designBrief.requiredDetails || [], provider, rawSceneSpec, sceneSpec, validation, repairs, artifactPath: saved.relPath, commit: saved.commit };
+
+  coverage = validateDetailCoverage(designBrief, sceneSpec);
+  if (!coverage.ok) {
+    const enriched = ensurePromptDetails(prompt, designBrief, sceneSpec);
+    sceneSpec = sanitizeSceneSpec(enriched.sceneSpec, prompt, { skipPreset: true });
+    enrichments = enriched.enrichments;
+    validation = validateTest5Scene(sceneSpec);
+    if (!validation.ok) throw new Error(`Enriched SceneSpec failed validation: ${validation.errors.join('; ')}`);
+    coverage = validateDetailCoverage(designBrief, sceneSpec);
+  }
+  if (!coverage.ok) {
+    repairs += 1;
+    const repaired = await generateTest5SceneSpec(prompt, designBrief, `Structurally valid but missing required visual detail coverage: ${coverage.missingRequiredDetails.join(', ')}. Add actual renderable layers for those details. Return the full corrected SceneSpec.`);
+    provider = `${expanded.provider} + ${repaired.provider}`;
+    rawContent = repaired.content;
+    rawSceneSpec = coerceTest5RawScene(parseJsonObject(repaired.content), prompt);
+    validation = validateTest5Scene(rawSceneSpec);
+    if (!validation.ok) throw new Error(`Coverage repair raw SceneSpec failed validation: ${validation.errors.join('; ')}`);
+    sceneSpec = sanitizeSceneSpec(rawSceneSpec, prompt, { skipPreset: true });
+    const enriched = ensurePromptDetails(prompt, designBrief, sceneSpec);
+    sceneSpec = sanitizeSceneSpec(enriched.sceneSpec, prompt, { skipPreset: true });
+    enrichments = [...enrichments, ...enriched.enrichments];
+    validation = validateTest5Scene(sceneSpec);
+    coverage = validateDetailCoverage(designBrief, sceneSpec);
+  }
+  if (!coverage.ok) throw new Error(`Generated avatar failed detail coverage: ${coverage.missingRequiredDetails.join('; ')}`);
+
+  const saved = await saveTest5Artifact({ prompt, designBrief, expandedContent: expanded.content, provider, rawContent, rawSceneSpec, sceneSpec, validation, coverage, enrichments, repairs });
+  return { ok: true, prompt, userPrompt: prompt, expandedPrompt: designBrief.expandedPrompt, designBrief, visualChecklist: designBrief.visualChecklist || [], requiredDetails: designBrief.requiredDetails || [], requiredRenderableDetails: designBrief.requiredRenderableDetails || [], coverage, enrichments, provider, rawSceneSpec, sceneSpec, validation, repairs, artifactPath: saved.relPath, commit: saved.commit };
 }
 
 async function readJsonBody(req, maxBytes = 64_000) {
