@@ -1790,7 +1790,10 @@ function Test5HandCodedAvatar({ character, status = 'listening' }) {
   const hasPart = (type, side) => parts.some(part => part.type === type && (!side || part.side === side));
   const hasAnchoredPart = (type, side) => parts.some(part => part.type === type && (part.side === side || (!part.side && side === 'right') || (part.side === 'center' && side === 'right')));
   const partClass = (part) => `test5-dude-part part-${part.type || 'badge'} side-${part.side || 'center'} tone-${part.tone || 'primary'}`;
-  const renderHand = (side) => <div className={`test5-dude-arm ${side}`}><span className="test5-dude-hand">{hasAnchoredPart('wand', side) && <i className="test5-dude-wand" />}</span></div>;
+  const renderHand = (side) => {
+    const holdingWand = hasAnchoredPart('wand', side);
+    return <div className={`test5-dude-arm ${side}`}><span className={`test5-dude-hand${holdingWand ? ' holding-wand' : ''}`}>{holdingWand && <i className="test5-dude-wand" />}</span></div>;
+  };
   const renderFoot = (side) => <div className={`test5-dude-leg ${side}`}><span className="test5-dude-foot">{hasAnchoredPart('boot', side) && <b className="test5-dude-boot" />}{hasAnchoredPart('flame', side) && <i className="test5-dude-flame" />}</span></div>;
   return <div className={`avatar-card test5-dude-card ${status} built`} style={vars}>
     <div className={`test5-dude-character head-${character.headShape || 'rounded'} body-${character.bodyShape || 'compact'} expression-${character.expression || 'friendly'}`}>

@@ -38,6 +38,7 @@ assert(/<Test5HandCodedAvatar\s+character=\{reactCssCharacter\}/.test(app), 'fro
 const css = fs.readFileSync('src/styles.css', 'utf8');
 assert(/test5-dude-head/.test(app) && /test5-dude-head/.test(css), 'frontend must include original-blue-dude-style head/body CSS scaffold');
 assert(/test5-dude-hand/.test(app) && /test5-dude-hand/.test(css), 'hand-held props such as wands must be nested in an explicit hand anchor');
+assert(/holding-wand/.test(app) && /holding-wand/.test(css), 'hand-held wands need a visible hand grip/clasp so they do not look detached');
 assert(/test5-dude-foot/.test(app) && /test5-dude-foot/.test(css), 'foot-worn props such as boots/flames must be nested in an explicit foot anchor');
 assert(/skipPreset: true/.test(bridge), 'test5 sanitizer must skip baked quality presets to prove fresh generation');
 assert(/artifacts\/test5\/generated/.test(bridge), 'test5 artifacts are not saved under artifacts/test5/generated');
