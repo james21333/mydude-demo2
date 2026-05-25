@@ -1917,8 +1917,105 @@ function colorName(hex) {
   return ({ '#38bdf8': 'blue', '#34d399': 'green', '#fb7185': 'red', '#a78bfa': 'purple', '#facc15': 'gold', '#60a5fa': 'sky-blue' })[hex] || 'colorful';
 }
 
+
+function test5BridgeOrigin() {
+  const override = params.get('test5Bridge');
+  if (override) return override.replace(/\/$/, '');
+  const host = window.location.hostname || '';
+  if (host === 'localhost' || host === '127.0.0.1') return 'http://127.0.0.1:8788';
+  return 'https://bridge2.mydude.live';
+}
+
+function Test5AvatarLab() {
+  const [prompt, setPrompt] = useState('purple robot astronaut with a glass helmet and tiny boots');
+  const [status, setStatus] = useState('ready');
+  const [error, setError] = useState('');
+  const [result, setResult] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  async function generate() {
+    const text = prompt.trim();
+    if (!text || busy) return;
+    setBusy(true);
+    setError('');
+    setStatus('asking LLM for a fresh SceneSpec…');
+    try {
+      const res = await fetch(`${test5BridgeOrigin()}/test5/avatar`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ prompt: text, commit: true }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.ok) throw new Error(json.error || `HTTP ${res.status}`);
+      setResult(json);
+      setStatus(`rendered + saved${json.commit?.ok ? ` + committed ${json.commit.hash}` : json.commit?.attempted ? ' (commit failed; artifact saved)' : ''}`);
+    } catch (err) {
+      setError(String(err?.message || err));
+      setStatus('failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const scene = result?.sceneSpec;
+  return <div className="app-shell test5-shell">
+    <header className="hero-card" style={{ gap: 12 }}>
+      <div className="eyebrow">/test5 dynamic avatar lab</div>
+      <h1>LLM → SceneSpec → My Dude renderer → committed artifact</h1>
+      <p>
+        Type a prompt. The bridge asks an LLM for a brand-new controlled drawing recipe, validates/sanitizes it,
+        saves it under <code>artifacts/test5/generated</code>, commits it, then this page renders the returned SceneSpec with the same SVG avatar renderer.
+      </p>
+      <div className="debug-pill">bridge: {test5BridgeOrigin()}</div>
+    </header>
+
+    <main className="demo-grid" style={{ alignItems: 'start' }}>
+      <section className="control-panel">
+        <label className="field-label" htmlFor="test5-prompt">Avatar prompt</label>
+        <textarea
+          id="test5-prompt"
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value.slice(0, 1200))}
+          rows={5}
+          style={{ width: '100%', borderRadius: 16, border: '1px solid rgba(148,163,184,.28)', background: 'rgba(15,23,42,.74)', color: 'white', padding: 14, resize: 'vertical', fontSize: 15, lineHeight: 1.4 }}
+          placeholder="Example: blue mushroom wizard with sleepy eyes and a tiny glowing staff"
+        />
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginTop: 12 }}>
+          <button className="primary" onClick={generate} disabled={busy || !prompt.trim()}>{busy ? 'Generating…' : 'Generate Avatar'}</button>
+          <span className="debug-pill">status: {status}</span>
+        </div>
+        {error ? <div className="error-box" style={{ marginTop: 12 }}>Error: {error}</div> : null}
+        {result ? <div className="debug-box" style={{ marginTop: 12 }}>
+          <div><strong>Provider:</strong> {result.provider}</div>
+          <div><strong>Artifact:</strong> {result.artifactPath}</div>
+          <div><strong>Commit:</strong> {result.commit?.ok ? result.commit.hash : result.commit?.error || 'not committed'}</div>
+          <div><strong>Repairs:</strong> {result.repairs}</div>
+        </div> : null}
+      </section>
+
+      <section className="avatar-stage" style={{ minHeight: 620 }}>
+        {scene ? <>
+          <SceneAvatar scene={scene} mouthPhase={0} status="listening" />
+          <div className="avatar-caption">
+            <strong>{scene.title}</strong><br />{scene.summary}
+          </div>
+        </> : <div className="placeholder-card">
+          <Sparkles size={42} />
+          <p>No generated avatar yet. Submit a prompt to make the LLM draw one live.</p>
+        </div>}
+      </section>
+    </main>
+
+    {result ? <section className="debug-box" style={{ marginTop: 18 }}>
+      <h2 style={{ marginTop: 0 }}>Sanitized SceneSpec returned by the LLM pipeline</h2>
+      <pre style={{ whiteSpace: 'pre-wrap', overflowX: 'auto', maxHeight: 420 }}>{JSON.stringify(result.sceneSpec, null, 2)}</pre>
+    </section> : null}
+  </div>;
+}
+
 function RootRouter() {
   const path = window.location.pathname || '/';
+  if (/^\/test5(\/|$)/.test(path)) return <Test5AvatarLab />;
   if (/^\/(test[1-4])(\/|$)/.test(path)) return <TestMatrixApp />;
   return <App />;
 }

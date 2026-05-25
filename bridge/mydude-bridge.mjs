@@ -3,10 +3,14 @@ import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 
 import { generatePhase1SceneSpec } from '../shared/phase1/phase1-avatar-engine.mjs';
 
 const PORT = Number(process.env.PORT || 8788);
+const execFileAsync = promisify(execFile);
+const REPO_ROOT = '/home/josh/.openclaw/repos/mydude-demo2';
 const ALLOWED_ORIGIN = process.env.MYDUDE_ALLOWED_ORIGIN || 'https://demo2.mydude.live';
 const MODEL = 'gpt-4o-mini';
 function isPhase1BridgeEnabled() {
@@ -22,9 +26,9 @@ let copilotTokenCache = null;
 const sessionProfiles = new Map();
 
 
-const DRAWING_GRAMMAR_PATH = '/home/josh/.openclaw/repos/mydude-demo2/shared/avatar-drawing-grammar.json';
+const DRAWING_GRAMMAR_PATH = path.join(REPO_ROOT, 'shared/avatar-drawing-grammar.json');
 const DRAWING_GRAMMAR = JSON.parse(readFileSync(DRAWING_GRAMMAR_PATH, 'utf8'));
-const QUALITY_PRESETS = JSON.parse(readFileSync('/home/josh/.openclaw/repos/mydude-demo2/shared/avatar-quality-presets.json', 'utf8'));
+const QUALITY_PRESETS = JSON.parse(readFileSync(path.join(REPO_ROOT, 'shared/avatar-quality-presets.json'), 'utf8'));
 const QUALITY_PRESET_HINTS = (QUALITY_PRESETS.presets || []).map(p => `${p.id}: ${p.summary}`).join(' | ');
 const DRAWING_SHAPES = new Set(DRAWING_GRAMMAR.shapes || []);
 const DRAWING_MATERIALS = new Set(DRAWING_GRAMMAR.materials || []);
@@ -180,11 +184,11 @@ function fallbackSceneSpec(text = '', options = {}) {
   return { title: lower.replace(/[^a-z0-9\s-]/g, '').split(/\s+/).slice(-5).join(' ') || 'wild idea', summary: 'Fast 3D cartoon transformation', palette, scene, body, head, eyes, mouth, primitives: [scene, body, head, eyes, mouth, 'object_spark'], layers: fallbackDrawingLayers(text) };
 }
 
-function sanitizeSceneSpec(raw, text = '') {
-  const preset = presetSceneSpec(text);
+function sanitizeSceneSpec(raw, text = '', options = {}) {
+  const preset = options.skipPreset ? null : presetSceneSpec(text);
   if (preset) return preset;
   const allowed = new Set(SCENE_PRIMITIVES);
-  const fallback = fallbackSceneSpec(text);
+  const fallback = fallbackSceneSpec(text, { skipPreset: Boolean(options.skipPreset) });
   const clean = raw && typeof raw === 'object' ? raw : {};
   const use = (value, fb) => allowed.has(value) ? value : fb;
   return {
@@ -233,6 +237,221 @@ async function askSceneBrain(userText, sessionId = 'demo') {
   } catch {
     return fallbackSceneSpec(userText);
   } finally { clearTimeout(timer); }
+}
+
+
+function parseJsonObject(text = '') {
+  const raw = String(text || '').trim();
+  try { return JSON.parse(raw); } catch {}
+  const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/i)?.[1];
+  if (fenced) {
+    try { return JSON.parse(fenced); } catch {}
+  }
+  const start = raw.indexOf('{');
+  const end = raw.lastIndexOf('}');
+  if (start >= 0 && end > start) {
+    const objectText = raw.slice(start, end + 1);
+    try { return JSON.parse(objectText); } catch {}
+  }
+  throw new Error('LLM did not return a JSON object');
+}
+
+function test5SystemPrompt() {
+  return `You are the live /test5 My Dude avatar drawing engine. You dynamically create a NEW polished avatar drawing recipe for the user's prompt.
+Return STRICT JSON only. No markdown, comments, HTML, SVG, CSS, JavaScript, image URLs, base64, or prose.
+The browser renders your JSON as glossy SVG parts. You must use the controlled drawing grammar; do not invent arbitrary geometry.
+${SCENE_SCHEMA}
+Extra /test5 rules:
+- Do not copy a named preset. Make a fresh composition for this exact prompt.
+- Keep the My Dude quality bar: oversized expressive head, compact body, connected limbs, glossy dimensional materials, readable silhouette.
+- Required layers must use exact shape names, not roles: {"shape":"mascotBody","role":"part","attach":{"socket":"body.center"}}, {"shape":"mascotHead","role":"part","attach":{"socket":"head.center"}}, two eye layers with role:"eye", and exactly one mouth layer with role:"mouth" attached to head.mouth.
+- Use exact renderer shape names only. For dragon use mascotBody+mascotHead+softHorn+wing+claw; for scientist goggles use glasses; for robot use screen/panel/pixelEye/mouthScreen. Never invent names like dragon, goggles, smile, arm, leftEye, body.
+- Accessories/details must attach to valid sockets. Prefer head.leftHorn/rightHorn for antenna/horns, head.leftEar/rightEar for ears, body.front/body.patchLeft/body.patchRight for body details.
+- Max 28 layers. Use x/y only as small local offsets from sockets.
+Example minimal valid layer list: [{"shape":"mascotBody","anchor":"free","x":0,"y":0,"scale":[0.62,0.6],"rotate":0,"material":"glossyPurple","role":"part","z":2,"attach":{"socket":"body.center"}},{"shape":"mascotHead","anchor":"free","x":0,"y":0,"scale":[0.94,0.84],"rotate":0,"material":"glossyPurple","role":"part","z":8,"attach":{"socket":"head.center"}},{"shape":"cuteEye","anchor":"free","x":0,"y":0,"scale":[0.24,0.24],"rotate":0,"material":"softWhite","role":"eye","z":20,"attach":{"socket":"head.leftEye"}},{"shape":"cuteEye","anchor":"free","x":0,"y":0,"scale":[0.24,0.24],"rotate":0,"material":"softWhite","role":"eye","z":20,"attach":{"socket":"head.rightEye"}},{"shape":"mouthSmile","anchor":"free","x":0,"y":18,"scale":[0.38,0.2],"rotate":0,"material":"charcoalRubber","role":"mouth","z":31,"attach":{"socket":"head.mouth"}}]`;
+}
+
+async function callTest5Llm(prompt, repairNote = '') {
+  const userContent = `${repairNote ? `Repair this previous validation failure: ${repairNote}\n\n` : ''}Prompt: ${prompt.trim().slice(0, 900)}\nReturn one JSON object now.`;
+  if (process.env.OPENAI_API_KEY) {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
+      body: JSON.stringify({
+        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+        temperature: repairNote ? 0.12 : 0.42,
+        max_tokens: 1700,
+        response_format: { type: 'json_object' },
+        messages: [
+          { role: 'system', content: test5SystemPrompt() },
+          { role: 'user', content: userContent },
+        ],
+      }),
+    });
+    if (!res.ok) throw new Error(`OpenAI test5 generation failed: HTTP ${res.status}: ${(await res.text()).slice(0, 220)}`);
+    const json = await res.json();
+    return { provider: `openai/${process.env.OPENAI_MODEL || 'gpt-4o-mini'}`, content: json?.choices?.[0]?.message?.content || '{}' };
+  }
+
+  const token = await getCopilotToken();
+  const res = await fetch('https://api.individual.githubcopilot.com/chat/completions', {
+    method: 'POST',
+    headers: { ...ideHeaders, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: MODEL,
+      temperature: repairNote ? 0.12 : 0.42,
+      max_tokens: 1700,
+      messages: [
+        { role: 'system', content: test5SystemPrompt() },
+        { role: 'user', content: userContent },
+      ],
+      user: 'mydude-test5-avatar',
+    }),
+  });
+  if (!res.ok) throw new Error(`Copilot test5 generation failed: HTTP ${res.status}: ${(await res.text()).slice(0, 220)}`);
+  const json = await res.json();
+  return { provider: `github-copilot/${MODEL}`, content: json?.choices?.[0]?.message?.content || '{}' };
+}
+
+
+function coerceTest5RawScene(raw, prompt = '') {
+  if (!raw || typeof raw !== 'object') return raw;
+  const shapeAliases = new Map(Object.entries({
+    body: 'mascotBody', body_blob: 'mascotBody', mascot: 'mascotBody', torso: 'mascotBody',
+    head: 'mascotHead', head_round: 'mascotHead', head_dragon: 'mascotHead', face: 'mascotHead',
+    arm: 'stubbyArm', leftArm: 'stubbyArm', rightArm: 'stubbyArm', limb_arm: 'stubbyArm',
+    leg: 'stubbyLeg', leftLeg: 'stubbyLeg', rightLeg: 'stubbyLeg', limb_leg: 'stubbyLeg',
+    foot: 'hoof', bootFoot: 'boot',
+    eye: 'cuteEye', eyes_cartoon: 'cuteEye', eyes_googly: 'googlyEye', eyes_pixel: 'pixelEye',
+    smile: 'mouthSmile', mouth: 'mouthSmile', mouth_smile: 'mouthSmile', mouth_grin: 'mouthGrin',
+    limb_claw: 'claw', accessory_antenna: 'antenna', accessory_goggles: 'glasses', goggles: 'glasses',
+    texture_spots: 'bodyPatch', texture_stripes: 'stripe', accessory_hat: 'topHat', accessory_crown: 'crown', accessory_wand: 'wand',
+  }));
+  const layers = Array.isArray(raw.layers) ? raw.layers.map((layer, index) => {
+    const next = { ...layer };
+    next.shape = shapeAliases.get(next.shape) || next.shape;
+    if (next.role && !['eye', 'mouth'].includes(next.role)) next.role = 'part';
+    if ((next.shape === 'mascotBody' || next.shape === 'mascotHead') && next.role !== 'eye' && next.role !== 'mouth') next.role = 'part';
+    const text = `${next.id || ''} ${next.anchor || ''} ${next.attach?.socket || ''} ${index}`;
+    const side = /right/i.test(text) ? 'right' : /left/i.test(text) ? 'left' : index % 2 ? 'right' : 'left';
+    if (!next.attach || typeof next.attach !== 'object') next.attach = {};
+    if (!ATTACHMENT_SOCKET_NAMES.has(String(next.attach.socket || ''))) delete next.attach.socket;
+    if (!next.attach.socket) {
+      if (next.shape === 'mascotBody') next.attach.socket = 'body.center';
+      else if (next.shape === 'mascotHead') next.attach.socket = 'head.center';
+      else if (next.role === 'eye' || /Eye$/.test(next.shape)) next.attach.socket = side === 'right' ? 'head.rightEye' : 'head.leftEye';
+      else if (next.role === 'mouth' || /^mouth|snout|beak/.test(next.shape)) next.attach.socket = 'head.mouth';
+      else if (/antenna|horn/i.test(next.shape)) next.attach.socket = side === 'right' ? 'head.rightHorn' : 'head.leftHorn';
+      else if (/ear/i.test(next.shape)) next.attach.socket = side === 'right' ? 'head.rightEar' : 'head.leftEar';
+      else if (/arm|claw|paw|mitten/.test(next.shape)) next.attach.socket = side === 'right' ? 'body.rightHand' : 'body.leftHand';
+      else if (/leg|hoof|boot/.test(next.shape)) next.attach.socket = side === 'right' ? 'body.rightFoot' : 'body.leftFoot';
+      else if (/glasses|screen|panel|button|tie|badge|wand/.test(next.shape)) next.attach.socket = 'body.front';
+      else if (/patch|spot|stripe/.test(next.shape)) next.attach.socket = side === 'right' ? 'body.patchRight' : 'body.patchLeft';
+    }
+    if (!next.attach.socket) delete next.attach;
+    return next;
+  }) : [];
+  return { ...raw, layers };
+}
+
+function validateTest5Scene(scene) {
+  const errors = [];
+  const layers = Array.isArray(scene?.layers) ? scene.layers : [];
+  if (!scene || typeof scene !== 'object') errors.push('scene is not an object');
+  if (!layers.length) errors.push('scene.layers is empty');
+  if (!layers.some(l => l.shape === 'mascotBody')) errors.push('missing mascotBody layer');
+  if (!layers.some(l => l.shape === 'mascotHead')) errors.push('missing mascotHead layer');
+  if (layers.filter(l => l.role === 'eye').length < 2) errors.push('need at least two role:"eye" layers');
+  if (layers.filter(l => l.role === 'mouth').length !== 1) errors.push('need exactly one role:"mouth" layer');
+  for (const layer of layers) {
+    if (!DRAWING_SHAPES.has(layer.shape)) errors.push(`invalid shape ${layer.shape}`);
+    if (!DRAWING_MATERIALS.has(layer.material)) errors.push(`invalid material ${layer.material}`);
+    if (layer.attach?.socket && !ATTACHMENT_SOCKET_NAMES.has(layer.attach.socket)) errors.push(`invalid socket ${layer.attach.socket}`);
+  }
+  return { ok: errors.length === 0, errors: [...new Set(errors)].slice(0, 12) };
+}
+
+function slugify(text = '') {
+  return String(text).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 56) || 'avatar';
+}
+
+async function saveTest5Artifact({ prompt, provider, rawContent, rawSceneSpec, sceneSpec, validation, repairs }) {
+  const createdAt = new Date().toISOString();
+  const stamp = createdAt.replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+  const relPath = `artifacts/test5/generated/${stamp}-${slugify(prompt)}.json`;
+  const absPath = path.join(REPO_ROOT, relPath);
+  await fs.mkdir(path.dirname(absPath), { recursive: true });
+  const artifact = { prompt, createdAt, provider, rawContent, rawSceneSpec, sanitizedSceneSpec: sceneSpec, validation, repairs };
+  await fs.writeFile(absPath, JSON.stringify(artifact, null, 2), 'utf8');
+
+  let commit = { attempted: false, ok: false, enabled: process.env.TEST5_AUTO_COMMIT !== '0' };
+  if (commit.enabled) {
+    commit.attempted = true;
+    try {
+      const msg = `test5: add generated avatar ${slugify(prompt).slice(0, 40)}`;
+      await execFileAsync('git', ['add', relPath], { cwd: REPO_ROOT, timeout: 15_000 });
+      await execFileAsync('git', ['commit', '-m', msg, '--', relPath], { cwd: REPO_ROOT, timeout: 30_000 });
+      const { stdout } = await execFileAsync('git', ['rev-parse', '--short', 'HEAD'], { cwd: REPO_ROOT, timeout: 10_000 });
+      commit = { ...commit, ok: true, hash: stdout.trim(), message: msg };
+    } catch (error) {
+      commit = { ...commit, ok: false, error: String(error?.stderr || error?.message || error).slice(0, 500) };
+    }
+  }
+  return { relPath, absPath, artifact, commit };
+}
+
+async function generateTest5Avatar(prompt) {
+  let first = await callTest5Llm(prompt);
+  let rawSceneSpec = coerceTest5RawScene(parseJsonObject(first.content), prompt);
+  let validation = validateTest5Scene(rawSceneSpec);
+  let sceneSpec = null;
+  let repairs = 0;
+  let provider = first.provider;
+  let rawContent = first.content;
+
+  if (!validation.ok) {
+    repairs = 1;
+    const repaired = await callTest5Llm(prompt, validation.errors.join('; '));
+    provider = repaired.provider;
+    rawContent = repaired.content;
+    rawSceneSpec = coerceTest5RawScene(parseJsonObject(repaired.content), prompt);
+    validation = validateTest5Scene(rawSceneSpec);
+  }
+  if (!validation.ok) throw new Error(`Generated raw SceneSpec failed validation: ${validation.errors.join('; ')}`);
+  sceneSpec = sanitizeSceneSpec(rawSceneSpec, prompt, { skipPreset: true });
+  validation = validateTest5Scene(sceneSpec);
+  if (!validation.ok) throw new Error(`Sanitized SceneSpec failed validation: ${validation.errors.join('; ')}`);
+  const saved = await saveTest5Artifact({ prompt, provider, rawContent, rawSceneSpec, sceneSpec, validation, repairs });
+  return { ok: true, prompt, provider, rawSceneSpec, sceneSpec, validation, repairs, artifactPath: saved.relPath, commit: saved.commit };
+}
+
+async function readJsonBody(req, maxBytes = 64_000) {
+  const chunks = [];
+  let size = 0;
+  for await (const chunk of req) {
+    size += chunk.length;
+    if (size > maxBytes) throw new Error('request body too large');
+    chunks.push(chunk);
+  }
+  return JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}');
+}
+
+async function handleTest5Avatar(req, res) {
+  try {
+    const body = await readJsonBody(req);
+    const prompt = String(body.prompt || '').trim().slice(0, 1200);
+    if (!prompt) {
+      res.writeHead(400, corsHeaders());
+      res.end(JSON.stringify({ ok: false, error: 'prompt_required' }));
+      return;
+    }
+    const result = await generateTest5Avatar(prompt);
+    res.writeHead(200, corsHeaders());
+    res.end(JSON.stringify(result));
+  } catch (error) {
+    res.writeHead(502, corsHeaders());
+    res.end(JSON.stringify({ ok: false, error: String(error?.message || error) }));
+  }
 }
 
 const defaultServerConfig = Object.freeze({
@@ -538,6 +757,10 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'OPTIONS') {
     res.writeHead(204, corsHeaders());
     res.end();
+    return;
+  }
+  if (req.method === 'POST' && req.url?.startsWith('/test5/avatar')) {
+    await handleTest5Avatar(req, res);
     return;
   }
   if (req.url?.startsWith('/health')) {

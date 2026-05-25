@@ -190,3 +190,22 @@ button { border: 0; border-radius: 999px; padding: 9px 13px; display: inline-fle
 /* Keep the full-screen generated avatar from interfering with the mic/listen controls. */
 .stage, .avatar-card, .scene-svg, .drawing-svg { pointer-events: none; }
 .voice-panel.compact-controls, .voice-panel.compact-controls * { pointer-events: auto; }
+
+/* /test5 LLM SceneSpec lab */
+.test5-shell { position: relative; width: min(1320px, calc(100% - 24px)); margin: 18px auto; display: grid; gap: 16px; }
+.test5-shell .hero-card, .test5-shell .control-panel, .test5-shell .debug-box, .test5-shell .avatar-stage { border: 1px solid rgba(255,255,255,.15); border-radius: 24px; background: rgba(2,6,23,.58); box-shadow: 0 24px 80px rgba(0,0,0,.28); backdrop-filter: blur(16px); padding: clamp(16px, 2vw, 24px); }
+.test5-shell .hero-card h1 { font-size: clamp(2rem, 4.8vw, 4.2rem); letter-spacing: -.05em; }
+.test5-shell .hero-card p { color: #dbeafe; line-height: 1.55; max-width: 980px; }
+.test5-shell .demo-grid { display: grid; grid-template-columns: minmax(320px, 0.72fr) minmax(420px, 1fr); gap: 16px; }
+.test5-shell .control-panel { display: grid; gap: 8px; }
+.test5-shell .field-label { color: #bfdbfe; font-weight: 900; font-size: .86rem; letter-spacing: .04em; text-transform: uppercase; }
+.test5-shell .debug-pill { display: inline-flex; width: fit-content; align-items: center; border: 1px solid rgba(147,197,253,.32); border-radius: 999px; background: rgba(15,23,42,.62); color: #bfdbfe; padding: 6px 10px; font-size: .78rem; }
+.test5-shell .debug-box, .test5-shell .error-box { color: #dbeafe; line-height: 1.45; font-size: .9rem; overflow-wrap: anywhere; }
+.test5-shell .error-box { border: 1px solid rgba(251,113,133,.36); border-radius: 14px; background: rgba(127,29,29,.32); color: #fecdd3; padding: 10px 12px; }
+.test5-shell .avatar-stage { min-height: 620px; display: grid; place-items: center; gap: 10px; }
+.test5-shell .avatar-card { width: min(100%, 760px); height: 560px; min-height: 0; border-radius: 22px; padding: 8px; position: relative; inset: auto; }
+.test5-shell .scene-svg { width: 100%; height: 100%; max-height: 100%; }
+.test5-shell .avatar-caption { text-align: center; color: #dbeafe; line-height: 1.4; max-width: 720px; }
+.test5-shell .placeholder-card { min-height: 420px; display: grid; place-items: center; text-align: center; gap: 12px; color: #bfdbfe; opacity: .85; }
+.test5-shell pre { background: rgba(15,23,42,.72); border: 1px solid rgba(255,255,255,.12); border-radius: 16px; padding: 14px; }
+@media (max-width: 920px) { .test5-shell .demo-grid { grid-template-columns: 1fr; } .test5-shell .avatar-stage { min-height: 520px; } .test5-shell .avatar-card { height: 500px; position: relative; inset: auto; width: 100%; min-height: 0; border-radius: 22px; padding: 8px; } html body { overflow: auto; } }

@@ -7,9 +7,10 @@
   "scripts": {
     "build": "vite build && node scripts/validate.mjs && node scripts/phase1-parity.mjs",
     "deploy": "wrangler deploy",
-    "test": "vite build && node scripts/validate.mjs && node scripts/phase1-parity.mjs",
+    "test": "vite build && node scripts/validate.mjs && node scripts/phase1-parity.mjs && node scripts/test5-contract.mjs",
     "dev": "vite --host 0.0.0.0",
     "phase1:parity": "node scripts/phase1-parity.mjs",
+    "test5:contract": "node scripts/test5-contract.mjs",
     "testmatrix:server": "node scripts/testmatrix-server.mjs"
   },
   "dependencies": {
