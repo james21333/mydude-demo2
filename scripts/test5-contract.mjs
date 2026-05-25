@@ -35,7 +35,10 @@ assert(/sanitizeReactCssCharacter\s*\(/.test(bridge), 'test5 must sanitize the R
 assert(/reactCssCharacter/.test(bridge), 'test5 artifacts/results must include the GPT-authored React/CSS character receipt');
 assert(/function Test5HandCodedAvatar\s*\(/.test(app), 'frontend must render a hand-coded React/CSS character component for /test5');
 assert(/<Test5HandCodedAvatar\s+character=\{reactCssCharacter\}/.test(app), 'frontend must prefer the React/CSS character blueprint when available');
-assert(/test5-dude-head/.test(app) && /test5-dude-head/.test(fs.readFileSync('src/styles.css', 'utf8')), 'frontend must include original-blue-dude-style head/body CSS scaffold');
+const css = fs.readFileSync('src/styles.css', 'utf8');
+assert(/test5-dude-head/.test(app) && /test5-dude-head/.test(css), 'frontend must include original-blue-dude-style head/body CSS scaffold');
+assert(/test5-dude-hand/.test(app) && /test5-dude-hand/.test(css), 'hand-held props such as wands must be nested in an explicit hand anchor');
+assert(/test5-dude-foot/.test(app) && /test5-dude-foot/.test(css), 'foot-worn props such as boots/flames must be nested in an explicit foot anchor');
 assert(/skipPreset: true/.test(bridge), 'test5 sanitizer must skip baked quality presets to prove fresh generation');
 assert(/artifacts\/test5\/generated/.test(bridge), 'test5 artifacts are not saved under artifacts/test5/generated');
 assert(/expandedPrompt/.test(bridge) && /visualChecklist/.test(bridge), 'test5 artifacts do not save expanded prompt/checklist receipts');

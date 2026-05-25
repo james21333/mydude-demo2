@@ -1788,7 +1788,10 @@ function Test5HandCodedAvatar({ character, status = 'listening' }) {
   const vars = character.cssVariables || {};
   const parts = Array.isArray(character.parts) ? character.parts : [];
   const hasPart = (type, side) => parts.some(part => part.type === type && (!side || part.side === side));
+  const hasAnchoredPart = (type, side) => parts.some(part => part.type === type && (part.side === side || (!part.side && side === 'right') || (part.side === 'center' && side === 'right')));
   const partClass = (part) => `test5-dude-part part-${part.type || 'badge'} side-${part.side || 'center'} tone-${part.tone || 'primary'}`;
+  const renderHand = (side) => <div className={`test5-dude-arm ${side}`}><span className="test5-dude-hand">{hasAnchoredPart('wand', side) && <i className="test5-dude-wand" />}</span></div>;
+  const renderFoot = (side) => <div className={`test5-dude-leg ${side}`}><span className="test5-dude-foot">{hasAnchoredPart('boot', side) && <b className="test5-dude-boot" />}{hasAnchoredPart('flame', side) && <i className="test5-dude-flame" />}</span></div>;
   return <div className={`avatar-card test5-dude-card ${status} built`} style={vars}>
     <div className={`test5-dude-character head-${character.headShape || 'rounded'} body-${character.bodyShape || 'compact'} expression-${character.expression || 'friendly'}`}>
       {hasPart('tail') && <div className="test5-dude-tail" aria-hidden="true" />}
@@ -1811,7 +1814,7 @@ function Test5HandCodedAvatar({ character, status = 'listening' }) {
         <div className="test5-dude-mouth" />
       </div>
       <div className="test5-dude-lower">
-        <div className="test5-dude-arm left"><span /></div>
+        {renderHand('left')}
         <div className="test5-dude-body">
           {hasPart('robe') && <div className="test5-dude-robe" />}
           {hasPart('panel') && <div className="test5-dude-panel" />}
@@ -1819,11 +1822,11 @@ function Test5HandCodedAvatar({ character, status = 'listening' }) {
           {hasPart('scarf') && <div className="test5-dude-scarf" />}
           {parts.filter(part => ['spot','stripe','spark'].includes(part.type)).slice(0, 5).map((part, idx) => <span key={`${part.type}-${idx}`} className={partClass(part)}>{part.type === 'spark' ? '✦' : ''}</span>)}
         </div>
-        <div className="test5-dude-arm right"><span />{hasPart('wand', 'right') && <i className="test5-dude-wand" />}</div>
+        {renderHand('right')}
       </div>
       <div className="test5-dude-legs">
-        <div className="test5-dude-leg left"><span />{hasPart('boot', 'left') && <b />}{hasPart('flame', 'left') && <i />}</div>
-        <div className="test5-dude-leg right"><span />{hasPart('boot', 'right') && <b />}{hasPart('flame', 'right') && <i />}</div>
+        {renderFoot('left')}
+        {renderFoot('right')}
       </div>
     </div>
   </div>;

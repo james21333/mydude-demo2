@@ -252,8 +252,8 @@ button { border: 0; border-radius: 999px; padding: 9px 13px; display: inline-fle
 .body-robe .test5-dude-body { height: 110px; border-radius: 30px 30px 44px 44px; }
 .test5-dude-arm { width: 34px; height: 72px; border-radius: 999px; background: linear-gradient(180deg, var(--dude-secondary, #60a5fa), rgba(255,255,255,.12)); border: 1px solid rgba(255,255,255,.16); position: relative; transform-origin: top center; }
 .test5-dude-arm.left { transform: rotate(14deg); } .test5-dude-arm.right { transform: rotate(-14deg); }
-.test5-dude-arm span { position: absolute; left: 50%; bottom: -7px; width: 48px; height: 30px; transform: translateX(-50%); border-radius: 999px; background: var(--dude-secondary, #60a5fa); border: 1px solid rgba(255,255,255,.18); }
-.test5-dude-wand { position: absolute; right: -24px; top: 4px; width: 7px; height: 104px; border-radius: 999px; background: #92400e; transform: rotate(-24deg); box-shadow: 0 -18px 18px var(--dude-accent, #facc15); }
+.test5-dude-hand { position: absolute; left: 50%; bottom: -7px; width: 48px; height: 30px; transform: translateX(-50%); border-radius: 999px; background: var(--dude-secondary, #60a5fa); border: 1px solid rgba(255,255,255,.18); }
+.test5-dude-wand { position: absolute; right: -6px; bottom: 48%; width: 7px; height: 104px; border-radius: 999px; background: #92400e; transform: rotate(-24deg); transform-origin: 50% 100%; box-shadow: 0 -18px 18px var(--dude-accent, #facc15); z-index: -1; }
 .test5-dude-wand::before { content: "✦"; position: absolute; top: -30px; left: -12px; color: var(--dude-accent, #facc15); font-style: normal; font-size: 30px; }
 .test5-dude-panel { position: absolute; left: 50%; top: 18px; width: 64px; height: 36px; transform: translateX(-50%); border-radius: 12px; background: rgba(103,232,249,.38); box-shadow: 0 0 18px rgba(103,232,249,.42); }
 .test5-dude-badge { position: absolute; right: 22px; top: 18px; width: 26px; height: 26px; border-radius: 999px; background: var(--dude-accent, #facc15); box-shadow: 0 0 16px var(--dude-accent, #facc15); }
@@ -265,7 +265,7 @@ button { border: 0; border-radius: 999px; padding: 9px 13px; display: inline-fle
 .test5-dude-part.part-spark { position: absolute; right: -20px; top: -18px; color: var(--dude-accent, #facc15); text-shadow: 0 0 18px currentColor; }
 .test5-dude-legs { display: flex; justify-content: center; gap: 44px; margin-top: 4px; }
 .test5-dude-leg { position: relative; width: 34px; height: 44px; border-radius: 16px 16px 24px 24px; background: linear-gradient(180deg, var(--dude-secondary, #60a5fa), rgba(255,255,255,.1)); border: 1px solid rgba(255,255,255,.16); }
-.test5-dude-leg span { position: absolute; left: 50%; bottom: -5px; width: 48px; height: 18px; transform: translateX(-50%); border-radius: 999px; background: var(--dude-secondary, #60a5fa); }
+.test5-dude-foot { position: absolute; left: 50%; bottom: -5px; width: 48px; height: 18px; transform: translateX(-50%); border-radius: 999px; background: var(--dude-secondary, #60a5fa); }
 .test5-dude-leg b { position: absolute; left: 50%; bottom: -8px; width: 58px; height: 24px; transform: translateX(-50%); border-radius: 999px 999px 14px 14px; background: #0f172a; border: 1px solid rgba(255,255,255,.24); z-index: 2; }
 .test5-dude-leg i { position: absolute; left: 50%; bottom: -42px; width: 24px; height: 46px; transform: translateX(-50%); border-radius: 50% 50% 55% 55%; background: linear-gradient(180deg, #fef3c7, #fb923c 45%, #dc2626); filter: drop-shadow(0 0 18px #fb923c); z-index: 1; }
 @keyframes test5-dude-breathe { 0%,100% { transform: translateY(0) rotate(-.6deg); } 50% { transform: translateY(-10px) rotate(.8deg); } }
