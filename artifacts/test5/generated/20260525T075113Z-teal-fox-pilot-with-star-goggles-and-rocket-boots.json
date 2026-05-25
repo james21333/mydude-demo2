@@ -1,0 +1,306 @@
+{
+  "prompt": "teal fox pilot with star goggles and rocket boots",
+  "userPrompt": "teal fox pilot with star goggles and rocket boots",
+  "createdAt": "2026-05-25T07:51:13.418Z",
+  "provider": "github-copilot/gpt-4o-mini + github-copilot/gpt-4o-mini",
+  "expandedPrompt": "A cute teal fox character designed as a pilot, featuring oversized star-shaped goggles that reflect a bright sky. The fox has a sleek, aerodynamic silhouette with a compact body and oversized expressive head. It wears a stylish aviator scarf fluttering in the wind, and its rocket boots are detailed with flames and star motifs. The fox's expression is adventurous and excited, showcasing a wide grin. Its fur has subtle lighter teal patches for depth, and it has a fluffy tail that adds to its playful charm.",
+  "designBrief": {
+    "title": "Teal Fox Pilot",
+    "expandedPrompt": "A cute teal fox character designed as a pilot, featuring oversized star-shaped goggles that reflect a bright sky. The fox has a sleek, aerodynamic silhouette with a compact body and oversized expressive head. It wears a stylish aviator scarf fluttering in the wind, and its rocket boots are detailed with flames and star motifs. The fox's expression is adventurous and excited, showcasing a wide grin. Its fur has subtle lighter teal patches for depth, and it has a fluffy tail that adds to its playful charm.",
+    "subject": "teal fox pilot character",
+    "mood": "adventurous",
+    "palettePlan": {
+      "primary": "teal",
+      "secondary": "white",
+      "accent": "gold"
+    },
+    "styleTags": [
+      "cute mascot",
+      "glossy SVG",
+      "blue-avatar quality"
+    ],
+    "visualChecklist": [
+      "oversized star-shaped goggles",
+      "fluffy tail with lighter teal patches",
+      "rocket boots with flame details",
+      "fluttering aviator scarf",
+      "wide grin with visible teeth",
+      "compact connected body",
+      "expressive oversized head",
+      "glowing star motifs on boots"
+    ],
+    "requiredDetails": [
+      "anatomy detail: fluffy tail",
+      "color/material detail: lighter teal patches on fur",
+      "expression detail: wide grin",
+      "accessory/marking: star-shaped goggles"
+    ],
+    "forbiddenDetails": [
+      "raw SVG",
+      "HTML",
+      "unvalidated custom shapes",
+      "external images"
+    ],
+    "qualityConstraints": [
+      "oversized expressive head",
+      "compact connected body",
+      "readable silhouette",
+      "valid renderer sockets only"
+    ]
+  },
+  "visualChecklist": [
+    "oversized star-shaped goggles",
+    "fluffy tail with lighter teal patches",
+    "rocket boots with flame details",
+    "fluttering aviator scarf",
+    "wide grin with visible teeth",
+    "compact connected body",
+    "expressive oversized head",
+    "glowing star motifs on boots"
+  ],
+  "requiredDetails": [
+    "anatomy detail: fluffy tail",
+    "color/material detail: lighter teal patches on fur",
+    "expression detail: wide grin",
+    "accessory/marking: star-shaped goggles"
+  ],
+  "expandedContent": "{\n  \"title\": \"Teal Fox Pilot\",\n  \"expandedPrompt\": \"A cute teal fox character designed as a pilot, featuring oversized star-shaped goggles that reflect a bright sky. The fox has a sleek, aerodynamic silhouette with a compact body and oversized expressive head. It wears a stylish aviator scarf fluttering in the wind, and its rocket boots are detailed with flames and star motifs. The fox's expression is adventurous and excited, showcasing a wide grin. Its fur has subtle lighter teal patches for depth, and it has a fluffy tail that adds to its playful charm.\",\n  \"subject\": \"teal fox pilot character\",\n  \"mood\": \"adventurous\",\n  \"palettePlan\": { \"primary\": \"teal\", \"secondary\": \"white\", \"accent\": \"gold\" },\n  \"styleTags\": [\"cute mascot\", \"glossy SVG\", \"blue-avatar quality\"],\n  \"visualChecklist\": [\n    \"oversized star-shaped goggles\",\n    \"fluffy tail with lighter teal patches\",\n    \"rocket boots with flame details\",\n    \"fluttering aviator scarf\",\n    \"wide grin with visible teeth\",\n    \"compact connected body\",\n    \"expressive oversized head\",\n    \"glowing star motifs on boots\"\n  ],\n  \"requiredDetails\": [\n    \"anatomy detail: fluffy tail\",\n    \"color/material detail: lighter teal patches on fur\",\n    \"expression detail: wide grin\",\n    \"accessory/marking: star-shaped goggles\"\n  ],\n  \"forbiddenDetails\": [\n    \"raw SVG\",\n    \"HTML\",\n    \"unvalidated custom shapes\",\n    \"external images\"\n  ],\n  \"qualityConstraints\": [\n    \"oversized expressive head\",\n    \"compact connected body\",\n    \"readable silhouette\",\n    \"valid renderer sockets only\"\n  ]\n}",
+  "rawContent": "{\n  \"title\": \"Teal Fox Pilot\",\n  \"summary\": \"A cute teal fox character designed as a pilot, featuring oversized star-shaped goggles and rocket boots.\",\n  \"palette\": \"blue\",\n  \"scene\": \"scene_sky\",\n  \"body\": \"body_capsule\",\n  \"head\": \"head_round\",\n  \"eyes\": \"eyes_star\",\n  \"mouth\": \"mouth_grin\",\n  \"primitives\": [\n    \"body_blob\",\n    \"body_triangle\",\n    \"head_hair\",\n    \"head_mask\",\n    \"eyes_googly\",\n    \"eyes_heart\",\n    \"mouth_wave\",\n    \"accessory_scarf\",\n    \"accessory_boot\",\n    \"accessory_flame\"\n  ],\n  \"layers\": [\n    {\"shape\":\"body_capsule\",\"anchor\":\"body\",\"x\":0,\"y\":0,\"scale\":[0.8,0.6],\"rotate\":0,\"material\":\"glossyTeal\",\"role\":\"part\",\"z\":2,\"attach\":{\"socket\":\"body.center\"}},\n    {\"shape\":\"head_round\",\"anchor\":\"head\",\"x\":0,\"y\":-40,\"scale\":[0.9,0.9],\"rotate\":0,\"material\":\"glossyTeal\",\"role\":\"part\",\"z\":8,\"attach\":{\"socket\":\"head.center\"}},\n    {\"shape\":\"cuteEye\",\"anchor\":\"face\",\"x\":-20,\"y\":-10,\"scale\":[0.2,0.2],\"rotate\":0,\"material\":\"softWhite\",\"role\":\"eye\",\"z\":20,\"attach\":{\"socket\":\"head.leftEye\"}},\n    {\"shape\":\"cuteEye\",\"anchor\":\"face\",\"x\":20,\"y\":-10,\"scale\":[0.2,0.2],\"rotate\":0,\"material\":\"softWhite\",\"role\":\"eye\",\"z\":20,\"attach\":{\"socket\":\"head.rightEye\"}},\n    {\"shape\":\"mouthSmile\",\"anchor\":\"mouth\",\"x\":0,\"y\":20,\"scale\":[0.4,0.2],\"rotate\":0,\"material\":\"charcoalRubber\",\"role\":\"mouth\",\"z\":31,\"attach\":{\"socket\":\"head.mouth\"}},\n    {\"shape\":\"accessory_scarf\",\"anchor\":\"body\",\"x\":0,\"y\":-10,\"scale\":[1.2,0.3],\"rotate\":0,\"material\":\"glossyGold\",\"role\":\"part\",\"z\":5,\"attach\":{\"socket\":\"body.front\"}},\n    {\"shape\":\"accessory_boot\",\"anchor\":\"body\",\"x\":-30,\"y\":10,\"scale\":[0.5,0.5],\"rotate\":0,\"material\":\"glossyGold\",\"role\":\"part\",\"z\":10,\"attach\":{\"socket\":\"body.leftLeg\"}},\n    {\"shape\":\"accessory_boot\",\"anchor\":\"body\",\"x\":30,\"y\":10,\"scale\":[0.5,0.5],\"rotate\":0,\"material\":\"glossyGold\",\"role\":\"part\",\"z\":10,\"attach\":{\"socket\":\"body.rightLeg\"}},\n    {\"shape\":\"accessory_flame\",\"anchor\":\"body\",\"x\":-30,\"y\":15,\"scale\":[0.2,0.2],\"rotate\":0,\"material\":\"flame\",\"role\":\"part\",\"z\":15,\"attach\":{\"socket\":\"body.leftLeg\"}},\n    {\"shape\":\"accessory_flame\",\"anchor\":\"body\",\"x\":30,\"y\":15,\"scale\":[0.2,0.2],\"rotate\":0,\"material\":\"flame\",\"role\":\"part\",\"z\":15,\"attach\":{\"socket\":\"body.rightLeg\"}},\n    {\"shape\":\"head_mask\",\"anchor\":\"head\",\"x\":0,\"y\":0,\"scale\":[1.0,1.0],\"rotate\":0,\"material\":\"glossyTeal\",\"role\":\"part\",\"z\":12,\"attach\":{\"socket\":\"head.center\"}},\n    {\"shape\":\"eyes_star\",\"anchor\":\"head\",\"x\":0,\"y\":-30,\"scale\":[0.5,0.5],\"rotate\":0,\"material\":\"glossyGold\",\"role\":\"part\",\"z\":25,\"attach\":{\"socket\":\"head.center\"}}\n  ]\n}",
+  "rawSceneSpec": {
+    "title": "Teal Fox Pilot",
+    "summary": "A cute teal fox character designed as a pilot, featuring oversized star-shaped goggles and rocket boots.",
+    "palette": "blue",
+    "scene": "scene_sky",
+    "body": "body_capsule",
+    "head": "head_round",
+    "eyes": "eyes_star",
+    "mouth": "mouth_grin",
+    "primitives": [
+      "body_blob",
+      "body_triangle",
+      "head_hair",
+      "head_mask",
+      "eyes_googly",
+      "eyes_heart",
+      "mouth_wave",
+      "accessory_scarf",
+      "accessory_boot",
+      "accessory_flame"
+    ],
+    "layers": [
+      {
+        "shape": "mascotHead",
+        "anchor": "head",
+        "x": 0,
+        "y": -40,
+        "scale": [
+          0.9,
+          0.9
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "shape": "cuteEye",
+        "anchor": "face",
+        "x": -20,
+        "y": -10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "shape": "cuteEye",
+        "anchor": "face",
+        "x": 20,
+        "y": -10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "shape": "mouthSmile",
+        "anchor": "mouth",
+        "x": 0,
+        "y": 20,
+        "scale": [
+          0.4,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "charcoalRubber",
+        "role": "mouth",
+        "z": 31,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      },
+      {
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "rotate": 0,
+        "opacity": 1,
+        "shape": "mascotBody",
+        "scale": [
+          0.62,
+          0.6
+        ],
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 2,
+        "attach": {
+          "socket": "body.center"
+        }
+      }
+    ]
+  },
+  "sanitizedSceneSpec": {
+    "title": "Teal Fox Pilot",
+    "summary": "A cute teal fox character designed as a pilot, featuring oversized star-shaped goggles and rocket boots.",
+    "palette": "blue",
+    "scene": "scene_sky",
+    "body": "body_capsule",
+    "head": "head_round",
+    "eyes": "eyes_star",
+    "mouth": "mouth_grin",
+    "primitives": [
+      "body_blob",
+      "body_triangle",
+      "head_hair",
+      "head_mask",
+      "eyes_googly",
+      "eyes_heart",
+      "mouth_wave",
+      "scene_space",
+      "body_rocket",
+      "head_round",
+      "eyes_cartoon",
+      "mouth_smile",
+      "object_spark"
+    ],
+    "layers": [
+      {
+        "id": "mascotBody-4",
+        "shape": "mascotBody",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.62,
+          0.6
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 2,
+        "attach": {
+          "socket": "body.center"
+        }
+      },
+      {
+        "id": "mascotHead-0",
+        "shape": "mascotHead",
+        "anchor": "free",
+        "x": 0,
+        "y": -40,
+        "scale": [
+          0.9,
+          0.9
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "id": "cuteEye-1",
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": -20,
+        "y": -10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "id": "cuteEye-2",
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": 20,
+        "y": -10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "id": "mouthSmile-3",
+        "shape": "mouthSmile",
+        "anchor": "free",
+        "x": 0,
+        "y": 20,
+        "scale": [
+          0.4,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "charcoalRubber",
+        "opacity": 1,
+        "role": "mouth",
+        "z": 31,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      }
+    ]
+  },
+  "validation": {
+    "ok": true,
+    "errors": []
+  },
+  "repairs": 0
+}
