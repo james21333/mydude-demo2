@@ -1,0 +1,705 @@
+{
+  "prompt": "blue mushroom wizard with sleepy eyes and a tiny glowing staff",
+  "userPrompt": "blue mushroom wizard with sleepy eyes and a tiny glowing staff",
+  "createdAt": "2026-05-25T22:54:00.085Z",
+  "provider": "github-copilot/gpt-4o-mini + github-copilot/gpt-4o-mini + github-copilot/gpt-4o-mini",
+  "expandedPrompt": "A whimsical blue mushroom wizard character with a large oversized head and sleepy eyes. The character has a rounded silhouette resembling a mushroom cap, with a smooth texture for a glossy finish. The wizard holds a tiny glowing staff that emits a soft blue light, and wears a starry wizard hat adorned with tiny sparkles. The body is compact and connected, with subtle mushroom gills visible at the base. The expression is dreamy and relaxed, with a slight smile. The color palette features vibrant blue tones complemented by soft white highlights and glowing blue accents.",
+  "designBrief": {
+    "title": "Sleepy Blue Mushroom Wizard",
+    "expandedPrompt": "A whimsical blue mushroom wizard character with a large oversized head and sleepy eyes. The character has a rounded silhouette resembling a mushroom cap, with a smooth texture for a glossy finish. The wizard holds a tiny glowing staff that emits a soft blue light, and wears a starry wizard hat adorned with tiny sparkles. The body is compact and connected, with subtle mushroom gills visible at the base. The expression is dreamy and relaxed, with a slight smile. The color palette features vibrant blue tones complemented by soft white highlights and glowing blue accents.",
+    "subject": "blue mushroom wizard",
+    "mood": "dreamy",
+    "palettePlan": {
+      "primary": "vibrant blue",
+      "secondary": "soft white",
+      "accent": "glowing blue"
+    },
+    "styleTags": [
+      "cute mascot",
+      "glossy SVG",
+      "blue-avatar quality"
+    ],
+    "visualChecklist": [
+      "oversized mushroom cap head",
+      "sleepy half-closed eyes",
+      "tiny glowing staff",
+      "starry wizard hat",
+      "smooth glossy texture",
+      "rounded body shape",
+      "mushroom gills at the base",
+      "subtle sparkles around the staff"
+    ],
+    "requiredDetails": [
+      "mushroom cap head shape",
+      "glowing blue light from the staff",
+      "sleepy expression with half-closed eyes",
+      "starry wizard hat accessory"
+    ],
+    "requiredRenderableDetails": [
+      {
+        "id": "star-accents",
+        "label": "star accents",
+        "acceptableShapes": [
+          "star",
+          "spark",
+          "starEye"
+        ],
+        "acceptableSockets": [
+          "head.leftEye",
+          "head.rightEye",
+          "head.center",
+          "body.front"
+        ],
+        "minimumCount": 2
+      },
+      {
+        "id": "magic-staff",
+        "label": "wand or staff",
+        "acceptableShapes": [
+          "wand",
+          "spark",
+          "star"
+        ],
+        "acceptableSockets": [
+          "body.leftHand",
+          "body.rightHand",
+          "body.front"
+        ],
+        "minimumCount": 1
+      },
+      {
+        "id": "wings",
+        "label": "wings",
+        "acceptableShapes": [
+          "wing"
+        ],
+        "acceptableSockets": [
+          "body.leftShoulder",
+          "body.rightShoulder"
+        ],
+        "minimumCount": 2
+      }
+    ],
+    "forbiddenDetails": [
+      "raw SVG",
+      "HTML",
+      "unvalidated custom shapes",
+      "external images"
+    ],
+    "qualityConstraints": [
+      "oversized expressive head",
+      "compact connected body",
+      "readable silhouette",
+      "valid renderer sockets only"
+    ]
+  },
+  "visualChecklist": [
+    "oversized mushroom cap head",
+    "sleepy half-closed eyes",
+    "tiny glowing staff",
+    "starry wizard hat",
+    "smooth glossy texture",
+    "rounded body shape",
+    "mushroom gills at the base",
+    "subtle sparkles around the staff"
+  ],
+  "requiredDetails": [
+    "mushroom cap head shape",
+    "glowing blue light from the staff",
+    "sleepy expression with half-closed eyes",
+    "starry wizard hat accessory"
+  ],
+  "expandedContent": "{\n  \"title\": \"Sleepy Blue Mushroom Wizard\",\n  \"expandedPrompt\": \"A whimsical blue mushroom wizard character with a large oversized head and sleepy eyes. The character has a rounded silhouette resembling a mushroom cap, with a smooth texture for a glossy finish. The wizard holds a tiny glowing staff that emits a soft blue light, and wears a starry wizard hat adorned with tiny sparkles. The body is compact and connected, with subtle mushroom gills visible at the base. The expression is dreamy and relaxed, with a slight smile. The color palette features vibrant blue tones complemented by soft white highlights and glowing blue accents.\",\n  \"subject\": \"blue mushroom wizard\",\n  \"mood\": \"dreamy\",\n  \"palettePlan\": { \"primary\": \"vibrant blue\", \"secondary\": \"soft white\", \"accent\": \"glowing blue\" },\n  \"styleTags\": [\"cute mascot\", \"glossy SVG\", \"blue-avatar quality\"],\n  \"visualChecklist\": [\n    \"oversized mushroom cap head\",\n    \"sleepy half-closed eyes\",\n    \"tiny glowing staff\",\n    \"starry wizard hat\",\n    \"smooth glossy texture\",\n    \"rounded body shape\",\n    \"mushroom gills at the base\",\n    \"subtle sparkles around the staff\"\n  ],\n  \"requiredDetails\": [\n    \"mushroom cap head shape\",\n    \"glowing blue light from the staff\",\n    \"sleepy expression with half-closed eyes\",\n    \"starry wizard hat accessory\"\n  ],\n  \"requiredRenderableDetails\": [\n    { \"id\": \"mushroom_cap\", \"label\": \"mushroom cap head\", \"acceptableShapes\": [\"capShape\"], \"acceptableSockets\": [\"head.socket\"], \"minimumCount\": 1 },\n    { \"id\": \"sleepy_eyes\", \"label\": \"sleepy eyes\", \"acceptableShapes\": [\"eyeShape\"], \"acceptableSockets\": [\"eyes.socket\"], \"minimumCount\": 1 },\n    { \"id\": \"glowing_staff\", \"label\": \"tiny glowing staff\", \"acceptableShapes\": [\"staffShape\"], \"acceptableSockets\": [\"hand.socket\"], \"minimumCount\": 1 },\n    { \"id\": \"starry_hat\", \"label\": \"starry wizard hat\", \"acceptableShapes\": [\"hatShape\"], \"acceptableSockets\": [\"head.socket\"], \"minimumCount\": 1 }\n  ],\n  \"forbiddenDetails\": [\"raw SVG\", \"HTML\", \"unvalidated custom shapes\", \"external images\"],\n  \"qualityConstraints\": [\"oversized expressive head\", \"compact connected body\", \"readable silhouette\", \"valid renderer sockets only\"]\n}",
+  "rawContent": "{\n  \"title\": \"Sleepy Blue Mushroom Wizard\",\n  \"summary\": \"A whimsical blue mushroom wizard character with a large oversized head and sleepy eyes, holding a tiny glowing staff.\",\n  \"palette\": \"blue\",\n  \"scene\": \"scene_forest\",\n  \"body\": \"body_mushroom\",\n  \"head\": \"head_round\",\n  \"eyes\": \"eyes_sleepy\",\n  \"mouth\": \"mouth_smile\",\n  \"primitives\": [\n    \"body_blob\",\n    \"head_round\",\n    \"eyes_sleepy\",\n    \"mouth_smile\",\n    \"body_gills\",\n    \"accessory_hat\",\n    \"accessory_wand\",\n    \"object_spark\"\n  ],\n  \"layers\": [\n    {\n      \"shape\": \"mascotBody\",\n      \"anchor\": \"body\",\n      \"x\": 0,\n      \"y\": 0,\n      \"scale\": [0.8, 0.7],\n      \"rotate\": 0,\n      \"material\": \"glossyBlue\",\n      \"role\": \"part\",\n      \"z\": 2,\n      \"attach\": {\"socket\": \"body.center\"}\n    },\n    {\n      \"shape\": \"mascotHead\",\n      \"anchor\": \"head\",\n      \"x\": 0,\n      \"y\": 20,\n      \"scale\": [0.9, 0.9],\n      \"rotate\": 0,\n      \"material\": \"glossyBlue\",\n      \"role\": \"part\",\n      \"z\": 8,\n      \"attach\": {\"socket\": \"head.center\"}\n    },\n    {\n      \"shape\": \"cuteEye\",\n      \"anchor\": \"leftEye\",\n      \"x\": -10,\n      \"y\": 10,\n      \"scale\": [0.2, 0.2],\n      \"rotate\": 0,\n      \"material\": \"softWhite\",\n      \"role\": \"eye\",\n      \"z\": 20,\n      \"attach\": {\"socket\": \"head.leftEye\"}\n    },\n    {\n      \"shape\": \"cuteEye\",\n      \"anchor\": \"rightEye\",\n      \"x\": 10,\n      \"y\": 10,\n      \"scale\": [0.2, 0.2],\n      \"rotate\": 0,\n      \"material\": \"softWhite\",\n      \"role\": \"eye\",\n      \"z\": 20,\n      \"attach\": {\"socket\": \"head.rightEye\"}\n    },\n    {\n      \"shape\": \"mouthSmile\",\n      \"anchor\": \"mouth\",\n      \"x\": 0,\n      \"y\": 15,\n      \"scale\": [0.3, 0.1],\n      \"rotate\": 0,\n      \"material\": \"charcoalRubber\",\n      \"role\": \"mouth\",\n      \"z\": 31,\n      \"attach\": {\"socket\": \"head.mouth\"}\n    },\n    {\n      \"shape\": \"accessory_hat\",\n      \"anchor\": \"head\",\n      \"x\": 0,\n      \"y\": -10,\n      \"scale\": [0.8, 0.8],\n      \"rotate\": 0,\n      \"material\": \"glossyBlue\",\n      \"role\": \"part\",\n      \"z\": 10,\n      \"attach\": {\"socket\": \"head.center\"}\n    },\n    {\n      \"shape\": \"accessory_wand\",\n      \"anchor\": \"leftHand\",\n      \"x\": -15,\n      \"y\": 10,\n      \"scale\": [0.1, 0.5],\n      \"rotate\": 0,\n      \"material\": \"glossyBlue\",\n      \"role\": \"part\",\n      \"z\": 15,\n      \"attach\": {\"socket\": \"body.leftHand\"}\n    },\n    {\n      \"shape\": \"object_spark\",\n      \"anchor\": \"wand\",\n      \"x\": -10,\n      \"y\": 5,\n      \"scale\": [0.05, 0.05],\n      \"rotate\": 0,\n      \"material\": \"glowingBlue\",\n      \"role\": \"part\",\n      \"z\": 20,\n      \"attach\": {\"socket\": \"body.leftHand\"}\n    },\n    {\n      \"shape\": \"body_gills\",\n      \"anchor\": \"body\",\n      \"x\": 0,\n      \"y\": -10,\n      \"scale\": [0.6, 0.2],\n      \"rotate\": 0,\n      \"material\": \"glossyBlue\",\n      \"role\": \"part\",\n      \"z\": 5,\n      \"attach\": {\"socket\": \"body.bottom\"}\n    }\n  ]\n}",
+  "rawSceneSpec": {
+    "title": "Sleepy Blue Mushroom Wizard",
+    "summary": "A whimsical blue mushroom wizard character with a large oversized head and sleepy eyes, holding a tiny glowing staff.",
+    "palette": "blue",
+    "scene": "scene_forest",
+    "body": "body_mushroom",
+    "head": "head_round",
+    "eyes": "eyes_sleepy",
+    "mouth": "mouth_smile",
+    "primitives": [
+      "body_blob",
+      "head_round",
+      "eyes_sleepy",
+      "mouth_smile",
+      "body_gills",
+      "accessory_hat",
+      "accessory_wand",
+      "object_spark"
+    ],
+    "layers": [
+      {
+        "shape": "mascotBody",
+        "anchor": "body",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.8,
+          0.7
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 2,
+        "attach": {
+          "socket": "body.center"
+        }
+      },
+      {
+        "shape": "mascotHead",
+        "anchor": "head",
+        "x": 0,
+        "y": 20,
+        "scale": [
+          0.9,
+          0.9
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "shape": "cuteEye",
+        "anchor": "leftEye",
+        "x": -10,
+        "y": 10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "shape": "cuteEye",
+        "anchor": "rightEye",
+        "x": 10,
+        "y": 10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "shape": "mouthSmile",
+        "anchor": "mouth",
+        "x": 0,
+        "y": 15,
+        "scale": [
+          0.3,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "charcoalRubber",
+        "role": "mouth",
+        "z": 31,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      },
+      {
+        "shape": "topHat",
+        "anchor": "head",
+        "x": 0,
+        "y": -10,
+        "scale": [
+          0.8,
+          0.8
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 10,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "shape": "wand",
+        "anchor": "leftHand",
+        "x": -15,
+        "y": 10,
+        "scale": [
+          0.1,
+          0.5
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 15,
+        "attach": {
+          "socket": "body.leftHand"
+        }
+      }
+    ]
+  },
+  "sanitizedSceneSpec": {
+    "title": "Sleepy Blue Mushroom Wizard",
+    "summary": "A whimsical blue mushroom wizard character with a large oversized head and sleepy eyes, holding a tiny glowing staff.",
+    "palette": "blue",
+    "scene": "scene_forest",
+    "body": "body_mushroom",
+    "head": "head_round",
+    "eyes": "eyes_sleepy",
+    "mouth": "mouth_smile",
+    "primitives": [
+      "body_blob",
+      "head_round",
+      "eyes_sleepy",
+      "mouth_smile",
+      "accessory_hat",
+      "accessory_wand",
+      "object_spark",
+      "scene_sky",
+      "eyes_cartoon"
+    ],
+    "layers": [
+      {
+        "id": "enrich-wing-body-leftShoulder-0-",
+        "shape": "wing",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.34,
+          0.38
+        ],
+        "rotate": -24,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 1,
+        "attach": {
+          "socket": "body.leftShoulder"
+        }
+      },
+      {
+        "id": "enrich-wing-body-rightShoulder-0",
+        "shape": "wing",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.34,
+          0.38
+        ],
+        "rotate": 24,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 1,
+        "attach": {
+          "socket": "body.rightShoulder"
+        }
+      },
+      {
+        "id": "mascotBody-0",
+        "shape": "mascotBody",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.68,
+          0.66
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 2,
+        "attach": {
+          "socket": "body.center"
+        }
+      },
+      {
+        "id": "mascotHead-1",
+        "shape": "mascotHead",
+        "anchor": "free",
+        "x": 0,
+        "y": 20,
+        "scale": [
+          0.9,
+          0.9
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "id": "topHat-5",
+        "shape": "topHat",
+        "anchor": "free",
+        "x": 0,
+        "y": -10,
+        "scale": [
+          0.8,
+          0.8
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 10,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "id": "enrich-wand-body-rightHand-18--8",
+        "shape": "wand",
+        "anchor": "free",
+        "x": 18,
+        "y": -8,
+        "scale": [
+          0.32,
+          0.5
+        ],
+        "rotate": -22,
+        "material": "wood",
+        "opacity": 1,
+        "role": "part",
+        "z": 13,
+        "attach": {
+          "socket": "body.rightHand"
+        }
+      },
+      {
+        "id": "wand-6",
+        "shape": "wand",
+        "anchor": "free",
+        "x": -15,
+        "y": 10,
+        "scale": [
+          0.1,
+          0.5
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 15,
+        "attach": {
+          "socket": "body.leftHand"
+        }
+      },
+      {
+        "id": "cuteEye-2",
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": -10,
+        "y": 10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "id": "cuteEye-3",
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": 10,
+        "y": 10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "id": "enrich-star-head-leftEye--6--14-",
+        "shape": "star",
+        "anchor": "free",
+        "x": -6,
+        "y": -14,
+        "scale": [
+          0.13,
+          0.13
+        ],
+        "rotate": -10,
+        "material": "glossyGold",
+        "opacity": 1,
+        "role": "part",
+        "z": 24,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "id": "enrich-star-head-rightEye-6--14-",
+        "shape": "star",
+        "anchor": "free",
+        "x": 6,
+        "y": -14,
+        "scale": [
+          0.13,
+          0.13
+        ],
+        "rotate": 10,
+        "material": "glossyGold",
+        "opacity": 1,
+        "role": "part",
+        "z": 24,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "id": "mouthSmile-4",
+        "shape": "mouthSmile",
+        "anchor": "free",
+        "x": 0,
+        "y": 15,
+        "scale": [
+          0.3,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "charcoalRubber",
+        "opacity": 1,
+        "role": "mouth",
+        "z": 31,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      }
+    ]
+  },
+  "rawReactCssCharacterContent": "{\n  \"componentName\": \"SleepyMushroomWizard\",\n  \"styleSystem\": \"my-dude-react-css-scaffold\",\n  \"title\": \"Sleepy Blue Mushroom Wizard\",\n  \"summary\": \"A whimsical blue mushroom wizard with sleepy eyes and a tiny glowing staff.\",\n  \"cssVariables\": {\n    \"--dude-primary\": \"#38bdf8\",\n    \"--dude-secondary\": \"#60a5fa\",\n    \"--dude-accent\": \"#93c5fd\",\n    \"--dude-eye\": \"#e0f2fe\",\n    \"--dude-panel\": \"rgba(255,255,255,.18)\",\n    \"--dude-mouth\": \"#0f172a\"\n  },\n  \"headShape\": \"mushroom\",\n  \"bodyShape\": \"compact\",\n  \"expression\": \"sleepy\",\n  \"parts\": [\n    { \"type\": \"hat\", \"label\": \"starry wizard hat\", \"tone\": \"primary\" },\n    { \"type\": \"staff\", \"label\": \"tiny glowing staff\", \"tone\": \"accent\" },\n    { \"type\": \"gills\", \"label\": \"mushroom gills\", \"tone\": \"secondary\" },\n    { \"type\": \"sparkles\", \"label\": \"subtle sparkles\", \"tone\": \"accent\" }\n  ],\n  \"notes\": [\n    \"Features a large oversized mushroom cap head and sleepy half-closed eyes.\",\n    \"Includes a tiny glowing staff emitting soft blue light.\",\n    \"Body is compact with rounded shape and subtle mushroom gills at the base.\"\n  ]\n}",
+  "rawReactCssCharacter": {
+    "componentName": "SleepyMushroomWizard",
+    "styleSystem": "my-dude-react-css-scaffold",
+    "title": "Sleepy Blue Mushroom Wizard",
+    "summary": "A whimsical blue mushroom wizard with sleepy eyes and a tiny glowing staff.",
+    "cssVariables": {
+      "--dude-primary": "#38bdf8",
+      "--dude-secondary": "#60a5fa",
+      "--dude-accent": "#93c5fd",
+      "--dude-eye": "#e0f2fe",
+      "--dude-panel": "rgba(255,255,255,.18)",
+      "--dude-mouth": "#0f172a"
+    },
+    "headShape": "mushroom",
+    "bodyShape": "compact",
+    "expression": "sleepy",
+    "parts": [
+      {
+        "type": "hat",
+        "label": "starry wizard hat",
+        "tone": "primary"
+      },
+      {
+        "type": "staff",
+        "label": "tiny glowing staff",
+        "tone": "accent"
+      },
+      {
+        "type": "gills",
+        "label": "mushroom gills",
+        "tone": "secondary"
+      },
+      {
+        "type": "sparkles",
+        "label": "subtle sparkles",
+        "tone": "accent"
+      }
+    ],
+    "notes": [
+      "Features a large oversized mushroom cap head and sleepy half-closed eyes.",
+      "Includes a tiny glowing staff emitting soft blue light.",
+      "Body is compact with rounded shape and subtle mushroom gills at the base."
+    ]
+  },
+  "reactCssCharacter": {
+    "kind": "react-css-character",
+    "componentName": "SleepyMushroomWizard",
+    "styleSystem": "my-dude-react-css-scaffold",
+    "title": "Sleepy Blue Mushroom Wizard",
+    "summary": "A whimsical blue mushroom wizard with sleepy eyes and a tiny glowing staff.",
+    "cssVariables": {
+      "--dude-primary": "#38bdf8",
+      "--dude-secondary": "#60a5fa",
+      "--dude-accent": "#93c5fd",
+      "--dude-eye": "#e0f2fe",
+      "--dude-panel": "rgba(255,255,255,.18)",
+      "--dude-mouth": "#0f172a"
+    },
+    "headShape": "mushroom",
+    "bodyShape": "compact",
+    "expression": "sleepy",
+    "parts": [
+      {
+        "type": "hat",
+        "side": "center",
+        "tone": "primary",
+        "label": "starry wizard hat"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "accent",
+        "label": "tiny glowing staff"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "secondary",
+        "label": "mushroom gills"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "accent",
+        "label": "subtle sparkles"
+      },
+      {
+        "type": "star",
+        "side": "left",
+        "tone": "accent",
+        "label": "left star accent"
+      },
+      {
+        "type": "star",
+        "side": "right",
+        "tone": "accent",
+        "label": "right star accent"
+      },
+      {
+        "type": "wand",
+        "side": "right",
+        "tone": "accent",
+        "label": "tiny glowing staff"
+      },
+      {
+        "type": "robe",
+        "side": "center",
+        "tone": "secondary",
+        "label": "simple robe panel"
+      }
+    ],
+    "notes": [
+      "Features a large oversized mushroom cap head and sleepy half-closed eyes.",
+      "Includes a tiny glowing staff emitting soft blue light.",
+      "Body is compact with rounded shape and subtle mushroom gills at the base."
+    ]
+  },
+  "validation": {
+    "ok": true,
+    "errors": []
+  },
+  "coverage": {
+    "ok": true,
+    "checks": [
+      {
+        "id": "star-accents",
+        "label": "star accents",
+        "ok": true,
+        "count": 2,
+        "minimumCount": 2,
+        "layers": [
+          "enrich-star-head-leftEye--6--14-",
+          "enrich-star-head-rightEye-6--14-"
+        ]
+      },
+      {
+        "id": "magic-staff",
+        "label": "wand or staff",
+        "ok": true,
+        "count": 2,
+        "minimumCount": 1,
+        "layers": [
+          "enrich-wand-body-rightHand-18--8",
+          "wand-6"
+        ]
+      },
+      {
+        "id": "wings",
+        "label": "wings",
+        "ok": true,
+        "count": 2,
+        "minimumCount": 2,
+        "layers": [
+          "enrich-wing-body-leftShoulder-0-",
+          "enrich-wing-body-rightShoulder-0"
+        ]
+      }
+    ],
+    "missingRequiredDetails": []
+  },
+  "enrichments": [
+    {
+      "reason": "star accent",
+      "shape": "star",
+      "socket": "head.leftEye",
+      "id": "enrich-star-head-leftEye--6--14-24"
+    },
+    {
+      "reason": "star accent",
+      "shape": "star",
+      "socket": "head.rightEye",
+      "id": "enrich-star-head-rightEye-6--14-24"
+    },
+    {
+      "reason": "magic staff",
+      "shape": "wand",
+      "socket": "body.rightHand",
+      "id": "enrich-wand-body-rightHand-18--8-13"
+    },
+    {
+      "reason": "wings",
+      "shape": "wing",
+      "socket": "body.leftShoulder",
+      "id": "enrich-wing-body-leftShoulder-0-0-1"
+    },
+    {
+      "reason": "wings",
+      "shape": "wing",
+      "socket": "body.rightShoulder",
+      "id": "enrich-wing-body-rightShoulder-0-0-1"
+    }
+  ],
+  "options": {
+    "enrichmentEnabled": true,
+    "coverageMode": "enforced",
+    "commitRequested": true
+  },
+  "repairs": 0
+}
