@@ -590,7 +590,15 @@ function slugify(text = '') {
   return String(text).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 56) || 'avatar';
 }
 
-async function saveTest5Artifact({ prompt, designBrief, expandedContent, provider, rawContent, rawSceneSpec, sceneSpec, validation, coverage, enrichments, repairs }) {
+
+function test5OptionEnabled(value, fallback = true) {
+  if (value === false) return false;
+  if (value === true) return true;
+  if (value == null || value === '') return fallback;
+  return !/^(0|false|off|no)$/i.test(String(value));
+}
+
+async function saveTest5Artifact({ prompt, designBrief, expandedContent, provider, rawContent, rawSceneSpec, sceneSpec, validation, coverage, enrichments, repairs, options = {} }) {
   const createdAt = new Date().toISOString();
   const stamp = createdAt.replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
   const relPath = `artifacts/test5/generated/${stamp}-${slugify(prompt)}.json`;
@@ -612,11 +620,16 @@ async function saveTest5Artifact({ prompt, designBrief, expandedContent, provide
     validation,
     coverage,
     enrichments,
+    options: {
+      enrichmentEnabled: options.enrichmentEnabled !== false,
+      coverageMode: options.coverageMode || 'enforced',
+      commitRequested: options.commit !== false,
+    },
     repairs,
   };
   await fs.writeFile(absPath, JSON.stringify(artifact, null, 2), 'utf8');
 
-  let commit = { attempted: false, ok: false, enabled: process.env.TEST5_AUTO_COMMIT !== '0', push: { attempted: false, ok: false, enabled: process.env.TEST5_AUTO_PUSH === '1' } };
+  let commit = { attempted: false, ok: false, enabled: options.commit !== false && process.env.TEST5_AUTO_COMMIT !== '0', push: { attempted: false, ok: false, enabled: options.commit !== false && process.env.TEST5_AUTO_PUSH === '1' } };
   if (commit.enabled) {
     commit.attempted = true;
     try {
@@ -642,7 +655,7 @@ async function saveTest5Artifact({ prompt, designBrief, expandedContent, provide
   return { relPath, absPath, artifact, commit };
 }
 
-async function generateTest5Avatar(prompt) {
+async function generateTest5Avatar(prompt, options = {}) {
   const expanded = await expandTest5Prompt(prompt);
   const designBrief = expanded.designBrief;
   let first = await generateTest5SceneSpec(prompt, designBrief);
@@ -652,6 +665,8 @@ async function generateTest5Avatar(prompt) {
   let repairs = 0;
   let provider = `${expanded.provider} + ${first.provider}`;
   let rawContent = first.content;
+  const enrichmentEnabled = options.enrichmentEnabled !== false;
+  const coverageMode = options.coverageMode || (enrichmentEnabled ? 'enforced' : 'report-only');
   let coverage = { ok: false, checks: [], missingRequiredDetails: [] };
   let enrichments = [];
 
@@ -669,7 +684,7 @@ async function generateTest5Avatar(prompt) {
   if (!validation.ok) throw new Error(`Sanitized SceneSpec failed validation: ${validation.errors.join('; ')}`);
 
   coverage = validateDetailCoverage(designBrief, sceneSpec);
-  if (!coverage.ok) {
+  if (!coverage.ok && enrichmentEnabled) {
     const enriched = ensurePromptDetails(prompt, designBrief, sceneSpec);
     sceneSpec = sanitizeSceneSpec(enriched.sceneSpec, prompt, { skipPreset: true });
     enrichments = enriched.enrichments;
@@ -677,7 +692,7 @@ async function generateTest5Avatar(prompt) {
     if (!validation.ok) throw new Error(`Enriched SceneSpec failed validation: ${validation.errors.join('; ')}`);
     coverage = validateDetailCoverage(designBrief, sceneSpec);
   }
-  if (!coverage.ok) {
+  if (!coverage.ok && coverageMode !== 'report-only') {
     repairs += 1;
     const repaired = await generateTest5SceneSpec(prompt, designBrief, `Structurally valid but missing required visual detail coverage: ${coverage.missingRequiredDetails.join(', ')}. Add actual renderable layers for those details. Return the full corrected SceneSpec.`);
     provider = `${expanded.provider} + ${repaired.provider}`;
@@ -686,16 +701,18 @@ async function generateTest5Avatar(prompt) {
     validation = validateTest5Scene(rawSceneSpec);
     if (!validation.ok) throw new Error(`Coverage repair raw SceneSpec failed validation: ${validation.errors.join('; ')}`);
     sceneSpec = sanitizeSceneSpec(rawSceneSpec, prompt, { skipPreset: true });
-    const enriched = ensurePromptDetails(prompt, designBrief, sceneSpec);
-    sceneSpec = sanitizeSceneSpec(enriched.sceneSpec, prompt, { skipPreset: true });
-    enrichments = [...enrichments, ...enriched.enrichments];
+    if (enrichmentEnabled) {
+      const enriched = ensurePromptDetails(prompt, designBrief, sceneSpec);
+      sceneSpec = sanitizeSceneSpec(enriched.sceneSpec, prompt, { skipPreset: true });
+      enrichments = [...enrichments, ...enriched.enrichments];
+    }
     validation = validateTest5Scene(sceneSpec);
     coverage = validateDetailCoverage(designBrief, sceneSpec);
   }
-  if (!coverage.ok) throw new Error(`Generated avatar failed detail coverage: ${coverage.missingRequiredDetails.join('; ')}`);
+  if (!coverage.ok && coverageMode !== 'report-only') throw new Error(`Generated avatar failed detail coverage: ${coverage.missingRequiredDetails.join('; ')}`);
 
-  const saved = await saveTest5Artifact({ prompt, designBrief, expandedContent: expanded.content, provider, rawContent, rawSceneSpec, sceneSpec, validation, coverage, enrichments, repairs });
-  return { ok: true, prompt, userPrompt: prompt, expandedPrompt: designBrief.expandedPrompt, designBrief, visualChecklist: designBrief.visualChecklist || [], requiredDetails: designBrief.requiredDetails || [], requiredRenderableDetails: designBrief.requiredRenderableDetails || [], coverage, enrichments, provider, rawSceneSpec, sceneSpec, validation, repairs, artifactPath: saved.relPath, commit: saved.commit };
+  const saved = await saveTest5Artifact({ prompt, designBrief, expandedContent: expanded.content, provider, rawContent, rawSceneSpec, sceneSpec, validation, coverage, enrichments, repairs, options: { ...options, enrichmentEnabled, coverageMode } });
+  return { ok: true, prompt, userPrompt: prompt, expandedPrompt: designBrief.expandedPrompt, designBrief, visualChecklist: designBrief.visualChecklist || [], requiredDetails: designBrief.requiredDetails || [], requiredRenderableDetails: designBrief.requiredRenderableDetails || [], coverage, enrichments, options: { enrichmentEnabled, coverageMode, commitRequested: options.commit !== false }, provider, rawSceneSpec, sceneSpec, validation, repairs, artifactPath: saved.relPath, commit: saved.commit };
 }
 
 async function readJsonBody(req, maxBytes = 64_000) {
@@ -718,7 +735,10 @@ async function handleTest5Avatar(req, res) {
       res.end(JSON.stringify({ ok: false, error: 'prompt_required' }));
       return;
     }
-    const result = await generateTest5Avatar(prompt);
+    const enrichmentEnabled = test5OptionEnabled(body.enrichment ?? body.enableEnrichment ?? process.env.TEST5_ENABLE_ENRICHMENT, true);
+    const coverageMode = String(body.coverageMode || (enrichmentEnabled ? 'enforced' : 'report-only'));
+    const commit = body.commit === false ? false : true;
+    const result = await generateTest5Avatar(prompt, { enrichmentEnabled, coverageMode, commit });
     res.writeHead(200, corsHeaders());
     res.end(JSON.stringify(result));
   } catch (error) {

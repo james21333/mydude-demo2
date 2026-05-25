@@ -16,6 +16,7 @@ assert(/\/test5\/avatar/.test(app), 'frontend does not call the test5 avatar end
 assert(/<SceneAvatar\s+scene=\{scene\}/.test(app), 'frontend does not render returned SceneSpec with SceneAvatar');
 assert(/expandedPrompt|designBrief|visualChecklist/.test(app), 'frontend does not expose expanded prompt/design brief receipts');
 assert(/coverage/.test(app) && /enrichments/.test(app), 'frontend must expose detail coverage and deterministic enrichments');
+assert(/useEnrichment/.test(app) && /fallback reusable shape primitives/.test(app), 'frontend must make enrichment/fallback primitives easy to toggle for comparisons');
 assert(/function generateTest5Avatar\s*\(/.test(bridge), 'bridge generateTest5Avatar is missing');
 assert(/req\.method === 'POST' && req\.url\?\.startsWith\('\/test5\/avatar'\)/.test(bridge), 'bridge POST /test5/avatar route is missing');
 assert(/function expandTest5Prompt\s*\(/.test(bridge), 'bridge prompt expander stage is missing');
@@ -25,6 +26,10 @@ assert(/callTest5Llm/.test(bridge), 'bridge does not call an LLM for test5');
 assert(/function validateDetailCoverage\s*\(/.test(bridge), 'bridge must validate required detail coverage against layers');
 assert(/function ensurePromptDetails\s*\(/.test(bridge), 'bridge must add deterministic procedural layer enrichments for missing common details');
 assert(/coverage\.ok/.test(bridge) && /missingRequiredDetails/.test(bridge), 'test5 must gate acceptance on detail coverage, not just structural validity');
+assert(/function test5OptionEnabled\s*\(/.test(bridge), 'test5 must have request/env option parsing');
+assert(/TEST5_ENABLE_ENRICHMENT/.test(bridge), 'test5 must allow procedural enrichment/fallback primitives to be disabled for testing');
+assert(/coverageMode/.test(bridge) && /report-only/.test(bridge), 'test5 must support report-only coverage when enrichment is disabled for comparisons');
+assert(/commitRequested/.test(bridge), 'test5 artifacts must record whether commit was requested');
 assert(/skipPreset: true/.test(bridge), 'test5 sanitizer must skip baked quality presets to prove fresh generation');
 assert(/artifacts\/test5\/generated/.test(bridge), 'test5 artifacts are not saved under artifacts/test5/generated');
 assert(/expandedPrompt/.test(bridge) && /visualChecklist/.test(bridge), 'test5 artifacts do not save expanded prompt/checklist receipts');

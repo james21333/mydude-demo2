@@ -1938,6 +1938,7 @@ function Test5AvatarLab() {
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [useEnrichment, setUseEnrichment] = useState(() => !/enrichment=0|fallback=0/.test(window.location.search));
 
   async function generate() {
     const text = prompt.trim();
@@ -1949,7 +1950,7 @@ function Test5AvatarLab() {
       const res = await fetch(`${test5BridgeOrigin()}/test5/avatar`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ prompt: text, commit: true }),
+        body: JSON.stringify({ prompt: text, commit: true, enrichment: useEnrichment, coverageMode: useEnrichment ? 'enforced' : 'report-only' }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok || !json.ok) throw new Error(json.error || `HTTP ${res.status}`);
@@ -1986,6 +1987,11 @@ function Test5AvatarLab() {
           style={{ width: '100%', borderRadius: 16, border: '1px solid rgba(148,163,184,.28)', background: 'rgba(15,23,42,.74)', color: 'white', padding: 14, resize: 'vertical', fontSize: 15, lineHeight: 1.4 }}
           placeholder="Example: blue mushroom wizard with sleepy eyes and a tiny glowing staff"
         />
+        <label style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 12, color: '#cbd5e1', fontSize: 14 }}>
+          <input type="checkbox" checked={useEnrichment} onChange={(e) => setUseEnrichment(e.target.checked)} />
+          Use fallback reusable shape primitives / procedural enrichment
+        </label>
+        <div className="debug-pill" style={{ marginTop: 8 }}>comparison mode: {useEnrichment ? 'LLM + enrichment, coverage enforced' : 'LLM only, enrichment off, coverage report-only'}</div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginTop: 12 }}>
           <button className="primary" onClick={generate} disabled={busy || !prompt.trim()}>{busy ? 'Generating…' : 'Generate Avatar'}</button>
           <span className="debug-pill">status: {status}</span>
@@ -1997,6 +2003,7 @@ function Test5AvatarLab() {
           <div><strong>Commit:</strong> {result.commit?.ok ? result.commit.hash : result.commit?.error || 'not committed'}</div>
           <div><strong>Push:</strong> {result.commit?.push?.ok ? 'pushed to GitHub' : result.commit?.push?.attempted ? result.commit.push.error || 'push failed' : 'not pushed'}</div>
           <div><strong>Repairs:</strong> {result.repairs}</div>
+          <div><strong>Mode:</strong> {result.options?.enrichmentEnabled ? 'LLM + fallback reusable shape primitives' : 'LLM only; fallback shape primitives off'} / coverage {result.options?.coverageMode || 'enforced'}</div>
           <div><strong>Coverage:</strong> {result.coverage?.ok ? 'passed' : 'failed'}{result.coverage?.missingRequiredDetails?.length ? ` — missing ${result.coverage.missingRequiredDetails.join(', ')}` : ''}</div>
           <div><strong>Enrichments:</strong> {result.enrichments?.length ? `${result.enrichments.length} procedural layer(s) added` : 'none needed'}</div>
           <div style={{ marginTop: 10 }}><strong>Expanded prompt:</strong> {result.expandedPrompt}</div>
