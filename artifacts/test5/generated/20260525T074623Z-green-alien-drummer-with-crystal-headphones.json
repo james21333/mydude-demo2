@@ -1,0 +1,402 @@
+{
+  "prompt": "green alien drummer with crystal headphones",
+  "userPrompt": "green alien drummer with crystal headphones",
+  "createdAt": "2026-05-25T07:46:23.516Z",
+  "provider": "github-copilot/gpt-4o-mini + github-copilot/gpt-4o-mini",
+  "expandedPrompt": "A cute green alien character with oversized expressive features, playing a set of drums. The alien has a round head with large sparkling eyes and a wide smile, showcasing excitement. Its skin is a vibrant green with subtle shimmering textures, resembling a crystal-like finish. The character wears oversized crystal headphones that reflect light, and it has small, pointed ears peeking out from under the headphones. The alien's body is compact and connected, with short arms and legs. It sports a star-patterned bandana around its neck and has a small tail that curls playfully. The drums are colorful with cosmic patterns, and there are musical notes floating around to emphasize the rhythm. The overall design is polished to match the default blue My Dude avatar quality.",
+  "designBrief": {
+    "title": "Green Alien Drummer",
+    "expandedPrompt": "A cute green alien character with oversized expressive features, playing a set of drums. The alien has a round head with large sparkling eyes and a wide smile, showcasing excitement. Its skin is a vibrant green with subtle shimmering textures, resembling a crystal-like finish. The character wears oversized crystal headphones that reflect light, and it has small, pointed ears peeking out from under the headphones. The alien's body is compact and connected, with short arms and legs. It sports a star-patterned bandana around its neck and has a small tail that curls playfully. The drums are colorful with cosmic patterns, and there are musical notes floating around to emphasize the rhythm. The overall design is polished to match the default blue My Dude avatar quality.",
+    "subject": "a cute green alien drummer character",
+    "mood": "energetic",
+    "palettePlan": {
+      "primary": "vibrant green",
+      "secondary": "cosmic blue",
+      "accent": "shimmering crystal"
+    },
+    "styleTags": [
+      "cute mascot",
+      "glossy SVG",
+      "blue-avatar quality"
+    ],
+    "visualChecklist": [
+      "oversized expressive head",
+      "large sparkling eyes",
+      "wide smile",
+      "pointed ears",
+      "compact connected body",
+      "star-patterned bandana",
+      "short arms and legs",
+      "small curled tail",
+      "colorful drums with cosmic patterns",
+      "floating musical notes",
+      "shimmering crystal headphones",
+      "light reflections on accessories"
+    ],
+    "requiredDetails": [
+      "vibrant green skin with shimmering texture",
+      "oversized crystal headphones",
+      "wide smile showing excitement",
+      "star-patterned bandana around the neck"
+    ],
+    "forbiddenDetails": [
+      "raw SVG",
+      "HTML",
+      "unvalidated custom shapes",
+      "external images"
+    ],
+    "qualityConstraints": [
+      "oversized expressive head",
+      "compact connected body",
+      "readable silhouette",
+      "valid renderer sockets only"
+    ]
+  },
+  "visualChecklist": [
+    "oversized expressive head",
+    "large sparkling eyes",
+    "wide smile",
+    "pointed ears",
+    "compact connected body",
+    "star-patterned bandana",
+    "short arms and legs",
+    "small curled tail",
+    "colorful drums with cosmic patterns",
+    "floating musical notes",
+    "shimmering crystal headphones",
+    "light reflections on accessories"
+  ],
+  "requiredDetails": [
+    "vibrant green skin with shimmering texture",
+    "oversized crystal headphones",
+    "wide smile showing excitement",
+    "star-patterned bandana around the neck"
+  ],
+  "expandedContent": "{\n  \"title\": \"Green Alien Drummer\",\n  \"expandedPrompt\": \"A cute green alien character with oversized expressive features, playing a set of drums. The alien has a round head with large sparkling eyes and a wide smile, showcasing excitement. Its skin is a vibrant green with subtle shimmering textures, resembling a crystal-like finish. The character wears oversized crystal headphones that reflect light, and it has small, pointed ears peeking out from under the headphones. The alien's body is compact and connected, with short arms and legs. It sports a star-patterned bandana around its neck and has a small tail that curls playfully. The drums are colorful with cosmic patterns, and there are musical notes floating around to emphasize the rhythm. The overall design is polished to match the default blue My Dude avatar quality.\",\n  \"subject\": \"a cute green alien drummer character\",\n  \"mood\": \"energetic\",\n  \"palettePlan\": { \"primary\": \"vibrant green\", \"secondary\": \"cosmic blue\", \"accent\": \"shimmering crystal\" },\n  \"styleTags\": [\"cute mascot\", \"glossy SVG\", \"blue-avatar quality\"],\n  \"visualChecklist\": [\n    \"oversized expressive head\",\n    \"large sparkling eyes\",\n    \"wide smile\",\n    \"pointed ears\",\n    \"compact connected body\",\n    \"star-patterned bandana\",\n    \"short arms and legs\",\n    \"small curled tail\",\n    \"colorful drums with cosmic patterns\",\n    \"floating musical notes\",\n    \"shimmering crystal headphones\",\n    \"light reflections on accessories\"\n  ],\n  \"requiredDetails\": [\n    \"vibrant green skin with shimmering texture\",\n    \"oversized crystal headphones\",\n    \"wide smile showing excitement\",\n    \"star-patterned bandana around the neck\"\n  ],\n  \"forbiddenDetails\": [\"raw SVG\", \"HTML\", \"unvalidated custom shapes\", \"external images\"],\n  \"qualityConstraints\": [\"oversized expressive head\", \"compact connected body\", \"readable silhouette\", \"valid renderer sockets only\"]\n}",
+  "rawContent": "{\n  \"title\": \"Green Alien Drummer\",\n  \"summary\": \"A cute green alien character with oversized expressive features, playing a set of drums, showcasing excitement.\",\n  \"palette\": \"green\",\n  \"scene\": \"scene_stage\",\n  \"body\": \"body_capsule\",\n  \"head\": \"head_round\",\n  \"eyes\": \"eyes_star\",\n  \"mouth\": \"mouth_smile\",\n  \"primitives\": {\n    \"head\": \"head_round\",\n    \"body\": \"body_capsule\",\n    \"eyes\": [\"eyes_googly\", \"eyes_googly\"],\n    \"mouth\": \"mouth_smile\",\n    \"ears\": \"head_animal\",\n    \"tail\": \"body_triangle\",\n    \"headphones\": [\"ring\", \"panel\", \"spark\"],\n    \"bandana\": \"body_star\",\n    \"drums\": \"body_box\",\n    \"notes\": \"object_star\"\n  },\n  \"layers\": [\n    {\"shape\":\"mascotBody\",\"anchor\":\"free\",\"x\":0,\"y\":0,\"scale\":[0.6,0.5],\"rotate\":0,\"material\":\"glossyGreen\",\"role\":\"part\",\"z\":2,\"attach\":{\"socket\":\"body.center\"}},\n    {\"shape\":\"mascotHead\",\"anchor\":\"free\",\"x\":0,\"y\":0,\"scale\":[0.8,0.7],\"rotate\":0,\"material\":\"glossyGreen\",\"role\":\"part\",\"z\":8,\"attach\":{\"socket\":\"head.center\"}},\n    {\"shape\":\"cuteEye\",\"anchor\":\"free\",\"x\":-15,\"y\":-10,\"scale\":[0.2,0.2],\"rotate\":0,\"material\":\"softWhite\",\"role\":\"eye\",\"z\":20,\"attach\":{\"socket\":\"head.leftEye\"}},\n    {\"shape\":\"cuteEye\",\"anchor\":\"free\",\"x\":15,\"y\":-10,\"scale\":[0.2,0.2],\"rotate\":0,\"material\":\"softWhite\",\"role\":\"eye\",\"z\":20,\"attach\":{\"socket\":\"head.rightEye\"}},\n    {\"shape\":\"mouthSmile\",\"anchor\":\"free\",\"x\":0,\"y\":15,\"scale\":[0.4,0.2],\"rotate\":0,\"material\":\"charcoalRubber\",\"role\":\"mouth\",\"z\":31,\"attach\":{\"socket\":\"head.mouth\"}},\n    {\"shape\":\"animalEar\",\"anchor\":\"free\",\"x\":-30,\"y\":-20,\"scale\":[0.15,0.15],\"rotate\":0,\"material\":\"glossyGreen\",\"role\":\"part\",\"z\":5,\"attach\":{\"socket\":\"head.leftEar\"}},\n    {\"shape\":\"animalEar\",\"anchor\":\"free\",\"x\":30,\"y\":-20,\"scale\":[0.15,0.15],\"rotate\":0,\"material\":\"glossyGreen\",\"role\":\"part\",\"z\":5,\"attach\":{\"socket\":\"head.rightEar\"}},\n    {\"shape\":\"body_triangle\",\"anchor\":\"free\",\"x\":0,\"y\":30,\"scale\":[0.1,0.1],\"rotate\":0,\"material\":\"glossyGreen\",\"role\":\"part\",\"z\":5,\"attach\":{\"socket\":\"body.tail\"}},\n    {\"shape\":\"ring\",\"anchor\":\"free\",\"x\":0,\"y\":-10,\"scale\":[0.5,0.5],\"rotate\":0,\"material\":\"glossyGold\",\"role\":\"part\",\"z\":10,\"attach\":{\"socket\":\"head.top\"}},\n    {\"shape\":\"panel\",\"anchor\":\"free\",\"x\":0,\"y\":-15,\"scale\":[0.5,0.5],\"rotate\":0,\"material\":\"glossyGold\",\"role\":\"part\",\"z\":11,\"attach\":{\"socket\":\"head.top\"}},\n    {\"shape\":\"body_star\",\"anchor\":\"free\",\"x\":0,\"y\":25,\"scale\":[0.3,0.3],\"rotate\":0,\"material\":\"glossyBlue\",\"role\":\"part\",\"z\":6,\"attach\":{\"socket\":\"body.front\"}},\n    {\"shape\":\"body_box\",\"anchor\":\"free\",\"x\":0,\"y\":60,\"scale\":[0.4,0.2],\"rotate\":0,\"material\":\"glossyRed\",\"role\":\"part\",\"z\":7,\"attach\":{\"socket\":\"body.front\"}},\n    {\"shape\":\"object_star\",\"anchor\":\"free\",\"x\":-50,\"y\":70,\"scale\":[0.1,0.1],\"rotate\":0,\"material\":\"glossyGold\",\"role\":\"part\",\"z\":8,\"attach\":{\"socket\":\"body.front\"}},\n    {\"shape\":\"object_star\",\"anchor\":\"free\",\"x\":50,\"y\":70,\"scale\":[0.1,0.1],\"rotate\":0,\"material\":\"glossyGold\",\"role\":\"part\",\"z\":8,\"attach\":{\"socket\":\"body.front\"}},\n    {\"shape\":\"object_star\",\"anchor\":\"free\",\"x\":-30,\"y\":80,\"scale\":[0.1,0.1],\"rotate\":0,\"material\":\"glossyGold\",\"role\":\"part\",\"z\":8,\"attach\":{\"socket\":\"body.front\"}},\n    {\"shape\":\"object_star\",\"anchor\":\"free\",\"x\":30,\"y\":80,\"scale\":[0.1,0.1],\"rotate\":0,\"material\":\"glossyGold\",\"role\":\"part\",\"z\":8,\"attach\":{\"socket\":\"body.front\"}}\n  ]\n}",
+  "rawSceneSpec": {
+    "title": "Green Alien Drummer",
+    "summary": "A cute green alien character with oversized expressive features, playing a set of drums, showcasing excitement.",
+    "palette": "green",
+    "scene": "scene_stage",
+    "body": "body_capsule",
+    "head": "head_round",
+    "eyes": "eyes_star",
+    "mouth": "mouth_smile",
+    "primitives": {
+      "head": "head_round",
+      "body": "body_capsule",
+      "eyes": [
+        "eyes_googly",
+        "eyes_googly"
+      ],
+      "mouth": "mouth_smile",
+      "ears": "head_animal",
+      "tail": "body_triangle",
+      "headphones": [
+        "ring",
+        "panel",
+        "spark"
+      ],
+      "bandana": "body_star",
+      "drums": "body_box",
+      "notes": "object_star"
+    },
+    "layers": [
+      {
+        "shape": "mascotBody",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.6,
+          0.5
+        ],
+        "rotate": 0,
+        "material": "glossyGreen",
+        "role": "part",
+        "z": 2,
+        "attach": {
+          "socket": "body.center"
+        }
+      },
+      {
+        "shape": "mascotHead",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.8,
+          0.7
+        ],
+        "rotate": 0,
+        "material": "glossyGreen",
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": -15,
+        "y": -10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": 15,
+        "y": -10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "shape": "mouthSmile",
+        "anchor": "free",
+        "x": 0,
+        "y": 15,
+        "scale": [
+          0.4,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "charcoalRubber",
+        "role": "mouth",
+        "z": 31,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      },
+      {
+        "shape": "animalEar",
+        "anchor": "free",
+        "x": -30,
+        "y": -20,
+        "scale": [
+          0.15,
+          0.15
+        ],
+        "rotate": 0,
+        "material": "glossyGreen",
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "head.leftEar"
+        }
+      },
+      {
+        "shape": "animalEar",
+        "anchor": "free",
+        "x": 30,
+        "y": -20,
+        "scale": [
+          0.15,
+          0.15
+        ],
+        "rotate": 0,
+        "material": "glossyGreen",
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "head.rightEar"
+        }
+      },
+      {
+        "shape": "panel",
+        "anchor": "free",
+        "x": 0,
+        "y": -15,
+        "scale": [
+          0.5,
+          0.5
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "role": "part",
+        "z": 11,
+        "attach": {
+          "socket": "head.center"
+        }
+      }
+    ]
+  },
+  "sanitizedSceneSpec": {
+    "title": "Green Alien Drummer",
+    "summary": "A cute green alien character with oversized expressive features, playing a set of drums, showcasing excitement.",
+    "palette": "green",
+    "scene": "scene_stage",
+    "body": "body_capsule",
+    "head": "head_round",
+    "eyes": "eyes_star",
+    "mouth": "mouth_smile",
+    "primitives": [
+      "scene_space",
+      "body_blob",
+      "head_round",
+      "eyes_cartoon",
+      "mouth_smile",
+      "object_spark"
+    ],
+    "layers": [
+      {
+        "id": "mascotBody-0",
+        "shape": "mascotBody",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.6,
+          0.5
+        ],
+        "rotate": 0,
+        "material": "glossyGreen",
+        "opacity": 1,
+        "role": "part",
+        "z": 2,
+        "attach": {
+          "socket": "body.center"
+        }
+      },
+      {
+        "id": "animalEar-5",
+        "shape": "animalEar",
+        "anchor": "free",
+        "x": -30,
+        "y": -20,
+        "scale": [
+          0.15,
+          0.15
+        ],
+        "rotate": 0,
+        "material": "glossyGreen",
+        "opacity": 1,
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "head.leftEar"
+        }
+      },
+      {
+        "id": "animalEar-6",
+        "shape": "animalEar",
+        "anchor": "free",
+        "x": 30,
+        "y": -20,
+        "scale": [
+          0.15,
+          0.15
+        ],
+        "rotate": 0,
+        "material": "glossyGreen",
+        "opacity": 1,
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "head.rightEar"
+        }
+      },
+      {
+        "id": "mascotHead-1",
+        "shape": "mascotHead",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.9,
+          0.78
+        ],
+        "rotate": 0,
+        "material": "glossyGreen",
+        "opacity": 1,
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "id": "cuteEye-2",
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": -15,
+        "y": -10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "id": "cuteEye-3",
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": 15,
+        "y": -10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "id": "mouthSmile-4",
+        "shape": "mouthSmile",
+        "anchor": "free",
+        "x": 0,
+        "y": 15,
+        "scale": [
+          0.4,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "charcoalRubber",
+        "opacity": 1,
+        "role": "mouth",
+        "z": 31,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      }
+    ]
+  },
+  "validation": {
+    "ok": true,
+    "errors": []
+  },
+  "repairs": 0
+}
