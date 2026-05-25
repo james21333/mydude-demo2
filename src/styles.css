@@ -209,3 +209,64 @@ button { border: 0; border-radius: 999px; padding: 9px 13px; display: inline-fle
 .test5-shell .placeholder-card { min-height: 420px; display: grid; place-items: center; text-align: center; gap: 12px; color: #bfdbfe; opacity: .85; }
 .test5-shell pre { background: rgba(15,23,42,.72); border: 1px solid rgba(255,255,255,.12); border-radius: 16px; padding: 14px; }
 @media (max-width: 920px) { .test5-shell .demo-grid { grid-template-columns: 1fr; } .test5-shell .avatar-stage { min-height: 520px; } .test5-shell .avatar-card { height: 500px; position: relative; inset: auto; width: 100%; min-height: 0; border-radius: 22px; padding: 8px; } html body { overflow: auto; } }
+
+
+/* /test5 original-blue-dude-style hand-coded React/CSS scaffold */
+.test5-dude-card { background: rgba(2,6,23,.42); overflow: visible; }
+.test5-dude-character { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; transform-origin: 50% 100%; filter: drop-shadow(0 28px 54px rgba(0,0,0,.34)); animation: test5-dude-breathe 3.2s ease-in-out infinite; }
+.test5-dude-antenna { width: 5px; height: 34px; border-radius: 999px; background: rgba(255,255,255,.48); position: relative; z-index: 8; }
+.test5-dude-antenna::before { content: ""; position: absolute; left: 50%; top: -13px; width: 18px; height: 18px; transform: translateX(-50%); border-radius: 999px; background: var(--dude-accent, #93c5fd); box-shadow: 0 0 34px var(--dude-accent, #93c5fd); }
+.test5-dude-head { width: min(310px, 38vw); aspect-ratio: 1.08; position: relative; border-radius: 34% 34% 42% 42%; background: linear-gradient(135deg, var(--dude-primary, #38bdf8), var(--dude-secondary, #60a5fa) 58%, rgba(255,255,255,.18)); border: 2px solid rgba(255,255,255,.28); box-shadow: inset 0 0 54px rgba(255,255,255,.16), 0 26px 86px rgba(0,0,0,.34); z-index: 6; }
+.head-animal .test5-dude-head { border-radius: 38% 38% 45% 45%; }
+.head-screen .test5-dude-head { border-radius: 24% 24% 30% 30%; }
+.head-mushroom .test5-dude-head { border-radius: 48% 48% 35% 35%; }
+.head-helmet .test5-dude-head::after { content: ""; position: absolute; inset: -10px; border: 5px solid rgba(255,255,255,.38); border-radius: inherit; box-shadow: inset 0 0 18px rgba(255,255,255,.16); }
+.test5-dude-shine { position: absolute; width: 35%; height: 18%; left: 15%; top: 12%; border-radius: 999px; background: rgba(255,255,255,.24); transform: rotate(-18deg); }
+.test5-dude-eyes { display: flex; justify-content: center; gap: clamp(42px, 5vw, 68px); padding-top: clamp(74px, 8vw, 98px); }
+.test5-dude-eyes span { width: clamp(36px, 4vw, 48px); height: clamp(42px, 4.8vw, 58px); border-radius: 45%; background: var(--dude-eye, #e0f2fe); box-shadow: 0 0 30px rgba(224,242,254,.62); animation: blink 5.2s infinite; }
+.test5-dude-eyes.sleepy span { height: 12px; margin-top: 24px; border-radius: 999px; }
+.test5-dude-eyes.focused span { transform: skew(-12deg) rotate(-3deg); }
+.test5-dude-eyes.excited span { border-radius: 52% 52% 38% 38%; }
+.test5-dude-mouth { width: clamp(58px, 6.5vw, 82px); height: clamp(16px, 1.8vw, 22px); margin: clamp(30px, 3.6vw, 42px) auto 0; border-radius: 0 0 999px 999px; background: var(--dude-mouth, #0f172a); box-shadow: inset 0 -4px 0 rgba(244,114,182,.28); }
+.test5-dude-snout { position: absolute; left: 50%; bottom: 22%; width: 34%; height: 20%; transform: translateX(-50%); border-radius: 44% 44% 48% 48%; background: linear-gradient(135deg, #fff7ed, #fdba74); border: 1px solid rgba(255,255,255,.34); box-shadow: inset 0 8px 14px rgba(255,255,255,.18); }
+.test5-dude-snout + .test5-dude-mouth, .test5-dude-snout ~ .test5-dude-mouth { position: absolute; left: 50%; bottom: 20%; transform: translateX(-50%); width: 48px; height: 12px; margin: 0; }
+.test5-dude-ear { position: absolute; top: -16%; width: 26%; height: 35%; border-radius: 70% 70% 42% 42%; background: linear-gradient(135deg, var(--dude-secondary, #60a5fa), var(--dude-primary, #38bdf8)); border: 2px solid rgba(255,255,255,.22); z-index: -1; }
+.test5-dude-ear.left { left: 4%; transform: rotate(-24deg); }
+.test5-dude-ear.right { right: 4%; transform: rotate(24deg); }
+.test5-dude-horn { position: absolute; top: -15%; width: 13%; height: 28%; border-radius: 999px 999px 40% 40%; background: linear-gradient(180deg, #fff7ed, #facc15); z-index: 1; }
+.test5-dude-horn.left { left: 23%; transform: rotate(-10deg); }
+.test5-dude-horn.right { right: 23%; transform: rotate(10deg); }
+.test5-dude-hat { position: absolute; left: 50%; top: -16%; width: 48%; height: 25%; transform: translateX(-50%) rotate(-5deg); border-radius: 18px 18px 8px 8px; background: linear-gradient(135deg, #172554, var(--dude-accent, #93c5fd)); border: 2px solid rgba(255,255,255,.24); z-index: 5; }
+.test5-dude-hat::after { content: ""; position: absolute; left: -18%; right: -18%; bottom: -22%; height: 34%; border-radius: 999px; background: #1e293b; }
+.test5-dude-glasses { position: absolute; top: 31%; left: 50%; transform: translateX(-50%); display: flex; gap: clamp(28px, 4vw, 52px); align-items: center; z-index: 7; }
+.test5-dude-glasses::before { content: ""; position: absolute; left: 50%; transform: translateX(-50%); width: 42px; height: 5px; background: rgba(15,23,42,.9); }
+.test5-dude-glasses i { width: clamp(58px, 7vw, 88px); height: clamp(42px, 5vw, 62px); border: 5px solid rgba(15,23,42,.92); border-radius: 16px; background: rgba(147,197,253,.12); }
+.test5-dude-star { position: absolute; top: 23%; z-index: 8; color: var(--dude-accent, #facc15); font-size: clamp(28px, 3.4vw, 42px); text-shadow: 0 0 18px currentColor; }
+.test5-dude-star.left { left: 24%; } .test5-dude-star.right { right: 24%; }
+.test5-dude-tail { position: absolute; right: -54px; top: 58%; width: 88px; height: 138px; border-radius: 999px 999px 999px 20px; background: linear-gradient(135deg, var(--dude-primary, #38bdf8), var(--dude-secondary, #60a5fa)); transform: rotate(36deg); transform-origin: 20% 15%; border: 2px solid rgba(255,255,255,.18); z-index: 1; }
+.test5-dude-wing { position: absolute; top: 47%; width: 124px; height: 98px; border-radius: 70% 20% 70% 30%; background: linear-gradient(135deg, var(--dude-secondary, #60a5fa), rgba(255,255,255,.15)); border: 1px solid rgba(255,255,255,.18); z-index: 2; }
+.test5-dude-wing.left { left: -92px; transform: rotate(-22deg); } .test5-dude-wing.right { right: -92px; transform: scaleX(-1) rotate(-22deg); }
+.test5-dude-lower { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 8px; z-index: 5; }
+.test5-dude-body { position: relative; width: 136px; height: 88px; border-radius: 32px 32px 26px 26px; background: linear-gradient(135deg, var(--dude-panel, rgba(255,255,255,.18)), rgba(255,255,255,.08)); border: 1px solid rgba(255,255,255,.2); box-shadow: inset 0 0 24px rgba(255,255,255,.08); }
+.body-robot .test5-dude-body { border-radius: 24px; background: linear-gradient(135deg, rgba(148,163,184,.42), rgba(15,23,42,.28)); }
+.body-robe .test5-dude-body { height: 110px; border-radius: 30px 30px 44px 44px; }
+.test5-dude-arm { width: 34px; height: 72px; border-radius: 999px; background: linear-gradient(180deg, var(--dude-secondary, #60a5fa), rgba(255,255,255,.12)); border: 1px solid rgba(255,255,255,.16); position: relative; transform-origin: top center; }
+.test5-dude-arm.left { transform: rotate(14deg); } .test5-dude-arm.right { transform: rotate(-14deg); }
+.test5-dude-arm span { position: absolute; left: 50%; bottom: -7px; width: 48px; height: 30px; transform: translateX(-50%); border-radius: 999px; background: var(--dude-secondary, #60a5fa); border: 1px solid rgba(255,255,255,.18); }
+.test5-dude-wand { position: absolute; right: -24px; top: 4px; width: 7px; height: 104px; border-radius: 999px; background: #92400e; transform: rotate(-24deg); box-shadow: 0 -18px 18px var(--dude-accent, #facc15); }
+.test5-dude-wand::before { content: "✦"; position: absolute; top: -30px; left: -12px; color: var(--dude-accent, #facc15); font-style: normal; font-size: 30px; }
+.test5-dude-panel { position: absolute; left: 50%; top: 18px; width: 64px; height: 36px; transform: translateX(-50%); border-radius: 12px; background: rgba(103,232,249,.38); box-shadow: 0 0 18px rgba(103,232,249,.42); }
+.test5-dude-badge { position: absolute; right: 22px; top: 18px; width: 26px; height: 26px; border-radius: 999px; background: var(--dude-accent, #facc15); box-shadow: 0 0 16px var(--dude-accent, #facc15); }
+.test5-dude-scarf { position: absolute; left: 50%; top: -4px; width: 82px; height: 22px; transform: translateX(-50%) rotate(-10deg); border-radius: 999px 999px 999px 10px; background: linear-gradient(90deg, #ef4444, #f97316); }
+.test5-dude-robe { position: absolute; inset: 12px 24px 6px; border-radius: 18px 18px 28px 28px; border-left: 5px solid rgba(255,255,255,.28); border-right: 5px solid rgba(255,255,255,.1); }
+.test5-dude-part.part-spot { position: absolute; width: 28px; height: 22px; border-radius: 999px; background: rgba(15,23,42,.32); }
+.test5-dude-part.part-spot:nth-of-type(1) { left: 20px; top: 20px; } .test5-dude-part.part-spot:nth-of-type(2) { right: 22px; bottom: 20px; }
+.test5-dude-part.part-stripe { position: absolute; left: 24px; right: 24px; height: 10px; border-radius: 999px; background: rgba(15,23,42,.28); transform: rotate(-8deg); }
+.test5-dude-part.part-spark { position: absolute; right: -20px; top: -18px; color: var(--dude-accent, #facc15); text-shadow: 0 0 18px currentColor; }
+.test5-dude-legs { display: flex; justify-content: center; gap: 44px; margin-top: 4px; }
+.test5-dude-leg { position: relative; width: 34px; height: 44px; border-radius: 16px 16px 24px 24px; background: linear-gradient(180deg, var(--dude-secondary, #60a5fa), rgba(255,255,255,.1)); border: 1px solid rgba(255,255,255,.16); }
+.test5-dude-leg span { position: absolute; left: 50%; bottom: -5px; width: 48px; height: 18px; transform: translateX(-50%); border-radius: 999px; background: var(--dude-secondary, #60a5fa); }
+.test5-dude-leg b { position: absolute; left: 50%; bottom: -8px; width: 58px; height: 24px; transform: translateX(-50%); border-radius: 999px 999px 14px 14px; background: #0f172a; border: 1px solid rgba(255,255,255,.24); z-index: 2; }
+.test5-dude-leg i { position: absolute; left: 50%; bottom: -42px; width: 24px; height: 46px; transform: translateX(-50%); border-radius: 50% 50% 55% 55%; background: linear-gradient(180deg, #fef3c7, #fb923c 45%, #dc2626); filter: drop-shadow(0 0 18px #fb923c); z-index: 1; }
+@keyframes test5-dude-breathe { 0%,100% { transform: translateY(0) rotate(-.6deg); } 50% { transform: translateY(-10px) rotate(.8deg); } }
+@media (max-width: 920px) { .test5-dude-head { width: min(250px, 64vw); } .test5-dude-body { width: 112px; height: 76px; } .test5-dude-tail { right: -36px; width: 64px; height: 104px; } }

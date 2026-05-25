@@ -1782,6 +1782,53 @@ function CartoonAvatar({ avatar, mouthPhase, status, voiceTheme = {} }) {
   </div>;
 }
 
+
+function Test5HandCodedAvatar({ character, status = 'listening' }) {
+  if (!character) return null;
+  const vars = character.cssVariables || {};
+  const parts = Array.isArray(character.parts) ? character.parts : [];
+  const hasPart = (type, side) => parts.some(part => part.type === type && (!side || part.side === side));
+  const partClass = (part) => `test5-dude-part part-${part.type || 'badge'} side-${part.side || 'center'} tone-${part.tone || 'primary'}`;
+  return <div className={`avatar-card test5-dude-card ${status} built`} style={vars}>
+    <div className={`test5-dude-character head-${character.headShape || 'rounded'} body-${character.bodyShape || 'compact'} expression-${character.expression || 'friendly'}`}>
+      {hasPart('tail') && <div className="test5-dude-tail" aria-hidden="true" />}
+      {hasPart('wing', 'left') && <div className="test5-dude-wing left" aria-hidden="true" />}
+      {hasPart('wing', 'right') && <div className="test5-dude-wing right" aria-hidden="true" />}
+      <div className="test5-dude-antenna" />
+      <div className="test5-dude-head">
+        {hasPart('ear', 'left') && <div className="test5-dude-ear left" />}
+        {hasPart('ear', 'right') && <div className="test5-dude-ear right" />}
+        {hasPart('horn', 'left') && <div className="test5-dude-horn left" />}
+        {hasPart('horn', 'right') && <div className="test5-dude-horn right" />}
+        {hasPart('hat') && <div className="test5-dude-hat" />}
+        {hasPart('helmet') && <div className="test5-dude-helmet" />}
+        <div className="test5-dude-shine" />
+        <div className={`test5-dude-eyes ${character.expression || 'friendly'}`}><span/><span/></div>
+        {hasPart('glasses') && <div className="test5-dude-glasses"><i/><i/></div>}
+        {hasPart('star', 'left') && <div className="test5-dude-star left">★</div>}
+        {hasPart('star', 'right') && <div className="test5-dude-star right">★</div>}
+        {hasPart('snout') && <div className="test5-dude-snout" />}
+        <div className="test5-dude-mouth" />
+      </div>
+      <div className="test5-dude-lower">
+        <div className="test5-dude-arm left"><span /></div>
+        <div className="test5-dude-body">
+          {hasPart('robe') && <div className="test5-dude-robe" />}
+          {hasPart('panel') && <div className="test5-dude-panel" />}
+          {hasPart('badge') && <div className="test5-dude-badge" />}
+          {hasPart('scarf') && <div className="test5-dude-scarf" />}
+          {parts.filter(part => ['spot','stripe','spark'].includes(part.type)).slice(0, 5).map((part, idx) => <span key={`${part.type}-${idx}`} className={partClass(part)}>{part.type === 'spark' ? '✦' : ''}</span>)}
+        </div>
+        <div className="test5-dude-arm right"><span />{hasPart('wand', 'right') && <i className="test5-dude-wand" />}</div>
+      </div>
+      <div className="test5-dude-legs">
+        <div className="test5-dude-leg left"><span />{hasPart('boot', 'left') && <b />}{hasPart('flame', 'left') && <i />}</div>
+        <div className="test5-dude-leg right"><span />{hasPart('boot', 'right') && <b />}{hasPart('flame', 'right') && <i />}</div>
+      </div>
+    </div>
+  </div>;
+}
+
 function SceneAvatar({ scene, mouthPhase, status, voiceTheme = {} }) {
   const palette = SCENE_PALETTES[scene.palette] || SCENE_PALETTES.blue;
   const [primary, dark, light] = palette;
@@ -1965,13 +2012,13 @@ function Test5AvatarLab() {
   }
 
   const scene = result?.sceneSpec;
+  const reactCssCharacter = result?.reactCssCharacter;
   return <div className="app-shell test5-shell">
     <header className="hero-card" style={{ gap: 12 }}>
       <div className="eyebrow">/test5 dynamic avatar lab</div>
-      <h1>LLM → SceneSpec → My Dude renderer → committed artifact</h1>
+      <h1>LLM → hand-coded React/CSS My Dude → committed artifact</h1>
       <p>
-        Type a prompt. The bridge expands it into a renderer-aware design brief, asks an LLM for a brand-new controlled drawing recipe,
-        verifies required visual detail coverage, procedurally enriches missing common details, saves/commits the artifact, then this page renders the returned SceneSpec.
+        Type a prompt. The bridge expands it into art direction, asks the live LLM to author a safe React/CSS character blueprint the way the original blue dude was hand-coded, keeps the SceneSpec receipt for comparison, saves/commits the artifact, then this page renders the hand-coded scaffold.
       </p>
       <div className="debug-pill">bridge: {test5BridgeOrigin()}</div>
     </header>
@@ -2005,6 +2052,7 @@ function Test5AvatarLab() {
           <div><strong>Repairs:</strong> {result.repairs}</div>
           <div><strong>Mode:</strong> {result.options?.enrichmentEnabled ? 'LLM + fallback reusable shape primitives' : 'LLM only; fallback shape primitives off'} / coverage {result.options?.coverageMode || 'enforced'}</div>
           <div><strong>Coverage:</strong> {result.coverage?.ok ? 'passed' : 'failed'}{result.coverage?.missingRequiredDetails?.length ? ` — missing ${result.coverage.missingRequiredDetails.join(', ')}` : ''}</div>
+          <div><strong>React/CSS component:</strong> {result.reactCssCharacter?.componentName || 'not returned'} ({result.reactCssCharacter?.styleSystem || 'unknown'})</div>
           <div><strong>Enrichments:</strong> {result.enrichments?.length ? `${result.enrichments.length} procedural layer(s) added` : 'none needed'}</div>
           <div style={{ marginTop: 10 }}><strong>Expanded prompt:</strong> {result.expandedPrompt}</div>
           {result.coverage?.checks?.length ? <div style={{ marginTop: 10 }}><strong>Detail coverage:</strong><ul>{result.coverage.checks.map((item) => <li key={item.id}>{item.ok ? '✓' : '✗'} {item.label || item.id}: {item.count}/{item.minimumCount}</li>)}</ul></div> : null}
@@ -2015,9 +2063,9 @@ function Test5AvatarLab() {
 
       <section className="avatar-stage" style={{ minHeight: 620 }}>
         {scene ? <>
-          <SceneAvatar scene={scene} mouthPhase={0} status="listening" />
+          {reactCssCharacter ? <Test5HandCodedAvatar character={reactCssCharacter} status="listening" /> : <SceneAvatar scene={scene} mouthPhase={0} status="listening" />}
           <div className="avatar-caption">
-            <strong>{scene.title}</strong><br />{scene.summary}
+            <strong>{reactCssCharacter?.title || scene.title}</strong><br />{reactCssCharacter?.summary || scene.summary}
           </div>
         </> : <div className="placeholder-card">
           <Sparkles size={42} />
@@ -2031,7 +2079,9 @@ function Test5AvatarLab() {
       <pre style={{ whiteSpace: 'pre-wrap', overflowX: 'auto', maxHeight: 320 }}>{JSON.stringify(result.designBrief, null, 2)}</pre>
       <h2>Coverage and enrichment receipts</h2>
       <pre style={{ whiteSpace: 'pre-wrap', overflowX: 'auto', maxHeight: 320 }}>{JSON.stringify({ coverage: result.coverage, enrichments: result.enrichments }, null, 2)}</pre>
-      <h2>Sanitized SceneSpec returned by the two-stage LLM pipeline</h2>
+      <h2>GPT-authored React/CSS character blueprint</h2>
+      <pre style={{ whiteSpace: 'pre-wrap', overflowX: 'auto', maxHeight: 420 }}>{JSON.stringify(result.reactCssCharacter, null, 2)}</pre>
+      <h2>Sanitized SceneSpec comparison receipt</h2>
       <pre style={{ whiteSpace: 'pre-wrap', overflowX: 'auto', maxHeight: 420 }}>{JSON.stringify(result.sceneSpec, null, 2)}</pre>
     </section> : null}
   </div>;

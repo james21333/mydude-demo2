@@ -388,6 +388,134 @@ async function generateTest5SceneSpec(prompt, designBrief, repairNote = '') {
   return callTest5Llm(prompt, designBrief, repairNote);
 }
 
+function test5ReactCssSystemPrompt(designBrief = {}) {
+  const briefText = JSON.stringify(designBrief || {}, null, 2).slice(0, 5000);
+  return `You are GPT-5.5/Hermes recreating the original blue My Dude build method for /test5.
+The original was not an image generator or an OpenClaw dependency: it was a hand-coded React/CSS mascot scaffold with tuned head/body proportions, shine, eyes, one mouth, antenna/ears/accessories, arms/legs, and CSS variables.
+Return STRICT JSON only. No markdown, raw JSX, raw CSS text, HTML, SVG, JavaScript, image URLs, or base64.
+You are authoring a SAFE React/CSS character blueprint that our existing React component will render through a fixed hand-coded scaffold.
+Expanded design brief:
+${briefText}
+Required JSON shape:
+{
+  "componentName": "ShortPascalName",
+  "styleSystem": "my-dude-react-css-scaffold",
+  "title": "Short character name",
+  "summary": "One sentence about the generated hand-coded character",
+  "cssVariables": {
+    "--dude-primary": "#38bdf8",
+    "--dude-secondary": "#60a5fa",
+    "--dude-accent": "#93c5fd",
+    "--dude-eye": "#e0f2fe",
+    "--dude-panel": "rgba(255,255,255,.18)",
+    "--dude-mouth": "#0f172a"
+  },
+  "headShape": "rounded|animal|helmet|screen|mushroom|crown",
+  "bodyShape": "compact|round|suited|robot|robe|pilot",
+  "expression": "friendly|sleepy|focused|excited|curious",
+  "parts": [
+    { "type": "ear", "side": "left", "label": "fox ear", "tone": "primary" },
+    { "type": "glasses", "label": "star goggles", "tone": "accent" }
+  ],
+  "notes": ["which details are custom to the prompt"]
+}
+Rules:
+- Think like the original blue-dude React/CSS author: first lock a polished mascot scaffold, then customize CSS variables and named div parts.
+- Keep a single connected character, not floating stickers.
+- Include prompt-specific parts when relevant: ears, tail, snout, horns, wings, hat, glasses, star, boots, flame, wand, badge, scarf, antenna, spots, stripes, panel, robe, helmet.
+- Use 4 to 12 parts. Prefer fewer polished readable parts over clutter.
+- Do not output raw code; this JSON is the receipt for the hand-coded React/CSS scaffold.`;
+}
+
+function fallbackReactCssCharacter(prompt = '', designBrief = {}) {
+  const text = `${prompt} ${designBrief.expandedPrompt || ''}`.toLowerCase();
+  const isFox = /fox/.test(text);
+  const isRobot = /robot|screen|computer/.test(text);
+  const isWizard = /wizard|magic|wand|staff/.test(text);
+  const isPilot = /pilot|aviator|rocket/.test(text);
+  const primary = isFox ? '#fb923c' : /purple|wizard|space/.test(text) ? '#a78bfa' : /green|mushroom/.test(text) ? '#34d399' : /pink/.test(text) ? '#f472b6' : '#38bdf8';
+  const parts = [];
+  const add = (type, label, opts = {}) => parts.push({ type, label, tone: opts.tone || 'primary', side: opts.side || 'center' });
+  if (isFox || /cat|dog|animal/.test(text)) { add('ear', 'left animal ear', { side: 'left' }); add('ear', 'right animal ear', { side: 'right' }); add('snout', 'soft snout', { tone: 'cream' }); add('tail', 'curved tail', { side: 'right' }); }
+  if (/goggle|glasses|visor/.test(text)) add('glasses', 'prompt eyewear', { tone: 'dark' });
+  if (/star/.test(text)) { add('star', 'left star accent', { side: 'left', tone: 'accent' }); add('star', 'right star accent', { side: 'right', tone: 'accent' }); }
+  if (/boot/.test(text)) { add('boot', 'left boot', { side: 'left', tone: 'dark' }); add('boot', 'right boot', { side: 'right', tone: 'dark' }); }
+  if (/flame|rocket/.test(text)) { add('flame', 'left rocket flame', { side: 'left', tone: 'accent' }); add('flame', 'right rocket flame', { side: 'right', tone: 'accent' }); }
+  if (isWizard) { add('hat', 'soft wizard hat', { tone: 'accent' }); add('wand', 'tiny glowing staff', { side: 'right', tone: 'accent' }); add('robe', 'simple robe panel', { tone: 'secondary' }); }
+  if (isRobot) { add('antenna', 'robot antenna', { tone: 'accent' }); add('panel', 'screen body panel', { tone: 'accent' }); }
+  if (isPilot) add('scarf', 'pilot scarf', { tone: 'accent' });
+  if (!parts.length) { add('antenna', 'glowing antenna', { tone: 'accent' }); add('badge', 'prompt badge', { tone: 'accent' }); }
+  return {
+    componentName: `${slugify(designBrief.title || prompt).split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('').slice(0, 32) || 'Custom'}Dude`,
+    styleSystem: 'my-dude-react-css-scaffold',
+    title: String(designBrief.title || `${prompt.slice(0, 42)} Buddy`).slice(0, 80),
+    summary: String(designBrief.expandedPrompt || `Hand-coded React/CSS My Dude character for ${prompt}`).slice(0, 220),
+    cssVariables: {
+      '--dude-primary': primary,
+      '--dude-secondary': /gold|yellow|star/.test(text) ? '#facc15' : primary,
+      '--dude-accent': /flame|rocket/.test(text) ? '#fb923c' : /star|gold|yellow/.test(text) ? '#facc15' : '#93c5fd',
+      '--dude-eye': /sleepy/.test(text) ? '#e0f2fe' : '#f8fafc',
+      '--dude-panel': 'rgba(255,255,255,.18)',
+      '--dude-mouth': '#0f172a',
+    },
+    headShape: isFox ? 'animal' : isRobot ? 'screen' : isWizard && /mushroom/.test(text) ? 'mushroom' : 'rounded',
+    bodyShape: isRobot ? 'robot' : isWizard ? 'robe' : isPilot ? 'pilot' : 'compact',
+    expression: /sleepy/.test(text) ? 'sleepy' : /focus|angry/.test(text) ? 'focused' : /excited|happy/.test(text) ? 'excited' : 'friendly',
+    parts: parts.slice(0, 12),
+    notes: (designBrief.visualChecklist || []).slice(0, 8),
+  };
+}
+
+function sanitizeReactCssCharacter(raw, prompt = '', designBrief = {}) {
+  const fallback = fallbackReactCssCharacter(prompt, designBrief);
+  const clean = raw && typeof raw === 'object' ? raw : {};
+  const validColor = (value, fb) => {
+    const v = String(value || '').trim();
+    return /^(#[0-9a-f]{3,8}|rgba?\([^)]{1,80}\)|hsla?\([^)]{1,80}\))$/i.test(v) ? v.slice(0, 90) : fb;
+  };
+  const allowedVars = ['--dude-primary','--dude-secondary','--dude-accent','--dude-eye','--dude-panel','--dude-mouth'];
+  const cssVariables = {};
+  for (const key of allowedVars) cssVariables[key] = validColor(clean.cssVariables?.[key], fallback.cssVariables[key]);
+  const oneOf = (value, allowed, fb) => allowed.includes(value) ? value : fb;
+  const allowedPartTypes = new Set(['ear','tail','snout','horn','wing','hat','glasses','star','boot','flame','wand','badge','scarf','antenna','spot','stripe','panel','robe','helmet','crown','spark']);
+  const allowedSides = new Set(['left','right','center']);
+  const allowedTones = new Set(['primary','secondary','accent','cream','dark','eye']);
+  const sourceParts = Array.isArray(clean.parts) && clean.parts.length ? [...clean.parts] : [];
+  for (const fallbackPart of fallback.parts) {
+    if (!sourceParts.some(part => part?.type === fallbackPart.type && (part?.side || 'center') === (fallbackPart.side || 'center'))) sourceParts.push(fallbackPart);
+  }
+  const parts = sourceParts.map((part, index) => ({
+    type: allowedPartTypes.has(part?.type) ? part.type : 'badge',
+    side: allowedSides.has(part?.side) ? part.side : 'center',
+    tone: allowedTones.has(part?.tone) ? part.tone : 'primary',
+    label: String(part?.label || `${part?.type || 'detail'} ${index + 1}`).replace(/[<>]/g, '').slice(0, 80),
+  })).slice(0, 12);
+  return {
+    kind: 'react-css-character',
+    componentName: String(clean.componentName || fallback.componentName).replace(/[^A-Za-z0-9]/g, '').slice(0, 40) || fallback.componentName,
+    styleSystem: 'my-dude-react-css-scaffold',
+    title: String(clean.title || fallback.title).replace(/[<>]/g, '').slice(0, 90),
+    summary: String(clean.summary || fallback.summary).replace(/[<>]/g, '').slice(0, 240),
+    cssVariables,
+    headShape: oneOf(clean.headShape, ['rounded','animal','helmet','screen','mushroom','crown'], fallback.headShape),
+    bodyShape: oneOf(clean.bodyShape, ['compact','round','suited','robot','robe','pilot'], fallback.bodyShape),
+    expression: oneOf(clean.expression, ['friendly','sleepy','focused','excited','curious'], fallback.expression),
+    parts: parts.length ? parts : fallback.parts,
+    notes: (Array.isArray(clean.notes) ? clean.notes : fallback.notes).map(n => String(n).replace(/[<>]/g, '').slice(0, 140)).filter(Boolean).slice(0, 8),
+  };
+}
+
+async function generateTest5ReactCssCharacter(prompt, designBrief, repairNote = '') {
+  const userContent = `${repairNote ? `Repair this blueprint issue: ${repairNote}\n\n` : ''}Original user prompt: ${prompt.trim().slice(0, 900)}\nExpanded prompt: ${String(designBrief?.expandedPrompt || '').slice(0, 1800)}\nVisual checklist: ${(designBrief?.visualChecklist || []).join('; ')}\nReturn one safe React/CSS character blueprint JSON object now.`;
+  try {
+    const result = await callTest5Chat({ system: test5ReactCssSystemPrompt(designBrief), userContent, temperature: repairNote ? 0.18 : 0.48, maxTokens: 1500, stage: repairNote ? 'react-css-repair' : 'react-css' });
+    const rawReactCssCharacter = parseJsonObject(result.content);
+    return { ...result, rawReactCssCharacter, reactCssCharacter: sanitizeReactCssCharacter(rawReactCssCharacter, prompt, designBrief) };
+  } catch (error) {
+    return { provider: 'local/react-css-fallback', content: String(error?.message || error), rawReactCssCharacter: null, reactCssCharacter: sanitizeReactCssCharacter(null, prompt, designBrief) };
+  }
+}
+
 function renderableDetail(id, label, acceptableShapes, acceptableSockets = [], minimumCount = 1) {
   return { id, label, acceptableShapes, acceptableSockets, minimumCount };
 }
@@ -598,7 +726,7 @@ function test5OptionEnabled(value, fallback = true) {
   return !/^(0|false|off|no)$/i.test(String(value));
 }
 
-async function saveTest5Artifact({ prompt, designBrief, expandedContent, provider, rawContent, rawSceneSpec, sceneSpec, validation, coverage, enrichments, repairs, options = {} }) {
+async function saveTest5Artifact({ prompt, designBrief, expandedContent, provider, rawContent, rawSceneSpec, sceneSpec, rawReactCssCharacterContent, rawReactCssCharacter, reactCssCharacter, validation, coverage, enrichments, repairs, options = {} }) {
   const createdAt = new Date().toISOString();
   const stamp = createdAt.replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
   const relPath = `artifacts/test5/generated/${stamp}-${slugify(prompt)}.json`;
@@ -617,6 +745,9 @@ async function saveTest5Artifact({ prompt, designBrief, expandedContent, provide
     rawContent,
     rawSceneSpec,
     sanitizedSceneSpec: sceneSpec,
+    rawReactCssCharacterContent,
+    rawReactCssCharacter,
+    reactCssCharacter,
     validation,
     coverage,
     enrichments,
@@ -658,12 +789,14 @@ async function saveTest5Artifact({ prompt, designBrief, expandedContent, provide
 async function generateTest5Avatar(prompt, options = {}) {
   const expanded = await expandTest5Prompt(prompt);
   const designBrief = expanded.designBrief;
+  const characterResult = await generateTest5ReactCssCharacter(prompt, designBrief);
+  const reactCssCharacter = characterResult.reactCssCharacter;
   let first = await generateTest5SceneSpec(prompt, designBrief);
   let rawSceneSpec = coerceTest5RawScene(parseJsonObject(first.content), prompt);
   let validation = validateTest5Scene(rawSceneSpec);
   let sceneSpec = null;
   let repairs = 0;
-  let provider = `${expanded.provider} + ${first.provider}`;
+  let provider = `${expanded.provider} + ${characterResult.provider} + ${first.provider}`;
   let rawContent = first.content;
   const enrichmentEnabled = options.enrichmentEnabled !== false;
   const coverageMode = options.coverageMode || (enrichmentEnabled ? 'enforced' : 'report-only');
@@ -673,7 +806,7 @@ async function generateTest5Avatar(prompt, options = {}) {
   if (!validation.ok) {
     repairs = 1;
     const repaired = await generateTest5SceneSpec(prompt, designBrief, validation.errors.join('; '));
-    provider = `${expanded.provider} + ${repaired.provider}`;
+    provider = `${expanded.provider} + ${characterResult.provider} + ${repaired.provider}`;
     rawContent = repaired.content;
     rawSceneSpec = coerceTest5RawScene(parseJsonObject(repaired.content), prompt);
     validation = validateTest5Scene(rawSceneSpec);
@@ -695,7 +828,7 @@ async function generateTest5Avatar(prompt, options = {}) {
   if (!coverage.ok && coverageMode !== 'report-only') {
     repairs += 1;
     const repaired = await generateTest5SceneSpec(prompt, designBrief, `Structurally valid but missing required visual detail coverage: ${coverage.missingRequiredDetails.join(', ')}. Add actual renderable layers for those details. Return the full corrected SceneSpec.`);
-    provider = `${expanded.provider} + ${repaired.provider}`;
+    provider = `${expanded.provider} + ${characterResult.provider} + ${repaired.provider}`;
     rawContent = repaired.content;
     rawSceneSpec = coerceTest5RawScene(parseJsonObject(repaired.content), prompt);
     validation = validateTest5Scene(rawSceneSpec);
@@ -711,8 +844,8 @@ async function generateTest5Avatar(prompt, options = {}) {
   }
   if (!coverage.ok && coverageMode !== 'report-only') throw new Error(`Generated avatar failed detail coverage: ${coverage.missingRequiredDetails.join('; ')}`);
 
-  const saved = await saveTest5Artifact({ prompt, designBrief, expandedContent: expanded.content, provider, rawContent, rawSceneSpec, sceneSpec, validation, coverage, enrichments, repairs, options: { ...options, enrichmentEnabled, coverageMode } });
-  return { ok: true, prompt, userPrompt: prompt, expandedPrompt: designBrief.expandedPrompt, designBrief, visualChecklist: designBrief.visualChecklist || [], requiredDetails: designBrief.requiredDetails || [], requiredRenderableDetails: designBrief.requiredRenderableDetails || [], coverage, enrichments, options: { enrichmentEnabled, coverageMode, commitRequested: options.commit !== false }, provider, rawSceneSpec, sceneSpec, validation, repairs, artifactPath: saved.relPath, commit: saved.commit };
+  const saved = await saveTest5Artifact({ prompt, designBrief, expandedContent: expanded.content, provider, rawContent, rawSceneSpec, sceneSpec, rawReactCssCharacterContent: characterResult.content, rawReactCssCharacter: characterResult.rawReactCssCharacter, reactCssCharacter, validation, coverage, enrichments, repairs, options: { ...options, enrichmentEnabled, coverageMode } });
+  return { ok: true, prompt, userPrompt: prompt, expandedPrompt: designBrief.expandedPrompt, designBrief, reactCssCharacter, visualChecklist: designBrief.visualChecklist || [], requiredDetails: designBrief.requiredDetails || [], requiredRenderableDetails: designBrief.requiredRenderableDetails || [], coverage, enrichments, options: { enrichmentEnabled, coverageMode, commitRequested: options.commit !== false }, provider, rawSceneSpec, sceneSpec, validation, repairs, artifactPath: saved.relPath, commit: saved.commit };
 }
 
 async function readJsonBody(req, maxBytes = 64_000) {
