@@ -1,0 +1,782 @@
+{
+  "prompt": "purple robot astronaut with a glass helmet and tiny boots",
+  "userPrompt": "purple robot astronaut with a glass helmet and tiny boots",
+  "createdAt": "2026-05-25T11:15:46.024Z",
+  "provider": "github-copilot/gpt-4o-mini + github-copilot/gpt-4o-mini + github-copilot/gpt-4o-mini",
+  "expandedPrompt": "A cute purple robot astronaut with a glossy glass helmet reflecting stars, tiny metallic boots, and a friendly, curious expression. The robot has rounded edges and a compact body, with glowing circuits visible on its arms and legs. It features expressive eyes behind the helmet, small antennae on top, and a star badge on its chest. The overall silhouette is sleek and futuristic, emphasizing the astronaut theme.",
+  "designBrief": {
+    "title": "Purple Robot Astronaut",
+    "expandedPrompt": "A cute purple robot astronaut with a glossy glass helmet reflecting stars, tiny metallic boots, and a friendly, curious expression. The robot has rounded edges and a compact body, with glowing circuits visible on its arms and legs. It features expressive eyes behind the helmet, small antennae on top, and a star badge on its chest. The overall silhouette is sleek and futuristic, emphasizing the astronaut theme.",
+    "subject": "a purple robot astronaut character",
+    "mood": "playful curiosity",
+    "palettePlan": {
+      "primary": "purple",
+      "secondary": "silver",
+      "accent": "glow blue"
+    },
+    "styleTags": [
+      "cute mascot",
+      "glossy SVG",
+      "blue-avatar quality"
+    ],
+    "visualChecklist": [
+      "purple body with metallic sheen",
+      "glassy helmet reflecting stars",
+      "tiny silver boots with a shiny finish",
+      "curved arms and legs",
+      "small antennae on top of the head",
+      "friendly large eyes behind the helmet",
+      "glowing circuits along the arms",
+      "star badge on the chest",
+      "compact body with rounded edges",
+      "playful expression",
+      "soft light blue accents",
+      "visible joints for flexibility"
+    ],
+    "requiredDetails": [
+      "robot anatomy with rounded limbs",
+      "purple metallic color scheme",
+      "curious expression with wide eyes",
+      "star badge accessory on chest"
+    ],
+    "requiredRenderableDetails": [
+      {
+        "id": "star-accents",
+        "label": "star accents",
+        "acceptableShapes": [
+          "star",
+          "spark",
+          "starEye"
+        ],
+        "acceptableSockets": [
+          "head.leftEye",
+          "head.rightEye",
+          "head.center",
+          "body.front"
+        ],
+        "minimumCount": 2
+      },
+      {
+        "id": "boots",
+        "label": "boots on both feet",
+        "acceptableShapes": [
+          "boot"
+        ],
+        "acceptableSockets": [
+          "body.leftFoot",
+          "body.rightFoot"
+        ],
+        "minimumCount": 2
+      },
+      {
+        "id": "wings",
+        "label": "wings",
+        "acceptableShapes": [
+          "wing"
+        ],
+        "acceptableSockets": [
+          "body.leftShoulder",
+          "body.rightShoulder"
+        ],
+        "minimumCount": 2
+      }
+    ],
+    "forbiddenDetails": [
+      "raw SVG",
+      "HTML",
+      "unvalidated custom shapes",
+      "external images"
+    ],
+    "qualityConstraints": [
+      "oversized expressive head",
+      "compact connected body",
+      "readable silhouette",
+      "valid renderer sockets only"
+    ]
+  },
+  "visualChecklist": [
+    "purple body with metallic sheen",
+    "glassy helmet reflecting stars",
+    "tiny silver boots with a shiny finish",
+    "curved arms and legs",
+    "small antennae on top of the head",
+    "friendly large eyes behind the helmet",
+    "glowing circuits along the arms",
+    "star badge on the chest",
+    "compact body with rounded edges",
+    "playful expression",
+    "soft light blue accents",
+    "visible joints for flexibility"
+  ],
+  "requiredDetails": [
+    "robot anatomy with rounded limbs",
+    "purple metallic color scheme",
+    "curious expression with wide eyes",
+    "star badge accessory on chest"
+  ],
+  "expandedContent": "{\n  \"title\": \"Purple Robot Astronaut\",\n  \"expandedPrompt\": \"A cute purple robot astronaut with a glossy glass helmet reflecting stars, tiny metallic boots, and a friendly, curious expression. The robot has rounded edges and a compact body, with glowing circuits visible on its arms and legs. It features expressive eyes behind the helmet, small antennae on top, and a star badge on its chest. The overall silhouette is sleek and futuristic, emphasizing the astronaut theme.\",\n  \"subject\": \"a purple robot astronaut character\",\n  \"mood\": \"playful curiosity\",\n  \"palettePlan\": { \"primary\": \"purple\", \"secondary\": \"silver\", \"accent\": \"glow blue\" },\n  \"styleTags\": [\"cute mascot\", \"glossy SVG\", \"blue-avatar quality\"],\n  \"visualChecklist\": [\n    \"purple body with metallic sheen\",\n    \"glassy helmet reflecting stars\",\n    \"tiny silver boots with a shiny finish\",\n    \"curved arms and legs\",\n    \"small antennae on top of the head\",\n    \"friendly large eyes behind the helmet\",\n    \"glowing circuits along the arms\",\n    \"star badge on the chest\",\n    \"compact body with rounded edges\",\n    \"playful expression\",\n    \"soft light blue accents\",\n    \"visible joints for flexibility\"\n  ],\n  \"requiredDetails\": [\n    \"robot anatomy with rounded limbs\",\n    \"purple metallic color scheme\",\n    \"curious expression with wide eyes\",\n    \"star badge accessory on chest\"\n  ],\n  \"requiredRenderableDetails\": [\n    { \"id\": \"helmet\", \"label\": \"glass helmet\", \"acceptableShapes\": [\"helmetShape\"], \"acceptableSockets\": [\"head.socket\"], \"minimumCount\": 1 },\n    { \"id\": \"boots\", \"label\": \"tiny boots\", \"acceptableShapes\": [\"bootShape\"], \"acceptableSockets\": [\"feet.socket\"], \"minimumCount\": 2 },\n    { \"id\": \"circuitGlow\", \"label\": \"glowing circuits\", \"acceptableShapes\": [\"circuitShape\"], \"acceptableSockets\": [\"arms.socket\", \"legs.socket\"], \"minimumCount\": 1 },\n    { \"id\": \"starBadge\", \"label\": \"star badge\", \"acceptableShapes\": [\"badgeShape\"], \"acceptableSockets\": [\"chest.socket\"], \"minimumCount\": 1 }\n  ],\n  \"forbiddenDetails\": [\"raw SVG\", \"HTML\", \"unvalidated custom shapes\", \"external images\"],\n  \"qualityConstraints\": [\"oversized expressive head\", \"compact connected body\", \"readable silhouette\", \"valid renderer sockets only\"]\n}",
+  "rawContent": "{\n  \"title\": \"Purple Robot Astronaut\",\n  \"summary\": \"A cute purple robot astronaut with a glossy glass helmet reflecting stars and tiny metallic boots, showcasing a playful curiosity.\",\n  \"palette\": \"purple\",\n  \"scene\": \"scene_space\",\n  \"body\": \"body_capsule\",\n  \"head\": \"head_round\",\n  \"eyes\": \"eyes_googly\",\n  \"mouth\": \"mouth_smile\",\n  \"primitives\": [\n    \"body_blob\",\n    \"body_capsule\",\n    \"head_round\",\n    \"eyes_googly\",\n    \"mouth_smile\",\n    \"body_star\",\n    \"body_cloud\",\n    \"body_lightbulb\",\n    \"body_monitor\",\n    \"body_car\"\n  ],\n  \"layers\": [\n    {\n      \"shape\": \"body_capsule\",\n      \"anchor\": \"body\",\n      \"x\": 0,\n      \"y\": 0,\n      \"scale\": [0.8, 1],\n      \"rotate\": 0,\n      \"material\": \"glossyPurple\",\n      \"role\": \"part\",\n      \"z\": 2,\n      \"attach\": { \"socket\": \"body.center\" }\n    },\n    {\n      \"shape\": \"head_round\",\n      \"anchor\": \"head\",\n      \"x\": 0,\n      \"y\": 50,\n      \"scale\": [0.7, 0.7],\n      \"rotate\": 0,\n      \"material\": \"blackGlass\",\n      \"role\": \"part\",\n      \"z\": 8,\n      \"attach\": { \"socket\": \"head.center\" }\n    },\n    {\n      \"shape\": \"cuteEye\",\n      \"anchor\": \"face\",\n      \"x\": -15,\n      \"y\": 10,\n      \"scale\": [0.2, 0.2],\n      \"rotate\": 0,\n      \"material\": \"softWhite\",\n      \"role\": \"eye\",\n      \"z\": 20,\n      \"attach\": { \"socket\": \"head.leftEye\" }\n    },\n    {\n      \"shape\": \"cuteEye\",\n      \"anchor\": \"face\",\n      \"x\": 15,\n      \"y\": 10,\n      \"scale\": [0.2, 0.2],\n      \"rotate\": 0,\n      \"material\": \"softWhite\",\n      \"role\": \"eye\",\n      \"z\": 20,\n      \"attach\": { \"socket\": \"head.rightEye\" }\n    },\n    {\n      \"shape\": \"mouthSmile\",\n      \"anchor\": \"mouth\",\n      \"x\": 0,\n      \"y\": 30,\n      \"scale\": [0.3, 0.15],\n      \"rotate\": 0,\n      \"material\": \"charcoalRubber\",\n      \"role\": \"mouth\",\n      \"z\": 31,\n      \"attach\": { \"socket\": \"head.mouth\" }\n    },\n    {\n      \"shape\": \"boot\",\n      \"anchor\": \"body\",\n      \"x\": -20,\n      \"y\": 80,\n      \"scale\": [0.2, 0.2],\n      \"rotate\": 0,\n      \"material\": \"glossySilver\",\n      \"role\": \"part\",\n      \"z\": 5,\n      \"attach\": { \"socket\": \"body.leftFoot\" }\n    },\n    {\n      \"shape\": \"boot\",\n      \"anchor\": \"body\",\n      \"x\": 20,\n      \"y\": 80,\n      \"scale\": [0.2, 0.2],\n      \"rotate\": 0,\n      \"material\": \"glossySilver\",\n      \"role\": \"part\",\n      \"z\": 5,\n      \"attach\": { \"socket\": \"body.rightFoot\" }\n    },\n    {\n      \"shape\": \"antenna\",\n      \"anchor\": \"head\",\n      \"x\": 0,\n      \"y\": -15,\n      \"scale\": [0.1, 0.1],\n      \"rotate\": 0,\n      \"material\": \"glossyPurple\",\n      \"role\": \"part\",\n      \"z\": 10,\n      \"attach\": { \"socket\": \"head.top\" }\n    },\n    {\n      \"shape\": \"star\",\n      \"anchor\": \"body\",\n      \"x\": 0,\n      \"y\": 20,\n      \"scale\": [0.1, 0.1],\n      \"rotate\": 0,\n      \"material\": \"glossyGold\",\n      \"role\": \"part\",\n      \"z\": 15,\n      \"attach\": { \"socket\": \"body.front\" }\n    },\n    {\n      \"shape\": \"body_blob\",\n      \"anchor\": \"body\",\n      \"x\": 0,\n      \"y\": 0,\n      \"scale\": [0.1, 0.1],\n      \"rotate\": 0,\n      \"material\": \"glossyPurple\",\n      \"role\": \"part\",\n      \"z\": 1,\n      \"attach\": { \"socket\": \"body.center\" }\n    },\n    {\n      \"shape\": \"body_lightbulb\",\n      \"anchor\": \"body\",\n      \"x\": 0,\n      \"y\": 0,\n      \"scale\": [0.1, 0.1],\n      \"rotate\": 0,\n      \"material\": \"glossyBlue\",\n      \"role\": \"part\",\n      \"z\": 1,\n      \"attach\": { \"socket\": \"body.center\" }\n    },\n    {\n      \"shape\": \"body_cloud\",\n      \"anchor\": \"body\",\n      \"x\": 0,\n      \"y\": 0,\n      \"scale\": [0.1, 0.1],\n      \"rotate\": 0,\n      \"material\": \"glossyPurple\",\n      \"role\": \"part\",\n      \"z\": 1,\n      \"attach\": { \"socket\": \"body.center\" }\n    }\n  ]\n}",
+  "rawSceneSpec": {
+    "title": "Purple Robot Astronaut",
+    "summary": "A cute purple robot astronaut with a glossy glass helmet reflecting stars and tiny metallic boots, showcasing a playful curiosity.",
+    "palette": "purple",
+    "scene": "scene_space",
+    "body": "body_capsule",
+    "head": "head_round",
+    "eyes": "eyes_googly",
+    "mouth": "mouth_smile",
+    "primitives": [
+      "body_blob",
+      "body_capsule",
+      "head_round",
+      "eyes_googly",
+      "mouth_smile",
+      "body_star",
+      "body_cloud",
+      "body_lightbulb",
+      "body_monitor",
+      "body_car"
+    ],
+    "layers": [
+      {
+        "shape": "mascotHead",
+        "anchor": "head",
+        "x": 0,
+        "y": 50,
+        "scale": [
+          0.7,
+          0.7
+        ],
+        "rotate": 0,
+        "material": "blackGlass",
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "shape": "cuteEye",
+        "anchor": "face",
+        "x": -15,
+        "y": 10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "shape": "cuteEye",
+        "anchor": "face",
+        "x": 15,
+        "y": 10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "shape": "mouthSmile",
+        "anchor": "mouth",
+        "x": 0,
+        "y": 30,
+        "scale": [
+          0.3,
+          0.15
+        ],
+        "rotate": 0,
+        "material": "charcoalRubber",
+        "role": "mouth",
+        "z": 31,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      },
+      {
+        "shape": "boot",
+        "anchor": "body",
+        "x": -20,
+        "y": 80,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "glossyPurple",
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "body.leftFoot"
+        }
+      },
+      {
+        "shape": "boot",
+        "anchor": "body",
+        "x": 20,
+        "y": 80,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "glossyPurple",
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "body.rightFoot"
+        }
+      },
+      {
+        "shape": "antenna",
+        "anchor": "head",
+        "x": 0,
+        "y": -15,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyPurple",
+        "role": "part",
+        "z": 10,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "shape": "star",
+        "anchor": "body",
+        "x": 0,
+        "y": 20,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "role": "part",
+        "z": 15,
+        "attach": {
+          "socket": "body.front"
+        }
+      },
+      {
+        "shape": "mascotBody",
+        "anchor": "body",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyPurple",
+        "role": "part",
+        "z": 1,
+        "attach": {
+          "socket": "body.center"
+        }
+      }
+    ]
+  },
+  "sanitizedSceneSpec": {
+    "title": "Purple Robot Astronaut",
+    "summary": "A cute purple robot astronaut with a glossy glass helmet reflecting stars and tiny metallic boots, showcasing a playful curiosity.",
+    "palette": "purple",
+    "scene": "scene_space",
+    "body": "body_capsule",
+    "head": "head_round",
+    "eyes": "eyes_googly",
+    "mouth": "mouth_smile",
+    "primitives": [
+      "body_blob",
+      "body_capsule",
+      "head_round",
+      "eyes_googly",
+      "mouth_smile",
+      "body_star",
+      "body_cloud",
+      "body_lightbulb",
+      "body_monitor",
+      "body_car",
+      "scene_lab",
+      "head_screen",
+      "eyes_pixel",
+      "mouth_screen",
+      "object_spark"
+    ],
+    "layers": [
+      {
+        "id": "mascotBody-8",
+        "shape": "mascotBody",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyPurple",
+        "opacity": 1,
+        "role": "part",
+        "z": 1,
+        "attach": {
+          "socket": "body.center"
+        }
+      },
+      {
+        "id": "enrich-wing-body-leftShoulder-0-",
+        "shape": "wing",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.34,
+          0.38
+        ],
+        "rotate": -24,
+        "material": "glossyPurple",
+        "opacity": 1,
+        "role": "part",
+        "z": 1,
+        "attach": {
+          "socket": "body.leftShoulder"
+        }
+      },
+      {
+        "id": "enrich-wing-body-rightShoulder-0",
+        "shape": "wing",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.34,
+          0.38
+        ],
+        "rotate": 24,
+        "material": "glossyPurple",
+        "opacity": 1,
+        "role": "part",
+        "z": 1,
+        "attach": {
+          "socket": "body.rightShoulder"
+        }
+      },
+      {
+        "id": "boot-4",
+        "shape": "boot",
+        "anchor": "free",
+        "x": -20,
+        "y": 80,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "glossyPurple",
+        "opacity": 1,
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "body.leftFoot"
+        }
+      },
+      {
+        "id": "boot-5",
+        "shape": "boot",
+        "anchor": "free",
+        "x": 20,
+        "y": 80,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "glossyPurple",
+        "opacity": 1,
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "body.rightFoot"
+        }
+      },
+      {
+        "id": "mascotHead-0",
+        "shape": "mascotHead",
+        "anchor": "free",
+        "x": 0,
+        "y": 50,
+        "scale": [
+          0.9,
+          0.78
+        ],
+        "rotate": 0,
+        "material": "blackGlass",
+        "opacity": 1,
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "id": "antenna-6",
+        "shape": "antenna",
+        "anchor": "free",
+        "x": 0,
+        "y": -15,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyPurple",
+        "opacity": 1,
+        "role": "part",
+        "z": 10,
+        "attach": {
+          "socket": "head.leftHorn"
+        }
+      },
+      {
+        "id": "star-7",
+        "shape": "star",
+        "anchor": "free",
+        "x": 0,
+        "y": 20,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "opacity": 1,
+        "role": "part",
+        "z": 15,
+        "attach": {
+          "socket": "body.front"
+        }
+      },
+      {
+        "id": "cuteEye-1",
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": -15,
+        "y": 10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "id": "cuteEye-2",
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": 15,
+        "y": 10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "id": "enrich-star-head-leftEye--6--14-",
+        "shape": "star",
+        "anchor": "free",
+        "x": -6,
+        "y": -14,
+        "scale": [
+          0.13,
+          0.13
+        ],
+        "rotate": -10,
+        "material": "glossyGold",
+        "opacity": 1,
+        "role": "part",
+        "z": 24,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "id": "enrich-star-head-rightEye-6--14-",
+        "shape": "star",
+        "anchor": "free",
+        "x": 6,
+        "y": -14,
+        "scale": [
+          0.13,
+          0.13
+        ],
+        "rotate": 10,
+        "material": "glossyGold",
+        "opacity": 1,
+        "role": "part",
+        "z": 24,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "id": "mouthSmile-3",
+        "shape": "mouthSmile",
+        "anchor": "free",
+        "x": 0,
+        "y": 30,
+        "scale": [
+          0.3,
+          0.15
+        ],
+        "rotate": 0,
+        "material": "charcoalRubber",
+        "opacity": 1,
+        "role": "mouth",
+        "z": 31,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      }
+    ]
+  },
+  "rawReactCssCharacterContent": "{\n  \"componentName\": \"PurpleRobotAstronaut\",\n  \"styleSystem\": \"my-dude-react-css-scaffold\",\n  \"title\": \"Purple Robot Astronaut\",\n  \"summary\": \"A cute purple robot astronaut with a glossy glass helmet and tiny silver boots, exuding playful curiosity.\",\n  \"cssVariables\": {\n    \"--dude-primary\": \"#6b5b9a\",\n    \"--dude-secondary\": \"#c0c0c0\",\n    \"--dude-accent\": \"#93c5fd\",\n    \"--dude-eye\": \"#e0f2fe\",\n    \"--dude-panel\": \"rgba(255,255,255,.18)\",\n    \"--dude-mouth\": \"#0f172a\"\n  },\n  \"headShape\": \"helmet\",\n  \"bodyShape\": \"robot\",\n  \"expression\": \"curious\",\n  \"parts\": [\n    { \"type\": \"antennae\", \"side\": \"top\", \"label\": \"small antennae\", \"tone\": \"primary\" },\n    { \"type\": \"boots\", \"side\": \"both\", \"label\": \"tiny silver boots\", \"tone\": \"secondary\" },\n    { \"type\": \"badge\", \"label\": \"star badge\", \"tone\": \"accent\" },\n    { \"type\": \"eyes\", \"label\": \"large friendly eyes\", \"tone\": \"eye\" }\n  ],\n  \"notes\": [\n    \"robot anatomy with rounded limbs\",\n    \"purple metallic color scheme\",\n    \"curious expression with wide eyes\",\n    \"star badge accessory on chest\"\n  ]\n}",
+  "rawReactCssCharacter": {
+    "componentName": "PurpleRobotAstronaut",
+    "styleSystem": "my-dude-react-css-scaffold",
+    "title": "Purple Robot Astronaut",
+    "summary": "A cute purple robot astronaut with a glossy glass helmet and tiny silver boots, exuding playful curiosity.",
+    "cssVariables": {
+      "--dude-primary": "#6b5b9a",
+      "--dude-secondary": "#c0c0c0",
+      "--dude-accent": "#93c5fd",
+      "--dude-eye": "#e0f2fe",
+      "--dude-panel": "rgba(255,255,255,.18)",
+      "--dude-mouth": "#0f172a"
+    },
+    "headShape": "helmet",
+    "bodyShape": "robot",
+    "expression": "curious",
+    "parts": [
+      {
+        "type": "antennae",
+        "side": "top",
+        "label": "small antennae",
+        "tone": "primary"
+      },
+      {
+        "type": "boots",
+        "side": "both",
+        "label": "tiny silver boots",
+        "tone": "secondary"
+      },
+      {
+        "type": "badge",
+        "label": "star badge",
+        "tone": "accent"
+      },
+      {
+        "type": "eyes",
+        "label": "large friendly eyes",
+        "tone": "eye"
+      }
+    ],
+    "notes": [
+      "robot anatomy with rounded limbs",
+      "purple metallic color scheme",
+      "curious expression with wide eyes",
+      "star badge accessory on chest"
+    ]
+  },
+  "reactCssCharacter": {
+    "kind": "react-css-character",
+    "componentName": "PurpleRobotAstronaut",
+    "styleSystem": "my-dude-react-css-scaffold",
+    "title": "Purple Robot Astronaut",
+    "summary": "A cute purple robot astronaut with a glossy glass helmet and tiny silver boots, exuding playful curiosity.",
+    "cssVariables": {
+      "--dude-primary": "#6b5b9a",
+      "--dude-secondary": "#c0c0c0",
+      "--dude-accent": "#93c5fd",
+      "--dude-eye": "#e0f2fe",
+      "--dude-panel": "rgba(255,255,255,.18)",
+      "--dude-mouth": "#0f172a"
+    },
+    "headShape": "helmet",
+    "bodyShape": "robot",
+    "expression": "curious",
+    "parts": [
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "primary",
+        "label": "small antennae"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "secondary",
+        "label": "tiny silver boots"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "accent",
+        "label": "star badge"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "eye",
+        "label": "large friendly eyes"
+      },
+      {
+        "type": "star",
+        "side": "left",
+        "tone": "accent",
+        "label": "left star accent"
+      },
+      {
+        "type": "star",
+        "side": "right",
+        "tone": "accent",
+        "label": "right star accent"
+      },
+      {
+        "type": "boot",
+        "side": "left",
+        "tone": "dark",
+        "label": "left boot"
+      },
+      {
+        "type": "boot",
+        "side": "right",
+        "tone": "dark",
+        "label": "right boot"
+      },
+      {
+        "type": "antenna",
+        "side": "center",
+        "tone": "accent",
+        "label": "robot antenna"
+      },
+      {
+        "type": "panel",
+        "side": "center",
+        "tone": "accent",
+        "label": "screen body panel"
+      }
+    ],
+    "notes": [
+      "robot anatomy with rounded limbs",
+      "purple metallic color scheme",
+      "curious expression with wide eyes",
+      "star badge accessory on chest"
+    ]
+  },
+  "validation": {
+    "ok": true,
+    "errors": []
+  },
+  "coverage": {
+    "ok": true,
+    "checks": [
+      {
+        "id": "star-accents",
+        "label": "star accents",
+        "ok": true,
+        "count": 3,
+        "minimumCount": 2,
+        "layers": [
+          "star-7",
+          "enrich-star-head-leftEye--6--14-",
+          "enrich-star-head-rightEye-6--14-"
+        ]
+      },
+      {
+        "id": "boots",
+        "label": "boots on both feet",
+        "ok": true,
+        "count": 2,
+        "minimumCount": 2,
+        "layers": [
+          "boot-4",
+          "boot-5"
+        ]
+      },
+      {
+        "id": "wings",
+        "label": "wings",
+        "ok": true,
+        "count": 2,
+        "minimumCount": 2,
+        "layers": [
+          "enrich-wing-body-leftShoulder-0-",
+          "enrich-wing-body-rightShoulder-0"
+        ]
+      }
+    ],
+    "missingRequiredDetails": []
+  },
+  "enrichments": [
+    {
+      "reason": "star accent",
+      "shape": "star",
+      "socket": "head.leftEye",
+      "id": "enrich-star-head-leftEye--6--14-24"
+    },
+    {
+      "reason": "star accent",
+      "shape": "star",
+      "socket": "head.rightEye",
+      "id": "enrich-star-head-rightEye-6--14-24"
+    },
+    {
+      "reason": "wings",
+      "shape": "wing",
+      "socket": "body.leftShoulder",
+      "id": "enrich-wing-body-leftShoulder-0-0-1"
+    },
+    {
+      "reason": "wings",
+      "shape": "wing",
+      "socket": "body.rightShoulder",
+      "id": "enrich-wing-body-rightShoulder-0-0-1"
+    }
+  ],
+  "options": {
+    "enrichmentEnabled": true,
+    "coverageMode": "enforced",
+    "commitRequested": true
+  },
+  "repairs": 0
+}
