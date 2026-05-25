@@ -1,0 +1,224 @@
+{
+  "prompt": "tiny test avatar",
+  "createdAt": "2026-05-25T06:52:13.385Z",
+  "provider": "github-copilot/gpt-4o-mini",
+  "rawContent": "{\n  \"title\": \"Tiny Test Avatar\",\n  \"summary\": \"A compact and friendly tiny avatar with a playful expression.\",\n  \"palette\": \"blue\",\n  \"scene\": null,\n  \"body\": \"body_blob\",\n  \"head\": \"head_round\",\n  \"eyes\": \"eyes_googly\",\n  \"mouth\": \"mouth_smile\",\n  \"primitives\": [],\n  \"layers\": [\n    {\n      \"shape\": \"mascotBody\",\n      \"anchor\": \"free\",\n      \"x\": 0,\n      \"y\": 0,\n      \"scale\": [0.3, 0.3],\n      \"rotate\": 0,\n      \"material\": \"glossyBlue\",\n      \"role\": \"part\",\n      \"z\": 2,\n      \"attach\": {\n        \"socket\": \"body.center\"\n      }\n    },\n    {\n      \"shape\": \"mascotHead\",\n      \"anchor\": \"free\",\n      \"x\": 0,\n      \"y\": 30,\n      \"scale\": [0.4, 0.4],\n      \"rotate\": 0,\n      \"material\": \"glossyBlue\",\n      \"role\": \"part\",\n      \"z\": 8,\n      \"attach\": {\n        \"socket\": \"head.center\"\n      }\n    },\n    {\n      \"shape\": \"cuteEye\",\n      \"anchor\": \"free\",\n      \"x\": -10,\n      \"y\": 10,\n      \"scale\": [0.1, 0.1],\n      \"rotate\": 0,\n      \"material\": \"softWhite\",\n      \"role\": \"eye\",\n      \"z\": 20,\n      \"attach\": {\n        \"socket\": \"head.leftEye\"\n      }\n    },\n    {\n      \"shape\": \"cuteEye\",\n      \"anchor\": \"free\",\n      \"x\": 10,\n      \"y\": 10,\n      \"scale\": [0.1, 0.1],\n      \"rotate\": 0,\n      \"material\": \"softWhite\",\n      \"role\": \"eye\",\n      \"z\": 20,\n      \"attach\": {\n        \"socket\": \"head.rightEye\"\n      }\n    },\n    {\n      \"shape\": \"mouthSmile\",\n      \"anchor\": \"free\",\n      \"x\": 0,\n      \"y\": 20,\n      \"scale\": [0.2, 0.1],\n      \"rotate\": 0,\n      \"material\": \"charcoalRubber\",\n      \"role\": \"mouth\",\n      \"z\": 31,\n      \"attach\": {\n        \"socket\": \"head.mouth\"\n      }\n    }\n  ]\n}",
+  "rawSceneSpec": {
+    "title": "Tiny Test Avatar",
+    "summary": "A compact and friendly tiny avatar with a playful expression.",
+    "palette": "blue",
+    "scene": null,
+    "body": "body_blob",
+    "head": "head_round",
+    "eyes": "eyes_googly",
+    "mouth": "mouth_smile",
+    "primitives": [],
+    "layers": [
+      {
+        "shape": "mascotBody",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.3,
+          0.3
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 2,
+        "attach": {
+          "socket": "body.center"
+        }
+      },
+      {
+        "shape": "mascotHead",
+        "anchor": "free",
+        "x": 0,
+        "y": 30,
+        "scale": [
+          0.4,
+          0.4
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": -10,
+        "y": 10,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": 10,
+        "y": 10,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "shape": "mouthSmile",
+        "anchor": "free",
+        "x": 0,
+        "y": 20,
+        "scale": [
+          0.2,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "charcoalRubber",
+        "role": "mouth",
+        "z": 31,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      }
+    ]
+  },
+  "sanitizedSceneSpec": {
+    "title": "Tiny Test Avatar",
+    "summary": "A compact and friendly tiny avatar with a playful expression.",
+    "palette": "blue",
+    "scene": "scene_sky",
+    "body": "body_blob",
+    "head": "head_round",
+    "eyes": "eyes_googly",
+    "mouth": "mouth_smile",
+    "primitives": [
+      "scene_sky",
+      "body_blob",
+      "head_round",
+      "eyes_cartoon",
+      "mouth_smile",
+      "object_spark"
+    ],
+    "layers": [
+      {
+        "id": "mascotBody-0",
+        "shape": "mascotBody",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.3,
+          0.3
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 2,
+        "attach": {
+          "socket": "body.center"
+        }
+      },
+      {
+        "id": "mascotHead-1",
+        "shape": "mascotHead",
+        "anchor": "free",
+        "x": 0,
+        "y": 30,
+        "scale": [
+          0.9,
+          0.78
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "id": "cuteEye-2",
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": -10,
+        "y": 10,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "id": "cuteEye-3",
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": 10,
+        "y": 10,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "id": "mouthSmile-4",
+        "shape": "mouthSmile",
+        "anchor": "free",
+        "x": 0,
+        "y": 20,
+        "scale": [
+          0.2,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "charcoalRubber",
+        "opacity": 1,
+        "role": "mouth",
+        "z": 31,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      }
+    ]
+  },
+  "validation": {
+    "ok": true,
+    "errors": []
+  },
+  "repairs": 0
+}
