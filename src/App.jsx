@@ -1794,7 +1794,9 @@ function Test5HandCodedAvatar({ character, status = 'listening' }) {
     const holdingWand = hasAnchoredPart('wand', side);
     return <div className={`test5-dude-arm ${side}`}><span className={`test5-dude-hand${holdingWand ? ' holding-wand' : ''}`}>{holdingWand && <i className="test5-dude-wand grip-wand-shaft wand-handle-in-hand" />}</span></div>;
   };
-  const renderFoot = (side) => <div className={`test5-dude-leg ${side}`}><span className="test5-dude-foot">{hasAnchoredPart('boot', side) && <b className="test5-dude-boot" />}{hasAnchoredPart('flame', side) && <i className="test5-dude-flame" />}</span></div>;
+  const isWizard = hasPart('robe') || hasPart('wand') || hasPart('hat');
+  const isMushroom = character.headShape === 'mushroom' || hasPart('mushroomCap');
+  const renderFoot = (side) => <div className={`test5-dude-leg ${side}`}><span className={`test5-dude-foot${isWizard ? ' wizardShoe' : ''}${isMushroom ? ' mushroomShoe' : ''}`}>{hasAnchoredPart('boot', side) && <b className="test5-dude-boot" />}{hasAnchoredPart('flame', side) && <i className="test5-dude-flame" />}</span></div>;
   return <div className={`avatar-card test5-dude-card ${status} built`} style={vars}>
     <div className={`test5-dude-character head-${character.headShape || 'rounded'} body-${character.bodyShape || 'compact'} expression-${character.expression || 'friendly'}`}>
       {hasPart('tail') && <div className="test5-dude-tail" aria-hidden="true" />}
@@ -1824,7 +1826,7 @@ function Test5HandCodedAvatar({ character, status = 'listening' }) {
       <div className="test5-dude-lower">
         {renderHand('left')}
         <div className="test5-dude-body">
-          {hasPart('robe') && <div className="test5-dude-robe" />}
+          {hasPart('robe') && <div className="test5-dude-robe"><span className="test5-dude-robe-trim" /><span className="test5-dude-robe-belt" /><span className="test5-dude-robe-gem" /></div>}
           {hasPart('panel') && <div className="test5-dude-panel" />}
           {hasPart('badge') && <div className="test5-dude-badge" />}
           {hasPart('scarf') && <div className="test5-dude-scarf" />}

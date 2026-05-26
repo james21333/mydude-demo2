@@ -45,6 +45,8 @@ assert(/test5-dude-foot/.test(app) && /test5-dude-foot/.test(css), 'foot-worn pr
 assert(/--dude-body/.test(bridge) && /--dude-arm/.test(bridge) && /--dude-hand/.test(bridge) && /--dude-leg/.test(bridge) && /--dude-foot/.test(bridge), 'React/CSS blueprint prompt must require explicit body/arm/hand/leg/foot colors');
 assert(/--dude-body/.test(css) && /--dude-arm/.test(css) && /--dude-hand/.test(css) && /--dude-leg/.test(css) && /--dude-foot/.test(css), 'renderer must apply explicit body/arm/hand/leg/foot colors');
 assert(/mushroomStem/.test(bridge) && /wizardRobe/.test(bridge), 'mushroom wizard fallback must distinguish mushroom stem/body colors from wizard robe colors');
+assert(/wizardShoe/.test(app) && /wizardShoe/.test(css) && /mushroomShoe/.test(app) && /mushroomShoe/.test(css), 'wizard/mushroom prompts need explicit shoe detail classes, not plain oval feet');
+assert(/test5-dude-robe-trim/.test(app) && /test5-dude-robe-trim/.test(css) && /test5-dude-robe-belt/.test(app) && /test5-dude-robe-belt/.test(css), 'wizard robe must include visible trim and belt/clothing details, not just a plain body blob');
 assert(/function validateReactCssFaithfulness\s*\(/.test(bridge), 'React/CSS blueprint must be validated for prompt-faithfulness before acceptance');
 assert(/generateTest5ReactCssCharacter\s*\([^)]*repairNote/.test(bridge) && /reactCssRepairNotes/.test(bridge), 'React/CSS blueprint failures must go through a bounded LLM critique/repair loop');
 assert(/mushroomCap/.test(bridge) && /mushroomGills/.test(bridge), 'mushroom prompts must require explicit cap and gill details in the blueprint');
