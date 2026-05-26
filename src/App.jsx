@@ -1826,7 +1826,7 @@ function Test5HandCodedAvatar({ character, status = 'listening' }) {
       <div className="test5-dude-lower">
         {renderHand('left')}
         <div className="test5-dude-body">
-          {hasPart('robe') && <div className="test5-dude-robe"><span className="test5-dude-robe-trim" /><span className="test5-dude-robe-belt" /><span className="test5-dude-robe-gem" /></div>}
+          {hasPart('robe') && <div className="test5-dude-robe"><span className="test5-dude-robe-collar" /><span className="test5-dude-robe-trim" /><span className="test5-dude-robe-belt" /><span className="test5-dude-robe-gem" /><span className="test5-dude-robe-hem" /></div>}
           {hasPart('panel') && <div className="test5-dude-panel" />}
           {hasPart('badge') && <div className="test5-dude-badge" />}
           {hasPart('scarf') && <div className="test5-dude-scarf" />}
