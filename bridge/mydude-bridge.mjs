@@ -527,6 +527,15 @@ function sanitizeReactCssCharacter(raw, prompt = '', designBrief = {}) {
   const allowedVars = ['--dude-primary','--dude-secondary','--dude-accent','--dude-eye','--dude-panel','--dude-mouth','--dude-body','--dude-arm','--dude-hand','--dude-leg','--dude-foot'];
   const cssVariables = {};
   for (const key of allowedVars) cssVariables[key] = validColor(clean.cssVariables?.[key], fallback.cssVariables[key]);
+  const promptText = `${prompt} ${designBrief.expandedPrompt || ''}`.toLowerCase();
+  const isMushroomWizard = /\b(mushroom|toadstool|fungus)\b/.test(promptText) && /\b(wizard|magic|wand|staff)\b/.test(promptText);
+  if (isMushroomWizard) {
+    cssVariables['--dude-body'] = '#312e81';
+    cssVariables['--dude-arm'] = '#4338ca';
+    cssVariables['--dude-hand'] = '#dbeafe';
+    cssVariables['--dude-leg'] = '#312e81';
+    cssVariables['--dude-foot'] = '#dbeafe';
+  }
   const oneOf = (value, allowed, fb) => allowed.includes(value) ? value : fb;
   const allowedPartTypes = new Set(['ear','tail','snout','horn','wing','hat','glasses','star','boot','flame','wand','badge','scarf','antenna','spot','stripe','panel','robe','helmet','crown','spark','mushroomCap','mushroomGills']);
   const allowedSides = new Set(['left','right','center']);
@@ -550,7 +559,7 @@ function sanitizeReactCssCharacter(raw, prompt = '', designBrief = {}) {
     summary: String(clean.summary || fallback.summary).replace(/[<>]/g, '').slice(0, 240),
     cssVariables,
     headShape: oneOf(clean.headShape, ['rounded','animal','helmet','screen','mushroom','crown'], fallback.headShape),
-    bodyShape: oneOf(clean.bodyShape, ['compact','round','suited','robot','robe','pilot'], fallback.bodyShape),
+    bodyShape: isMushroomWizard ? 'robe' : oneOf(clean.bodyShape, ['compact','round','suited','robot','robe','pilot'], fallback.bodyShape),
     expression: oneOf(clean.expression, ['friendly','sleepy','focused','excited','curious'], fallback.expression),
     parts: parts.length ? parts : fallback.parts,
     notes: (Array.isArray(clean.notes) ? clean.notes : fallback.notes).map(n => String(n).replace(/[<>]/g, '').slice(0, 140)).filter(Boolean).slice(0, 8),
