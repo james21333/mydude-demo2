@@ -430,6 +430,7 @@ Rules:
 - Include prompt-specific parts when relevant: ears, tail, snout, horns, wings, hat, glasses, star, boots, flame, wand, badge, scarf, antenna, spots, stripes, panel, robe, helmet.
 - For mushroom prompts, do not stop at headShape:"mushroom". Include explicit parts {"type":"mushroomCap"}, {"type":"mushroomGills"}, and at least two {"type":"spot"} cap markings; avoid animal ears, snout, tail, and wings unless the user explicitly asks for them.
 - Always decide explicit colors for body, arms, hands, legs, and feet in cssVariables. Wizard bodies should normally read as a robe/body color distinct from skin/hand color; do not leave limbs to inherit random accent colors.
+- For mushroom wizards specifically: treat the visible body/torso and legs as a wizard robe (deep indigo/navy/purple), arms as robe sleeves, and hands/feet or stem-like exposed parts as pale mushroom-stem cream/blue. The blue should primarily belong to the mushroom cap unless the user asks for blue robe/body.
 - For held props such as wand/staff/sword, put side:"left" or side:"right" so the renderer can anchor the item inside a hand. For worn props such as boots/flames, use side:"left" and side:"right" pairs.
 - Use 4 to 12 parts. Prefer fewer polished readable parts over clutter.
 - Do not output raw code; this JSON is the receipt for the hand-coded React/CSS scaffold.`;
@@ -460,6 +461,10 @@ function fallbackReactCssCharacter(prompt = '', designBrief = {}) {
   if (isRobot) { add('antenna', 'robot antenna', { tone: 'accent' }); add('panel', 'screen body panel', { tone: 'accent' }); }
   if (isPilot) add('scarf', 'pilot scarf', { tone: 'accent' });
   if (!parts.length) { add('antenna', 'glowing antenna', { tone: 'accent' }); add('badge', 'prompt badge', { tone: 'accent' }); }
+  const mushroomStem = '#dbeafe';
+  const wizardRobe = isMushroom ? '#312e81' : '#1e293b';
+  const wizardLimb = isMushroom ? '#4338ca' : primary;
+  const wizardHandsFeet = isMushroom ? mushroomStem : '#facc15';
   return {
     componentName: `${slugify(designBrief.title || prompt).split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('').slice(0, 32) || 'Custom'}Dude`,
     styleSystem: 'my-dude-react-css-scaffold',
@@ -472,11 +477,11 @@ function fallbackReactCssCharacter(prompt = '', designBrief = {}) {
       '--dude-eye': /sleepy/.test(text) ? '#e0f2fe' : '#f8fafc',
       '--dude-panel': 'rgba(255,255,255,.18)',
       '--dude-mouth': '#0f172a',
-      '--dude-body': isWizard ? '#1e293b' : primary,
-      '--dude-arm': isWizard ? primary : primary,
-      '--dude-hand': isWizard ? '#facc15' : primary,
-      '--dude-leg': isWizard ? '#1e293b' : primary,
-      '--dude-foot': isWizard ? '#facc15' : primary,
+      '--dude-body': isWizard ? wizardRobe : primary,
+      '--dude-arm': isWizard ? wizardLimb : primary,
+      '--dude-hand': isWizard ? wizardHandsFeet : primary,
+      '--dude-leg': isWizard ? wizardRobe : primary,
+      '--dude-foot': isWizard ? wizardHandsFeet : primary,
     },
     headShape: isMushroom ? 'mushroom' : isFox ? 'animal' : isRobot ? 'screen' : 'rounded',
     bodyShape: isRobot ? 'robot' : isWizard ? 'robe' : isPilot ? 'pilot' : 'compact',

@@ -40,9 +40,11 @@ assert(/test5-dude-head/.test(app) && /test5-dude-head/.test(css), 'frontend mus
 assert(/test5-dude-hand/.test(app) && /test5-dude-hand/.test(css), 'hand-held props such as wands must be nested in an explicit hand anchor');
 assert(/holding-wand/.test(app) && /holding-wand/.test(css), 'hand-held wands need a visible hand grip/clasp so they do not look detached');
 assert(/grip-wand-shaft/.test(app) && /grip-wand-shaft/.test(css), 'hand-held staff must pass through the hand grip near the staff middle, not put the wrong end in the hand');
+assert(/wand-handle-in-hand/.test(app) && /wand-handle-in-hand/.test(css), 'wand/staff handle segment must be explicitly aligned inside the hand grip, not just any shaft segment');
 assert(/test5-dude-foot/.test(app) && /test5-dude-foot/.test(css), 'foot-worn props such as boots/flames must be nested in an explicit foot anchor');
 assert(/--dude-body/.test(bridge) && /--dude-arm/.test(bridge) && /--dude-hand/.test(bridge) && /--dude-leg/.test(bridge) && /--dude-foot/.test(bridge), 'React/CSS blueprint prompt must require explicit body/arm/hand/leg/foot colors');
 assert(/--dude-body/.test(css) && /--dude-arm/.test(css) && /--dude-hand/.test(css) && /--dude-leg/.test(css) && /--dude-foot/.test(css), 'renderer must apply explicit body/arm/hand/leg/foot colors');
+assert(/mushroomStem/.test(bridge) && /wizardRobe/.test(bridge), 'mushroom wizard fallback must distinguish mushroom stem/body colors from wizard robe colors');
 assert(/function validateReactCssFaithfulness\s*\(/.test(bridge), 'React/CSS blueprint must be validated for prompt-faithfulness before acceptance');
 assert(/generateTest5ReactCssCharacter\s*\([^)]*repairNote/.test(bridge) && /reactCssRepairNotes/.test(bridge), 'React/CSS blueprint failures must go through a bounded LLM critique/repair loop');
 assert(/mushroomCap/.test(bridge) && /mushroomGills/.test(bridge), 'mushroom prompts must require explicit cap and gill details in the blueprint');

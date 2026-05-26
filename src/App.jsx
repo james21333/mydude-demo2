@@ -1792,7 +1792,7 @@ function Test5HandCodedAvatar({ character, status = 'listening' }) {
   const partClass = (part) => `test5-dude-part part-${part.type || 'badge'} side-${part.side || 'center'} tone-${part.tone || 'primary'}`;
   const renderHand = (side) => {
     const holdingWand = hasAnchoredPart('wand', side);
-    return <div className={`test5-dude-arm ${side}`}><span className={`test5-dude-hand${holdingWand ? ' holding-wand' : ''}`}>{holdingWand && <i className="test5-dude-wand grip-wand-shaft" />}</span></div>;
+    return <div className={`test5-dude-arm ${side}`}><span className={`test5-dude-hand${holdingWand ? ' holding-wand' : ''}`}>{holdingWand && <i className="test5-dude-wand grip-wand-shaft wand-handle-in-hand" />}</span></div>;
   };
   const renderFoot = (side) => <div className={`test5-dude-leg ${side}`}><span className="test5-dude-foot">{hasAnchoredPart('boot', side) && <b className="test5-dude-boot" />}{hasAnchoredPart('flame', side) && <i className="test5-dude-flame" />}</span></div>;
   return <div className={`avatar-card test5-dude-card ${status} built`} style={vars}>
