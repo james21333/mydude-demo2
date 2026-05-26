@@ -1802,11 +1802,16 @@ function Test5HandCodedAvatar({ character, status = 'listening' }) {
       {hasPart('wing', 'right') && <div className="test5-dude-wing right" aria-hidden="true" />}
       <div className="test5-dude-antenna" />
       <div className="test5-dude-head">
+        {character.headShape === 'mushroom' && <>
+          <div className="test5-dude-mushroom-cap"><span/><span/><span/></div>
+          <div className="test5-dude-mushroom-gills"><i/><i/><i/><i/></div>
+          <div className="test5-dude-mushroom-spots"><b/><b/><b/></div>
+        </>}
         {hasPart('ear', 'left') && <div className="test5-dude-ear left" />}
         {hasPart('ear', 'right') && <div className="test5-dude-ear right" />}
         {hasPart('horn', 'left') && <div className="test5-dude-horn left" />}
         {hasPart('horn', 'right') && <div className="test5-dude-horn right" />}
-        {hasPart('hat') && <div className="test5-dude-hat" />}
+        {character.headShape !== 'mushroom' && hasPart('hat') && <div className="test5-dude-hat" />}
         {hasPart('helmet') && <div className="test5-dude-helmet" />}
         <div className="test5-dude-shine" />
         <div className={`test5-dude-eyes ${character.expression || 'friendly'}`}><span/><span/></div>
@@ -1823,7 +1828,7 @@ function Test5HandCodedAvatar({ character, status = 'listening' }) {
           {hasPart('panel') && <div className="test5-dude-panel" />}
           {hasPart('badge') && <div className="test5-dude-badge" />}
           {hasPart('scarf') && <div className="test5-dude-scarf" />}
-          {parts.filter(part => ['spot','stripe','spark'].includes(part.type)).slice(0, 5).map((part, idx) => <span key={`${part.type}-${idx}`} className={partClass(part)}>{part.type === 'spark' ? '✦' : ''}</span>)}
+          {parts.filter(part => ['stripe','spark'].includes(part.type)).slice(0, 5).map((part, idx) => <span key={`${part.type}-${idx}`} className={partClass(part)}>{part.type === 'spark' ? '✦' : ''}</span>)}
         </div>
         {renderHand('right')}
       </div>

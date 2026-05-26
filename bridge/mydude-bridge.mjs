@@ -423,20 +423,29 @@ Rules:
 - Think like the original blue-dude React/CSS author: first lock a polished mascot scaffold, then customize CSS variables and named div parts.
 - Keep a single connected character, not floating stickers.
 - Include prompt-specific parts when relevant: ears, tail, snout, horns, wings, hat, glasses, star, boots, flame, wand, badge, scarf, antenna, spots, stripes, panel, robe, helmet.
+- For mushroom prompts, do not stop at headShape:"mushroom". Include explicit parts {"type":"mushroomCap"}, {"type":"mushroomGills"}, and at least two {"type":"spot"} cap markings; avoid animal ears, snout, tail, and wings unless the user explicitly asks for them.
+- For held props such as wand/staff/sword, put side:"left" or side:"right" so the renderer can anchor the item inside a hand. For worn props such as boots/flames, use side:"left" and side:"right" pairs.
 - Use 4 to 12 parts. Prefer fewer polished readable parts over clutter.
 - Do not output raw code; this JSON is the receipt for the hand-coded React/CSS scaffold.`;
 }
 
 function fallbackReactCssCharacter(prompt = '', designBrief = {}) {
   const text = `${prompt} ${designBrief.expandedPrompt || ''}`.toLowerCase();
-  const isFox = /fox/.test(text);
+  const isFox = /\bfox\b/.test(text);
   const isRobot = /robot|screen|computer/.test(text);
   const isWizard = /wizard|magic|wand|staff/.test(text);
   const isPilot = /pilot|aviator|rocket/.test(text);
-  const primary = isFox ? '#fb923c' : /purple|wizard|space/.test(text) ? '#a78bfa' : /green|mushroom/.test(text) ? '#34d399' : /pink/.test(text) ? '#f472b6' : '#38bdf8';
+  const isMushroom = /mushroom|toadstool|fungus/.test(text);
+  const primary = isFox ? '#fb923c' : /purple|wizard|space/.test(text) && !isMushroom ? '#a78bfa' : /green/.test(text) ? '#34d399' : /pink/.test(text) ? '#f472b6' : '#38bdf8';
   const parts = [];
   const add = (type, label, opts = {}) => parts.push({ type, label, tone: opts.tone || 'primary', side: opts.side || 'center' });
-  if (isFox || /cat|dog|animal/.test(text)) { add('ear', 'left animal ear', { side: 'left' }); add('ear', 'right animal ear', { side: 'right' }); add('snout', 'soft snout', { tone: 'cream' }); add('tail', 'curved tail', { side: 'right' }); }
+  if (isMushroom) {
+    add('mushroomCap', 'wide blue mushroom cap', { tone: 'primary' });
+    add('mushroomGills', 'visible cap gills underneath', { tone: 'secondary' });
+    add('spot', 'left white cap spot', { side: 'left', tone: 'eye' });
+    add('spot', 'right white cap spot', { side: 'right', tone: 'eye' });
+  }
+  if (isFox || /\b(cat|dog|animal)\b/.test(text)) { add('ear', 'left animal ear', { side: 'left' }); add('ear', 'right animal ear', { side: 'right' }); add('snout', 'soft snout', { tone: 'cream' }); add('tail', 'curved tail', { side: 'right' }); }
   if (/goggle|glasses|visor/.test(text)) add('glasses', 'prompt eyewear', { tone: 'dark' });
   if (/star/.test(text)) { add('star', 'left star accent', { side: 'left', tone: 'accent' }); add('star', 'right star accent', { side: 'right', tone: 'accent' }); }
   if (/boot/.test(text)) { add('boot', 'left boot', { side: 'left', tone: 'dark' }); add('boot', 'right boot', { side: 'right', tone: 'dark' }); }
@@ -458,12 +467,38 @@ function fallbackReactCssCharacter(prompt = '', designBrief = {}) {
       '--dude-panel': 'rgba(255,255,255,.18)',
       '--dude-mouth': '#0f172a',
     },
-    headShape: isFox ? 'animal' : isRobot ? 'screen' : isWizard && /mushroom/.test(text) ? 'mushroom' : 'rounded',
+    headShape: isMushroom ? 'mushroom' : isFox ? 'animal' : isRobot ? 'screen' : 'rounded',
     bodyShape: isRobot ? 'robot' : isWizard ? 'robe' : isPilot ? 'pilot' : 'compact',
     expression: /sleepy/.test(text) ? 'sleepy' : /focus|angry/.test(text) ? 'focused' : /excited|happy/.test(text) ? 'excited' : 'friendly',
     parts: parts.slice(0, 12),
     notes: (designBrief.visualChecklist || []).slice(0, 8),
   };
+}
+
+function suppressUnrequestedAnimalParts(parts = [], prompt = '', designBrief = {}) {
+  const text = `${prompt} ${designBrief.expandedPrompt || ''}`.toLowerCase();
+  const animalRequested = /\b(fox|cat|dog|wolf|animal|puppy|kitten|tail|ear|ears|snout|wing|wings|angel|bird|bat|dragon)\b/.test(String(prompt || '').toLowerCase());
+  if (animalRequested) return parts;
+  const animalish = new Set(['ear', 'tail', 'snout', 'wing', 'horn']);
+  return parts.filter(part => !animalish.has(part.type));
+}
+
+function validateReactCssFaithfulness(character = {}, prompt = '', designBrief = {}) {
+  const text = `${prompt} ${designBrief.expandedPrompt || ''} ${(designBrief.visualChecklist || []).join(' ')}`.toLowerCase();
+  const parts = Array.isArray(character.parts) ? character.parts : [];
+  const has = (type, side) => parts.some(part => part.type === type && (!side || part.side === side));
+  const failures = [];
+  if (/mushroom|toadstool|fungus/.test(text)) {
+    if (character.headShape !== 'mushroom') failures.push('mushroom prompt must use headShape:"mushroom"');
+    if (!has('mushroomCap')) failures.push('mushroom prompt must include mushroomCap part for a wide cap silhouette');
+    if (!has('mushroomGills')) failures.push('mushroom prompt must include mushroomGills part for underside/gills');
+    if (parts.filter(part => part.type === 'spot').length < 2) failures.push('mushroom prompt must include at least two cap spot parts');
+    const forbidden = suppressUnrequestedAnimalParts(parts, prompt, designBrief).length !== parts.length;
+    if (forbidden) failures.push('mushroom/non-animal prompt must not include unrequested dog/animal ears, snout, tail, horns, or wings');
+  }
+  if (/wand|staff|sword|lantern/.test(text) && !parts.some(part => ['wand'].includes(part.type) && ['left','right'].includes(part.side))) failures.push('held wand/staff must have side left/right so it can attach to a hand');
+  if (/boot/.test(text) && (!has('boot', 'left') || !has('boot', 'right'))) failures.push('boots must include left and right foot-worn boot parts');
+  return { ok: failures.length === 0, failures };
 }
 
 function sanitizeReactCssCharacter(raw, prompt = '', designBrief = {}) {
@@ -477,19 +512,20 @@ function sanitizeReactCssCharacter(raw, prompt = '', designBrief = {}) {
   const cssVariables = {};
   for (const key of allowedVars) cssVariables[key] = validColor(clean.cssVariables?.[key], fallback.cssVariables[key]);
   const oneOf = (value, allowed, fb) => allowed.includes(value) ? value : fb;
-  const allowedPartTypes = new Set(['ear','tail','snout','horn','wing','hat','glasses','star','boot','flame','wand','badge','scarf','antenna','spot','stripe','panel','robe','helmet','crown','spark']);
+  const allowedPartTypes = new Set(['ear','tail','snout','horn','wing','hat','glasses','star','boot','flame','wand','badge','scarf','antenna','spot','stripe','panel','robe','helmet','crown','spark','mushroomCap','mushroomGills']);
   const allowedSides = new Set(['left','right','center']);
   const allowedTones = new Set(['primary','secondary','accent','cream','dark','eye']);
   const sourceParts = Array.isArray(clean.parts) && clean.parts.length ? [...clean.parts] : [];
   for (const fallbackPart of fallback.parts) {
     if (!sourceParts.some(part => part?.type === fallbackPart.type && (part?.side || 'center') === (fallbackPart.side || 'center'))) sourceParts.push(fallbackPart);
   }
-  const parts = sourceParts.map((part, index) => ({
+  const mappedParts = sourceParts.map((part, index) => ({
     type: allowedPartTypes.has(part?.type) ? part.type : 'badge',
     side: allowedSides.has(part?.side) ? part.side : 'center',
     tone: allowedTones.has(part?.tone) ? part.tone : 'primary',
     label: String(part?.label || `${part?.type || 'detail'} ${index + 1}`).replace(/[<>]/g, '').slice(0, 80),
-  })).slice(0, 12);
+  })).slice(0, 16);
+  const parts = suppressUnrequestedAnimalParts(mappedParts, prompt, designBrief).slice(0, 12);
   return {
     kind: 'react-css-character',
     componentName: String(clean.componentName || fallback.componentName).replace(/[^A-Za-z0-9]/g, '').slice(0, 40) || fallback.componentName,
@@ -514,6 +550,24 @@ async function generateTest5ReactCssCharacter(prompt, designBrief, repairNote = 
   } catch (error) {
     return { provider: 'local/react-css-fallback', content: String(error?.message || error), rawReactCssCharacter: null, reactCssCharacter: sanitizeReactCssCharacter(null, prompt, designBrief) };
   }
+}
+
+async function generateFaithfulTest5ReactCssCharacter(prompt, designBrief) {
+  const reactCssRepairNotes = [];
+  let result = await generateTest5ReactCssCharacter(prompt, designBrief);
+  let faithfulness = validateReactCssFaithfulness(result.reactCssCharacter, prompt, designBrief);
+  for (let attempt = 0; !faithfulness.ok && attempt < 2; attempt += 1) {
+    const note = `${faithfulness.failures.join('; ')}. Return corrected JSON only. Preserve the prompt, remove unrequested animal traits, and use renderer parts that satisfy the failure.`;
+    reactCssRepairNotes.push(note);
+    result = await generateTest5ReactCssCharacter(prompt, designBrief, note);
+    faithfulness = validateReactCssFaithfulness(result.reactCssCharacter, prompt, designBrief);
+  }
+  if (!faithfulness.ok) {
+    reactCssRepairNotes.push(`deterministic sanitize fallback applied: ${faithfulness.failures.join('; ')}`);
+    result = { ...result, reactCssCharacter: sanitizeReactCssCharacter(null, prompt, designBrief) };
+    faithfulness = validateReactCssFaithfulness(result.reactCssCharacter, prompt, designBrief);
+  }
+  return { ...result, reactCssFaithfulness: faithfulness, reactCssRepairNotes };
 }
 
 function renderableDetail(id, label, acceptableShapes, acceptableSockets = [], minimumCount = 1) {
@@ -559,7 +613,9 @@ function normalizeRenderableDetails(details = [], prompt = '', brief = {}) {
   };
   for (const detail of details) add(detail);
   for (const detail of inferred) add(detail);
-  return normalized.slice(0, 10);
+  const animalRequestedByUser = /\b(fox|cat|dog|wolf|animal|puppy|kitten|tail|ear|ears|snout|wing|wings|angel|bird|bat|dragon|horn|horns)\b/.test(String(prompt || '').toLowerCase());
+  const filtered = animalRequestedByUser ? normalized : normalized.filter(detail => !/animal|ear|snout|tail|wing|horn/.test(`${detail.id} ${detail.label}`.toLowerCase()));
+  return filtered.slice(0, 10);
 }
 
 function validateDetailCoverage(designBrief = {}, scene = {}) {
@@ -583,6 +639,7 @@ function test5Layer(shape, socket, material, { x = 0, y = 0, scale = [0.25, 0.25
 
 function ensurePromptDetails(prompt = '', designBrief = {}, scene = {}) {
   const text = `${prompt} ${designBrief.expandedPrompt || ''} ${(designBrief.visualChecklist || []).join(' ')}`.toLowerCase();
+  const userText = String(prompt || '').toLowerCase();
   const next = { ...scene, layers: Array.isArray(scene.layers) ? [...scene.layers] : [] };
   const enrichments = [];
   const has = (shape, socket) => next.layers.some(l => l.shape === shape && (!socket || l.attach?.socket === socket));
@@ -593,12 +650,12 @@ function ensurePromptDetails(prompt = '', designBrief = {}, scene = {}) {
     enrichments.push({ reason, shape: layer.shape, socket: layer.attach.socket, id: layer.id });
   };
   const primary = /orange|fox/.test(text) ? 'glossyOrange' : materialForText(text);
-  if (/fox|cat|dog|wolf|animal/.test(text)) {
+  if (/\b(fox|cat|dog|wolf|animal)\b/.test(userText)) {
     if (!has('animalEar', 'head.leftEar') && !has('softEar', 'head.leftEar')) add('animal ears', test5Layer('animalEar', 'head.leftEar', primary, { scale: [0.28, 0.34], rotate: -16, z: 7 }));
     if (!has('animalEar', 'head.rightEar') && !has('softEar', 'head.rightEar')) add('animal ears', test5Layer('animalEar', 'head.rightEar', primary, { scale: [0.28, 0.34], rotate: 16, z: 7 }));
     if (!has('snout', 'head.mouth')) add('animal snout', test5Layer('snout', 'head.mouth', 'warmCream', { y: -4, scale: [0.38, 0.24], z: 23 }));
   }
-  if (/fox|dog|wolf|cat|tail/.test(text) && !has('tail', 'body.back')) add('tail', test5Layer('tail', 'body.back', primary, { x: 66, y: 4, scale: [0.42, 0.72], rotate: 28, z: 1 }));
+  if (/\b(fox|dog|wolf|cat|tail)\b/.test(userText) && !has('tail', 'body.back')) add('tail', test5Layer('tail', 'body.back', primary, { x: 66, y: 4, scale: [0.42, 0.72], rotate: 28, z: 1 }));
   if (/goggle|glasses|visor|headphone|headphones/.test(text) && !has('glasses', 'head.center') && !has('sunglasses', 'head.center')) add('eyewear', test5Layer('glasses', 'head.center', 'chrome', { y: -4, scale: [0.58, 0.34], z: 22 }));
   if (/star goggle|star-shaped|star goggles|star/.test(text)) {
     if (!has('star', 'head.leftEye')) add('star accent', test5Layer('star', 'head.leftEye', 'glossyGold', { x: -6, y: -14, scale: [0.13, 0.13], rotate: -10, z: 24 }));
@@ -615,11 +672,11 @@ function ensurePromptDetails(prompt = '', designBrief = {}, scene = {}) {
   if (/pilot|aviator|scarf/.test(text) && !has('tie', 'body.front') && !has('badge', 'body.front')) add('pilot scarf/badge', test5Layer('tie', 'body.front', 'glossyRed', { y: -18, scale: [0.28, 0.28], rotate: -18, z: 12 }));
   if (/wizard|magic|staff|wand/.test(text) && !has('wand', 'body.rightHand')) add('magic staff', test5Layer('wand', 'body.rightHand', 'wood', { x: 18, y: -8, scale: [0.32, 0.5], rotate: -22, z: 13 }));
   if (/dj|music|drummer|song|headphone/.test(text) && !next.layers.some(l => ['musicNote','microphone'].includes(l.shape))) add('music detail', test5Layer('musicNote', 'body.front', 'neon', { x: 52, y: -50, scale: [0.28, 0.28], rotate: 8, z: 15 }));
-  if (/dragon|demon|horn/.test(text)) {
+  if (/\b(dragon|demon|horn|horns)\b/.test(userText)) {
     if (!has('softHorn', 'head.leftHorn') && !has('horn', 'head.leftHorn')) add('horns', test5Layer('softHorn', 'head.leftHorn', 'warmCream', { scale: [0.24, 0.32], rotate: -12, z: 7 }));
     if (!has('softHorn', 'head.rightHorn') && !has('horn', 'head.rightHorn')) add('horns', test5Layer('softHorn', 'head.rightHorn', 'warmCream', { scale: [0.24, 0.32], rotate: 12, z: 7 }));
   }
-  if (/dragon|bird|bat|wing/.test(text)) {
+  if (/dragon|bird|bat|wing|angel/.test(userText)) {
     if (!has('wing', 'body.leftShoulder')) add('wings', test5Layer('wing', 'body.leftShoulder', primary, { scale: [0.34, 0.38], rotate: -24, z: 1 }));
     if (!has('wing', 'body.rightShoulder')) add('wings', test5Layer('wing', 'body.rightShoulder', primary, { scale: [0.34, 0.38], rotate: 24, z: 1 }));
   }
@@ -726,7 +783,7 @@ function test5OptionEnabled(value, fallback = true) {
   return !/^(0|false|off|no)$/i.test(String(value));
 }
 
-async function saveTest5Artifact({ prompt, designBrief, expandedContent, provider, rawContent, rawSceneSpec, sceneSpec, rawReactCssCharacterContent, rawReactCssCharacter, reactCssCharacter, validation, coverage, enrichments, repairs, options = {} }) {
+async function saveTest5Artifact({ prompt, designBrief, expandedContent, provider, rawContent, rawSceneSpec, sceneSpec, rawReactCssCharacterContent, rawReactCssCharacter, reactCssCharacter, reactCssFaithfulness, reactCssRepairNotes, validation, coverage, enrichments, repairs, options = {} }) {
   const createdAt = new Date().toISOString();
   const stamp = createdAt.replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
   const relPath = `artifacts/test5/generated/${stamp}-${slugify(prompt)}.json`;
@@ -748,6 +805,8 @@ async function saveTest5Artifact({ prompt, designBrief, expandedContent, provide
     rawReactCssCharacterContent,
     rawReactCssCharacter,
     reactCssCharacter,
+    reactCssFaithfulness,
+    reactCssRepairNotes,
     validation,
     coverage,
     enrichments,
@@ -789,7 +848,7 @@ async function saveTest5Artifact({ prompt, designBrief, expandedContent, provide
 async function generateTest5Avatar(prompt, options = {}) {
   const expanded = await expandTest5Prompt(prompt);
   const designBrief = expanded.designBrief;
-  const characterResult = await generateTest5ReactCssCharacter(prompt, designBrief);
+  const characterResult = await generateFaithfulTest5ReactCssCharacter(prompt, designBrief);
   const reactCssCharacter = characterResult.reactCssCharacter;
   let first = await generateTest5SceneSpec(prompt, designBrief);
   let rawSceneSpec = coerceTest5RawScene(parseJsonObject(first.content), prompt);
@@ -844,8 +903,8 @@ async function generateTest5Avatar(prompt, options = {}) {
   }
   if (!coverage.ok && coverageMode !== 'report-only') throw new Error(`Generated avatar failed detail coverage: ${coverage.missingRequiredDetails.join('; ')}`);
 
-  const saved = await saveTest5Artifact({ prompt, designBrief, expandedContent: expanded.content, provider, rawContent, rawSceneSpec, sceneSpec, rawReactCssCharacterContent: characterResult.content, rawReactCssCharacter: characterResult.rawReactCssCharacter, reactCssCharacter, validation, coverage, enrichments, repairs, options: { ...options, enrichmentEnabled, coverageMode } });
-  return { ok: true, prompt, userPrompt: prompt, expandedPrompt: designBrief.expandedPrompt, designBrief, reactCssCharacter, visualChecklist: designBrief.visualChecklist || [], requiredDetails: designBrief.requiredDetails || [], requiredRenderableDetails: designBrief.requiredRenderableDetails || [], coverage, enrichments, options: { enrichmentEnabled, coverageMode, commitRequested: options.commit !== false }, provider, rawSceneSpec, sceneSpec, validation, repairs, artifactPath: saved.relPath, commit: saved.commit };
+  const saved = await saveTest5Artifact({ prompt, designBrief, expandedContent: expanded.content, provider, rawContent, rawSceneSpec, sceneSpec, rawReactCssCharacterContent: characterResult.content, rawReactCssCharacter: characterResult.rawReactCssCharacter, reactCssCharacter, reactCssFaithfulness: characterResult.reactCssFaithfulness, reactCssRepairNotes: characterResult.reactCssRepairNotes, validation, coverage, enrichments, repairs, options: { ...options, enrichmentEnabled, coverageMode } });
+  return { ok: true, prompt, userPrompt: prompt, expandedPrompt: designBrief.expandedPrompt, designBrief, reactCssCharacter, reactCssFaithfulness: characterResult.reactCssFaithfulness, reactCssRepairNotes: characterResult.reactCssRepairNotes || [], visualChecklist: designBrief.visualChecklist || [], requiredDetails: designBrief.requiredDetails || [], requiredRenderableDetails: designBrief.requiredRenderableDetails || [], coverage, enrichments, options: { enrichmentEnabled, coverageMode, commitRequested: options.commit !== false }, provider, rawSceneSpec, sceneSpec, validation, repairs, artifactPath: saved.relPath, commit: saved.commit };
 }
 
 async function readJsonBody(req, maxBytes = 64_000) {

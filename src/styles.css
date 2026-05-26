@@ -219,7 +219,16 @@ button { border: 0; border-radius: 999px; padding: 9px 13px; display: inline-fle
 .test5-dude-head { width: min(310px, 38vw); aspect-ratio: 1.08; position: relative; border-radius: 34% 34% 42% 42%; background: linear-gradient(135deg, var(--dude-primary, #38bdf8), var(--dude-secondary, #60a5fa) 58%, rgba(255,255,255,.18)); border: 2px solid rgba(255,255,255,.28); box-shadow: inset 0 0 54px rgba(255,255,255,.16), 0 26px 86px rgba(0,0,0,.34); z-index: 6; }
 .head-animal .test5-dude-head { border-radius: 38% 38% 45% 45%; }
 .head-screen .test5-dude-head { border-radius: 24% 24% 30% 30%; }
-.head-mushroom .test5-dude-head { border-radius: 48% 48% 35% 35%; }
+.head-mushroom .test5-dude-head { width: min(340px, 42vw); aspect-ratio: 1.05; border-radius: 48% 48% 42% 42%; background: linear-gradient(180deg, #bfdbfe 0 10%, var(--dude-secondary, #60a5fa) 54%, #dbeafe 55%, var(--dude-primary, #38bdf8) 100%); overflow: visible; }
+.head-mushroom .test5-dude-mushroom-cap { position: absolute; left: 50%; top: -13%; width: 118%; height: 58%; transform: translateX(-50%); border-radius: 55% 55% 34% 34% / 70% 70% 32% 32%; background: radial-gradient(circle at 24% 26%, rgba(255,255,255,.45), transparent 18%), linear-gradient(135deg, var(--dude-primary, #38bdf8), #1d4ed8 64%, var(--dude-secondary, #60a5fa)); border: 2px solid rgba(255,255,255,.34); box-shadow: inset 0 -20px 30px rgba(15,23,42,.18), 0 18px 34px rgba(15,23,42,.22); z-index: 3; }
+.test5-dude-mushroom-cap span, .test5-dude-mushroom-spots b { position: absolute; border-radius: 999px; background: rgba(255,255,255,.82); box-shadow: inset 0 4px 8px rgba(15,23,42,.12); }
+.test5-dude-mushroom-cap span:nth-child(1), .test5-dude-mushroom-spots b:nth-child(1) { left: 22%; top: 28%; width: 38px; height: 28px; transform: rotate(-12deg); }
+.test5-dude-mushroom-cap span:nth-child(2), .test5-dude-mushroom-spots b:nth-child(2) { left: 50%; top: 16%; width: 30px; height: 22px; transform: translateX(-50%) rotate(8deg); }
+.test5-dude-mushroom-cap span:nth-child(3), .test5-dude-mushroom-spots b:nth-child(3) { right: 19%; top: 33%; width: 44px; height: 30px; transform: rotate(14deg); }
+.test5-dude-mushroom-gills { position: absolute; left: 50%; top: 37%; width: 82%; height: 18%; transform: translateX(-50%); border-radius: 0 0 999px 999px; background: linear-gradient(180deg, rgba(224,242,254,.82), rgba(125,211,252,.5)); display: flex; justify-content: center; gap: 8%; padding-top: 10px; z-index: 4; box-shadow: inset 0 -8px 16px rgba(15,23,42,.12); }
+.test5-dude-mushroom-gills i { width: 5px; height: 46px; border-radius: 999px; background: rgba(30,64,175,.42); transform: rotate(var(--gill-rot, 0deg)); }
+.test5-dude-mushroom-gills i:nth-child(1) { --gill-rot: -18deg; } .test5-dude-mushroom-gills i:nth-child(4) { --gill-rot: 18deg; }
+.test5-dude-mushroom-spots { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
 .head-helmet .test5-dude-head::after { content: ""; position: absolute; inset: -10px; border: 5px solid rgba(255,255,255,.38); border-radius: inherit; box-shadow: inset 0 0 18px rgba(255,255,255,.16); }
 .test5-dude-shine { position: absolute; width: 35%; height: 18%; left: 15%; top: 12%; border-radius: 999px; background: rgba(255,255,255,.24); transform: rotate(-18deg); }
 .test5-dude-eyes { display: flex; justify-content: center; gap: clamp(42px, 5vw, 68px); padding-top: clamp(74px, 8vw, 98px); }

@@ -40,6 +40,13 @@ assert(/test5-dude-head/.test(app) && /test5-dude-head/.test(css), 'frontend mus
 assert(/test5-dude-hand/.test(app) && /test5-dude-hand/.test(css), 'hand-held props such as wands must be nested in an explicit hand anchor');
 assert(/holding-wand/.test(app) && /holding-wand/.test(css), 'hand-held wands need a visible hand grip/clasp so they do not look detached');
 assert(/test5-dude-foot/.test(app) && /test5-dude-foot/.test(css), 'foot-worn props such as boots/flames must be nested in an explicit foot anchor');
+assert(/function validateReactCssFaithfulness\s*\(/.test(bridge), 'React/CSS blueprint must be validated for prompt-faithfulness before acceptance');
+assert(/generateTest5ReactCssCharacter\s*\([^)]*repairNote/.test(bridge) && /reactCssRepairNotes/.test(bridge), 'React/CSS blueprint failures must go through a bounded LLM critique/repair loop');
+assert(/mushroomCap/.test(bridge) && /mushroomGills/.test(bridge), 'mushroom prompts must require explicit cap and gill details in the blueprint');
+assert(/suppressUnrequestedAnimalParts/.test(bridge), 'mushroom/non-animal prompts must suppress unrequested dog/animal parts');
+assert(/head-mushroom[\s\S]*test5-dude-mushroom-cap/.test(css), 'mushroom head renderer must draw a real cap shape, not only a rounded head');
+assert(/test5-dude-mushroom-gills/.test(app) && /test5-dude-mushroom-gills/.test(css), 'mushroom head renderer must include visible gills/underside');
+assert(/test5-dude-mushroom-spots/.test(app) && /test5-dude-mushroom-spots/.test(css), 'mushroom cap spots must be attached to the mushroom cap');
 assert(/skipPreset: true/.test(bridge), 'test5 sanitizer must skip baked quality presets to prove fresh generation');
 assert(/artifacts\/test5\/generated/.test(bridge), 'test5 artifacts are not saved under artifacts/test5/generated');
 assert(/expandedPrompt/.test(bridge) && /visualChecklist/.test(bridge), 'test5 artifacts do not save expanded prompt/checklist receipts');
