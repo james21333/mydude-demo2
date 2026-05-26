@@ -1811,7 +1811,7 @@ function Test5HandCodedAvatar({ character, status = 'listening' }) {
         {hasPart('ear', 'right') && <div className="test5-dude-ear right" />}
         {hasPart('horn', 'left') && <div className="test5-dude-horn left" />}
         {hasPart('horn', 'right') && <div className="test5-dude-horn right" />}
-        {character.headShape !== 'mushroom' && hasPart('hat') && <div className="test5-dude-hat" />}
+        {hasPart('hat') && <div className="test5-dude-hat" />}
         {hasPart('helmet') && <div className="test5-dude-helmet" />}
         <div className="test5-dude-shine" />
         <div className={`test5-dude-eyes ${character.expression || 'friendly'}`}><span/><span/></div>
