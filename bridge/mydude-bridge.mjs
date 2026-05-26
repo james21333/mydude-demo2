@@ -408,7 +408,12 @@ Required JSON shape:
     "--dude-accent": "#93c5fd",
     "--dude-eye": "#e0f2fe",
     "--dude-panel": "rgba(255,255,255,.18)",
-    "--dude-mouth": "#0f172a"
+    "--dude-mouth": "#0f172a",
+    "--dude-body": "#1e293b",
+    "--dude-arm": "#60a5fa",
+    "--dude-hand": "#facc15",
+    "--dude-leg": "#1e293b",
+    "--dude-foot": "#facc15"
   },
   "headShape": "rounded|animal|helmet|screen|mushroom|crown",
   "bodyShape": "compact|round|suited|robot|robe|pilot",
@@ -424,6 +429,7 @@ Rules:
 - Keep a single connected character, not floating stickers.
 - Include prompt-specific parts when relevant: ears, tail, snout, horns, wings, hat, glasses, star, boots, flame, wand, badge, scarf, antenna, spots, stripes, panel, robe, helmet.
 - For mushroom prompts, do not stop at headShape:"mushroom". Include explicit parts {"type":"mushroomCap"}, {"type":"mushroomGills"}, and at least two {"type":"spot"} cap markings; avoid animal ears, snout, tail, and wings unless the user explicitly asks for them.
+- Always decide explicit colors for body, arms, hands, legs, and feet in cssVariables. Wizard bodies should normally read as a robe/body color distinct from skin/hand color; do not leave limbs to inherit random accent colors.
 - For held props such as wand/staff/sword, put side:"left" or side:"right" so the renderer can anchor the item inside a hand. For worn props such as boots/flames, use side:"left" and side:"right" pairs.
 - Use 4 to 12 parts. Prefer fewer polished readable parts over clutter.
 - Do not output raw code; this JSON is the receipt for the hand-coded React/CSS scaffold.`;
@@ -466,6 +472,11 @@ function fallbackReactCssCharacter(prompt = '', designBrief = {}) {
       '--dude-eye': /sleepy/.test(text) ? '#e0f2fe' : '#f8fafc',
       '--dude-panel': 'rgba(255,255,255,.18)',
       '--dude-mouth': '#0f172a',
+      '--dude-body': isWizard ? '#1e293b' : primary,
+      '--dude-arm': isWizard ? primary : primary,
+      '--dude-hand': isWizard ? '#facc15' : primary,
+      '--dude-leg': isWizard ? '#1e293b' : primary,
+      '--dude-foot': isWizard ? '#facc15' : primary,
     },
     headShape: isMushroom ? 'mushroom' : isFox ? 'animal' : isRobot ? 'screen' : 'rounded',
     bodyShape: isRobot ? 'robot' : isWizard ? 'robe' : isPilot ? 'pilot' : 'compact',
@@ -508,7 +519,7 @@ function sanitizeReactCssCharacter(raw, prompt = '', designBrief = {}) {
     const v = String(value || '').trim();
     return /^(#[0-9a-f]{3,8}|rgba?\([^)]{1,80}\)|hsla?\([^)]{1,80}\))$/i.test(v) ? v.slice(0, 90) : fb;
   };
-  const allowedVars = ['--dude-primary','--dude-secondary','--dude-accent','--dude-eye','--dude-panel','--dude-mouth'];
+  const allowedVars = ['--dude-primary','--dude-secondary','--dude-accent','--dude-eye','--dude-panel','--dude-mouth','--dude-body','--dude-arm','--dude-hand','--dude-leg','--dude-foot'];
   const cssVariables = {};
   for (const key of allowedVars) cssVariables[key] = validColor(clean.cssVariables?.[key], fallback.cssVariables[key]);
   const oneOf = (value, allowed, fb) => allowed.includes(value) ? value : fb;
