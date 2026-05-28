@@ -1,0 +1,829 @@
+{
+  "prompt": "alien tennis player",
+  "userPrompt": "alien tennis player",
+  "createdAt": "2026-05-28T23:59:58.344Z",
+  "provider": "github-copilot/gpt-4o-mini + github-copilot/gpt-4o-mini + github-copilot/gpt-4o-mini",
+  "expandedPrompt": "A whimsical alien tennis player with an oversized head and a compact body, sporting a vibrant green skin tone. The character has large expressive eyes, a cheerful smile, and wears a sporty headband. The silhouette features elongated limbs and a distinctive star-shaped antenna on top of its head. The alien is holding a tennis racket with a glowing tennis ball, and its feet are adorned with colorful tennis shoes. The background includes sparkles to emphasize the playful atmosphere.",
+  "designBrief": {
+    "title": "Alien Tennis Player",
+    "expandedPrompt": "A whimsical alien tennis player with an oversized head and a compact body, sporting a vibrant green skin tone. The character has large expressive eyes, a cheerful smile, and wears a sporty headband. The silhouette features elongated limbs and a distinctive star-shaped antenna on top of its head. The alien is holding a tennis racket with a glowing tennis ball, and its feet are adorned with colorful tennis shoes. The background includes sparkles to emphasize the playful atmosphere.",
+    "subject": "an alien character who plays tennis",
+    "mood": "playful",
+    "palettePlan": {
+      "primary": "vibrant green",
+      "secondary": "bright yellow",
+      "accent": "glowing white"
+    },
+    "styleTags": [
+      "cute mascot",
+      "glossy SVG",
+      "blue-avatar quality"
+    ],
+    "visualChecklist": [
+      "oversized head with large expressive eyes",
+      "cheerful smile",
+      "star-shaped antenna",
+      "sporty headband",
+      "elongated limbs",
+      "glowing tennis ball",
+      "colorful tennis shoes",
+      "tennis racket",
+      "sparkles in the background",
+      "compact body",
+      "playful posture",
+      "visible tennis court markings"
+    ],
+    "requiredDetails": [
+      "vibrant green skin tone",
+      "star-shaped antenna on head",
+      "sporty headband",
+      "glowing tennis ball"
+    ],
+    "requiredRenderableDetails": [
+      {
+        "id": "star-accents",
+        "label": "star accents",
+        "acceptableShapes": [
+          "star",
+          "spark",
+          "starEye"
+        ],
+        "acceptableSockets": [
+          "head.leftEye",
+          "head.rightEye",
+          "head.center",
+          "body.front"
+        ],
+        "minimumCount": 2
+      }
+    ],
+    "forbiddenDetails": [
+      "raw SVG",
+      "HTML",
+      "unvalidated custom shapes",
+      "external images"
+    ],
+    "qualityConstraints": [
+      "oversized expressive head",
+      "compact connected body",
+      "readable silhouette",
+      "valid renderer sockets only"
+    ]
+  },
+  "visualChecklist": [
+    "oversized head with large expressive eyes",
+    "cheerful smile",
+    "star-shaped antenna",
+    "sporty headband",
+    "elongated limbs",
+    "glowing tennis ball",
+    "colorful tennis shoes",
+    "tennis racket",
+    "sparkles in the background",
+    "compact body",
+    "playful posture",
+    "visible tennis court markings"
+  ],
+  "requiredDetails": [
+    "vibrant green skin tone",
+    "star-shaped antenna on head",
+    "sporty headband",
+    "glowing tennis ball"
+  ],
+  "expandedContent": "{\n  \"title\": \"Alien Tennis Player\",\n  \"expandedPrompt\": \"A whimsical alien tennis player with an oversized head and a compact body, sporting a vibrant green skin tone. The character has large expressive eyes, a cheerful smile, and wears a sporty headband. The silhouette features elongated limbs and a distinctive star-shaped antenna on top of its head. The alien is holding a tennis racket with a glowing tennis ball, and its feet are adorned with colorful tennis shoes. The background includes sparkles to emphasize the playful atmosphere.\",\n  \"subject\": \"an alien character who plays tennis\",\n  \"mood\": \"playful\",\n  \"palettePlan\": { \"primary\": \"vibrant green\", \"secondary\": \"bright yellow\", \"accent\": \"glowing white\" },\n  \"styleTags\": [\"cute mascot\", \"glossy SVG\", \"blue-avatar quality\"],\n  \"visualChecklist\": [\n    \"oversized head with large expressive eyes\",\n    \"cheerful smile\",\n    \"star-shaped antenna\",\n    \"sporty headband\",\n    \"elongated limbs\",\n    \"glowing tennis ball\",\n    \"colorful tennis shoes\",\n    \"tennis racket\",\n    \"sparkles in the background\",\n    \"compact body\",\n    \"playful posture\",\n    \"visible tennis court markings\"\n  ],\n  \"requiredDetails\": [\n    \"vibrant green skin tone\",\n    \"star-shaped antenna on head\",\n    \"sporty headband\",\n    \"glowing tennis ball\"\n  ],\n  \"requiredRenderableDetails\": [\n    { \"id\": \"head\", \"label\": \"oversized head\", \"acceptableShapes\": [\"headShape\"], \"acceptableSockets\": [\"headSocket\"], \"minimumCount\": 1 },\n    { \"id\": \"eyes\", \"label\": \"large expressive eyes\", \"acceptableShapes\": [\"eyeShape\"], \"acceptableSockets\": [\"eyeSocket\"], \"minimumCount\": 2 },\n    { \"id\": \"racket\", \"label\": \"tennis racket\", \"acceptableShapes\": [\"racketShape\"], \"acceptableSockets\": [\"handSocket\"], \"minimumCount\": 1 },\n    { \"id\": \"shoes\", \"label\": \"colorful tennis shoes\", \"acceptableShapes\": [\"shoeShape\"], \"acceptableSockets\": [\"footSocket\"], \"minimumCount\": 2 }\n  ],\n  \"forbiddenDetails\": [\"raw SVG\", \"HTML\", \"unvalidated custom shapes\", \"external images\"],\n  \"qualityConstraints\": [\"oversized expressive head\", \"compact connected body\", \"readable silhouette\", \"valid renderer sockets only\"]\n}",
+  "rawContent": "{\n  \"title\": \"Alien Tennis Player\",\n  \"summary\": \"A whimsical alien tennis player with an oversized head, vibrant green skin, and a playful demeanor, ready to serve on the court.\",\n  \"palette\": \"green\",\n  \"scene\": \"scene_stage\",\n  \"body\": \"body_blob\",\n  \"head\": \"head_round\",\n  \"eyes\": \"eyes_googly\",\n  \"mouth\": \"mouth_smile\",\n  \"primitives\": [\n    \"body_blob\",\n    \"head_round\",\n    \"eyes_googly\",\n    \"mouth_smile\",\n    \"body_capsule\",\n    \"body_star\",\n    \"body_triangle\",\n    \"body_flame\",\n    \"body_cloud\",\n    \"body_monitor\"\n  ],\n  \"layers\": [\n    {\"shape\":\"mascotBody\",\"anchor\":\"free\",\"x\":0,\"y\":0,\"scale\":[0.6,0.5],\"rotate\":0,\"material\":\"glossyGreen\",\"role\":\"part\",\"z\":2,\"attach\":{\"socket\":\"body.center\"}},\n    {\"shape\":\"mascotHead\",\"anchor\":\"free\",\"x\":0,\"y\":0,\"scale\":[0.9,0.8],\"rotate\":0,\"material\":\"glossyGreen\",\"role\":\"part\",\"z\":8,\"attach\":{\"socket\":\"head.center\"}},\n    {\"shape\":\"stubbyArm\",\"anchor\":\"free\",\"x\":0,\"y\":0,\"scale\":[0.25,0.45],\"rotate\":-15,\"material\":\"glossyGreen\",\"role\":\"part\",\"z\":5,\"attach\":{\"socket\":\"body.leftHand\"}},\n    {\"shape\":\"stubbyArm\",\"anchor\":\"free\",\"x\":0,\"y\":0,\"scale\":[0.25,0.45],\"rotate\":15,\"material\":\"glossyGreen\",\"role\":\"part\",\"z\":5,\"attach\":{\"socket\":\"body.rightHand\"}},\n    {\"shape\":\"cuteEye\",\"anchor\":\"free\",\"x\":-10,\"y\":-10,\"scale\":[0.25,0.25],\"rotate\":0,\"material\":\"softWhite\",\"role\":\"eye\",\"z\":20,\"attach\":{\"socket\":\"head.leftEye\"}},\n    {\"shape\":\"cuteEye\",\"anchor\":\"free\",\"x\":10,\"y\":-10,\"scale\":[0.25,0.25],\"rotate\":0,\"material\":\"softWhite\",\"role\":\"eye\",\"z\":20,\"attach\":{\"socket\":\"head.rightEye\"}},\n    {\"shape\":\"mouthSmile\",\"anchor\":\"free\",\"x\":0,\"y\":15,\"scale\":[0.4,0.2],\"rotate\":0,\"material\":\"charcoalRubber\",\"role\":\"mouth\",\"z\":31,\"attach\":{\"socket\":\"head.mouth\"}},\n    {\"shape\":\"star\",\"anchor\":\"free\",\"x\":0,\"y\":40,\"scale\":[0.15,0.15],\"rotate\":0,\"material\":\"glossyGold\",\"role\":\"part\",\"z\":10,\"attach\":{\"socket\":\"head.center\"}},\n    {\"shape\":\"headband\",\"anchor\":\"free\",\"x\":0,\"y\":-30,\"scale\":[0.8,0.1],\"rotate\":0,\"material\":\"glossyYellow\",\"role\":\"part\",\"z\":15,\"attach\":{\"socket\":\"head.top\"}},\n    {\"shape\":\"tennisRacket\",\"anchor\":\"free\",\"x\":30,\"y\":0,\"scale\":[0.3,0.5],\"rotate\":0,\"material\":\"glossyOrange\",\"role\":\"part\",\"z\":12,\"attach\":{\"socket\":\"body.rightHand\"}},\n    {\"shape\":\"glowingBall\",\"anchor\":\"free\",\"x\":45,\"y\":-10,\"scale\":[0.1,0.1],\"rotate\":0,\"material\":\"glowWhite\",\"role\":\"part\",\"z\":13,\"attach\":{\"socket\":\"body.rightHand\"}},\n    {\"shape\":\"shoe\",\"anchor\":\"free\",\"x\":-15,\"y\":40,\"scale\":[0.2,0.1],\"rotate\":0,\"material\":\"glossyBlue\",\"role\":\"part\",\"z\":5,\"attach\":{\"socket\":\"body.leftFoot\"}},\n    {\"shape\":\"shoe\",\"anchor\":\"free\",\"x\":15,\"y\":40,\"scale\":[0.2,0.1],\"rotate\":0,\"material\":\"glossyRed\",\"role\":\"part\",\"z\":5,\"attach\":{\"socket\":\"body.rightFoot\"}},\n    {\"shape\":\"spark\",\"anchor\":\"free\",\"x\":-50,\"y\":-50,\"scale\":[0.1,0.1],\"rotate\":0,\"material\":\"glossyWhite\",\"role\":\"part\",\"z\":9,\"attach\":{\"socket\":\"body.front\"}},\n    {\"shape\":\"spark\",\"anchor\":\"free\",\"x\":50,\"y\":-50,\"scale\":[0.1,0.1],\"rotate\":0,\"material\":\"glossyWhite\",\"role\":\"part\",\"z\":9,\"attach\":{\"socket\":\"body.front\"}},\n    {\"shape\":\"spark\",\"anchor\":\"free\",\"x\":0,\"y\":-50,\"scale\":[0.1,0.1],\"rotate\":0,\"material\":\"glossyWhite\",\"role\":\"part\",\"z\":9,\"attach\":{\"socket\":\"body.front\"}},\n    {\"shape\":\"spark\",\"anchor\":\"free\",\"x\":-30,\"y\":-70,\"scale\":[0.1,0.1],\"rotate\":0,\"material\":\"glossyWhite\",\"role\":\"part\",\"z\":9,\"attach\":{\"socket\":\"body.front\"}},\n    {\"shape\":\"spark\",\"anchor\":\"free\",\"x\":30,\"y\":-70,\"scale\":[0.1,0.1],\"rotate\":0,\"material\":\"glossyWhite\",\"role\":\"part\",\"z\":9,\"attach\":{\"socket\":\"body.front\"}}\n  ]\n}",
+  "rawSceneSpec": {
+    "title": "Alien Tennis Player",
+    "summary": "A whimsical alien tennis player with an oversized head, vibrant green skin, and a playful demeanor, ready to serve on the court.",
+    "palette": "green",
+    "scene": "scene_stage",
+    "body": "body_blob",
+    "head": "head_round",
+    "eyes": "eyes_googly",
+    "mouth": "mouth_smile",
+    "primitives": [
+      "body_blob",
+      "head_round",
+      "eyes_googly",
+      "mouth_smile",
+      "body_capsule",
+      "body_star",
+      "body_triangle",
+      "body_flame",
+      "body_cloud",
+      "body_monitor"
+    ],
+    "layers": [
+      {
+        "shape": "mascotBody",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.6,
+          0.5
+        ],
+        "rotate": 0,
+        "material": "glossyGreen",
+        "role": "part",
+        "z": 2,
+        "attach": {
+          "socket": "body.center"
+        }
+      },
+      {
+        "shape": "mascotHead",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.9,
+          0.8
+        ],
+        "rotate": 0,
+        "material": "glossyGreen",
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "shape": "stubbyArm",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.25,
+          0.45
+        ],
+        "rotate": -15,
+        "material": "glossyGreen",
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "body.leftHand"
+        }
+      },
+      {
+        "shape": "stubbyArm",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.25,
+          0.45
+        ],
+        "rotate": 15,
+        "material": "glossyGreen",
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "body.rightHand"
+        }
+      },
+      {
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": -10,
+        "y": -10,
+        "scale": [
+          0.25,
+          0.25
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": 10,
+        "y": -10,
+        "scale": [
+          0.25,
+          0.25
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "shape": "mouthSmile",
+        "anchor": "free",
+        "x": 0,
+        "y": 15,
+        "scale": [
+          0.4,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "charcoalRubber",
+        "role": "mouth",
+        "z": 31,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      },
+      {
+        "shape": "star",
+        "anchor": "free",
+        "x": 0,
+        "y": 40,
+        "scale": [
+          0.15,
+          0.15
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "role": "part",
+        "z": 10,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "shape": "spark",
+        "anchor": "free",
+        "x": -50,
+        "y": -50,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyPurple",
+        "role": "part",
+        "z": 9,
+        "attach": {
+          "socket": "body.front"
+        }
+      },
+      {
+        "shape": "spark",
+        "anchor": "free",
+        "x": 50,
+        "y": -50,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyPurple",
+        "role": "part",
+        "z": 9,
+        "attach": {
+          "socket": "body.front"
+        }
+      },
+      {
+        "shape": "spark",
+        "anchor": "free",
+        "x": 0,
+        "y": -50,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyPurple",
+        "role": "part",
+        "z": 9,
+        "attach": {
+          "socket": "body.front"
+        }
+      },
+      {
+        "shape": "spark",
+        "anchor": "free",
+        "x": -30,
+        "y": -70,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyPurple",
+        "role": "part",
+        "z": 9,
+        "attach": {
+          "socket": "body.front"
+        }
+      },
+      {
+        "shape": "spark",
+        "anchor": "free",
+        "x": 30,
+        "y": -70,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyPurple",
+        "role": "part",
+        "z": 9,
+        "attach": {
+          "socket": "body.front"
+        }
+      }
+    ]
+  },
+  "sanitizedSceneSpec": {
+    "title": "Alien Tennis Player",
+    "summary": "A whimsical alien tennis player with an oversized head, vibrant green skin, and a playful demeanor, ready to serve on the court.",
+    "palette": "green",
+    "scene": "scene_stage",
+    "body": "body_blob",
+    "head": "head_round",
+    "eyes": "eyes_googly",
+    "mouth": "mouth_smile",
+    "primitives": [
+      "body_blob",
+      "head_round",
+      "eyes_googly",
+      "mouth_smile",
+      "body_capsule",
+      "body_star",
+      "body_triangle",
+      "body_flame",
+      "body_cloud",
+      "body_monitor",
+      "scene_space",
+      "eyes_cartoon",
+      "object_spark"
+    ],
+    "layers": [
+      {
+        "id": "mascotBody-0",
+        "shape": "mascotBody",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.6,
+          0.5
+        ],
+        "rotate": 0,
+        "material": "glossyGreen",
+        "opacity": 1,
+        "role": "part",
+        "z": 2,
+        "attach": {
+          "socket": "body.center"
+        }
+      },
+      {
+        "id": "stubbyArm-2",
+        "shape": "stubbyArm",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.25,
+          0.45
+        ],
+        "rotate": -15,
+        "material": "glossyGreen",
+        "opacity": 1,
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "body.leftHand"
+        }
+      },
+      {
+        "id": "stubbyArm-3",
+        "shape": "stubbyArm",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.25,
+          0.45
+        ],
+        "rotate": 15,
+        "material": "glossyGreen",
+        "opacity": 1,
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "body.rightHand"
+        }
+      },
+      {
+        "id": "mascotHead-1",
+        "shape": "mascotHead",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.9,
+          0.8
+        ],
+        "rotate": 0,
+        "material": "glossyGreen",
+        "opacity": 1,
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "id": "spark-8",
+        "shape": "spark",
+        "anchor": "free",
+        "x": -50,
+        "y": -50,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyPurple",
+        "opacity": 1,
+        "role": "part",
+        "z": 9,
+        "attach": {
+          "socket": "body.front"
+        }
+      },
+      {
+        "id": "spark-9",
+        "shape": "spark",
+        "anchor": "free",
+        "x": 50,
+        "y": -50,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyPurple",
+        "opacity": 1,
+        "role": "part",
+        "z": 9,
+        "attach": {
+          "socket": "body.front"
+        }
+      },
+      {
+        "id": "spark-10",
+        "shape": "spark",
+        "anchor": "free",
+        "x": 0,
+        "y": -50,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyPurple",
+        "opacity": 1,
+        "role": "part",
+        "z": 9,
+        "attach": {
+          "socket": "body.front"
+        }
+      },
+      {
+        "id": "spark-11",
+        "shape": "spark",
+        "anchor": "free",
+        "x": -30,
+        "y": -70,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyPurple",
+        "opacity": 1,
+        "role": "part",
+        "z": 9,
+        "attach": {
+          "socket": "body.front"
+        }
+      },
+      {
+        "id": "spark-12",
+        "shape": "spark",
+        "anchor": "free",
+        "x": 30,
+        "y": -70,
+        "scale": [
+          0.1,
+          0.1
+        ],
+        "rotate": 0,
+        "material": "glossyPurple",
+        "opacity": 1,
+        "role": "part",
+        "z": 9,
+        "attach": {
+          "socket": "body.front"
+        }
+      },
+      {
+        "id": "star-7",
+        "shape": "star",
+        "anchor": "free",
+        "x": 0,
+        "y": 40,
+        "scale": [
+          0.15,
+          0.15
+        ],
+        "rotate": 0,
+        "material": "glossyGold",
+        "opacity": 1,
+        "role": "part",
+        "z": 10,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "id": "cuteEye-4",
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": -10,
+        "y": -10,
+        "scale": [
+          0.25,
+          0.25
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "id": "cuteEye-5",
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": 10,
+        "y": -10,
+        "scale": [
+          0.25,
+          0.25
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "id": "mouthSmile-6",
+        "shape": "mouthSmile",
+        "anchor": "free",
+        "x": 0,
+        "y": 15,
+        "scale": [
+          0.4,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "charcoalRubber",
+        "opacity": 1,
+        "role": "mouth",
+        "z": 31,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      }
+    ]
+  },
+  "rawReactCssCharacterContent": "{\n  \"componentName\": \"AlienTennisPlayer\",\n  \"styleSystem\": \"my-dude-react-css-scaffold\",\n  \"title\": \"Whimsical Alien Tennis Player\",\n  \"summary\": \"A playful alien character with vibrant green skin, oversized head, and sporty attire, ready to play tennis.\",\n  \"cssVariables\": {\n    \"--dude-primary\": \"#00ff00\",\n    \"--dude-secondary\": \"#ffff00\",\n    \"--dude-accent\": \"#ffffff\",\n    \"--dude-eye\": \"#000000\",\n    \"--dude-panel\": \"rgba(255,255,255,.18)\",\n    \"--dude-mouth\": \"#ffcc00\",\n    \"--dude-body\": \"#00ff00\",\n    \"--dude-arm\": \"#00ff00\",\n    \"--dude-hand\": \"#ffff00\",\n    \"--dude-leg\": \"#00ff00\",\n    \"--dude-foot\": \"#ffcc00\"\n  },\n  \"headShape\": \"rounded\",\n  \"bodyShape\": \"compact\",\n  \"expression\": \"excited\",\n  \"parts\": [\n    { \"type\": \"antenna\", \"side\": \"top\", \"label\": \"star-shaped antenna\", \"tone\": \"accent\" },\n    { \"type\": \"headband\", \"label\": \"sporty headband\", \"tone\": \"secondary\" },\n    { \"type\": \"eye\", \"side\": \"left\", \"label\": \"large expressive eye\", \"tone\": \"eye\" },\n    { \"type\": \"eye\", \"side\": \"right\", \"label\": \"large expressive eye\", \"tone\": \"eye\" },\n    { \"type\": \"mouth\", \"label\": \"cheerful smile\", \"tone\": \"mouth\" },\n    { \"type\": \"hand\", \"side\": \"right\", \"label\": \"tennis racket\", \"tone\": \"accent\" },\n    { \"type\": \"hand\", \"side\": \"left\", \"label\": \"glowing tennis ball\", \"tone\": \"accent\" },\n    { \"type\": \"shoe\", \"side\": \"left\", \"label\": \"colorful tennis shoe\", \"tone\": \"foot\" },\n    { \"type\": \"shoe\", \"side\": \"right\", \"label\": \"colorful tennis shoe\", \"tone\": \"foot\" }\n  ],\n  \"notes\": [\n    \"The character features a vibrant green skin tone, oversized head with large expressive eyes, and a cheerful smile.\",\n    \"Includes a star-shaped antenna and a sporty headband.\",\n    \"Holds a glowing tennis ball and a tennis racket, with colorful tennis shoes.\"\n  ]\n}",
+  "rawReactCssCharacter": {
+    "componentName": "AlienTennisPlayer",
+    "styleSystem": "my-dude-react-css-scaffold",
+    "title": "Whimsical Alien Tennis Player",
+    "summary": "A playful alien character with vibrant green skin, oversized head, and sporty attire, ready to play tennis.",
+    "cssVariables": {
+      "--dude-primary": "#00ff00",
+      "--dude-secondary": "#ffff00",
+      "--dude-accent": "#ffffff",
+      "--dude-eye": "#000000",
+      "--dude-panel": "rgba(255,255,255,.18)",
+      "--dude-mouth": "#ffcc00",
+      "--dude-body": "#00ff00",
+      "--dude-arm": "#00ff00",
+      "--dude-hand": "#ffff00",
+      "--dude-leg": "#00ff00",
+      "--dude-foot": "#ffcc00"
+    },
+    "headShape": "rounded",
+    "bodyShape": "compact",
+    "expression": "excited",
+    "parts": [
+      {
+        "type": "antenna",
+        "side": "top",
+        "label": "star-shaped antenna",
+        "tone": "accent"
+      },
+      {
+        "type": "headband",
+        "label": "sporty headband",
+        "tone": "secondary"
+      },
+      {
+        "type": "eye",
+        "side": "left",
+        "label": "large expressive eye",
+        "tone": "eye"
+      },
+      {
+        "type": "eye",
+        "side": "right",
+        "label": "large expressive eye",
+        "tone": "eye"
+      },
+      {
+        "type": "mouth",
+        "label": "cheerful smile",
+        "tone": "mouth"
+      },
+      {
+        "type": "hand",
+        "side": "right",
+        "label": "tennis racket",
+        "tone": "accent"
+      },
+      {
+        "type": "hand",
+        "side": "left",
+        "label": "glowing tennis ball",
+        "tone": "accent"
+      },
+      {
+        "type": "shoe",
+        "side": "left",
+        "label": "colorful tennis shoe",
+        "tone": "foot"
+      },
+      {
+        "type": "shoe",
+        "side": "right",
+        "label": "colorful tennis shoe",
+        "tone": "foot"
+      }
+    ],
+    "notes": [
+      "The character features a vibrant green skin tone, oversized head with large expressive eyes, and a cheerful smile.",
+      "Includes a star-shaped antenna and a sporty headband.",
+      "Holds a glowing tennis ball and a tennis racket, with colorful tennis shoes."
+    ]
+  },
+  "reactCssCharacter": {
+    "kind": "react-css-character",
+    "componentName": "AlienTennisPlayer",
+    "styleSystem": "my-dude-react-css-scaffold",
+    "title": "Whimsical Alien Tennis Player",
+    "summary": "A playful alien character with vibrant green skin, oversized head, and sporty attire, ready to play tennis.",
+    "cssVariables": {
+      "--dude-primary": "#00ff00",
+      "--dude-secondary": "#ffff00",
+      "--dude-accent": "#ffffff",
+      "--dude-eye": "#000000",
+      "--dude-panel": "rgba(255,255,255,.18)",
+      "--dude-mouth": "#ffcc00",
+      "--dude-body": "#00ff00",
+      "--dude-arm": "#00ff00",
+      "--dude-hand": "#ffff00",
+      "--dude-leg": "#00ff00",
+      "--dude-foot": "#ffcc00"
+    },
+    "headShape": "rounded",
+    "bodyShape": "compact",
+    "expression": "excited",
+    "parts": [
+      {
+        "type": "antenna",
+        "side": "center",
+        "tone": "accent",
+        "label": "star-shaped antenna"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "secondary",
+        "label": "sporty headband"
+      },
+      {
+        "type": "badge",
+        "side": "left",
+        "tone": "eye",
+        "label": "large expressive eye"
+      },
+      {
+        "type": "badge",
+        "side": "right",
+        "tone": "eye",
+        "label": "large expressive eye"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "primary",
+        "label": "cheerful smile"
+      },
+      {
+        "type": "badge",
+        "side": "right",
+        "tone": "accent",
+        "label": "tennis racket"
+      },
+      {
+        "type": "badge",
+        "side": "left",
+        "tone": "accent",
+        "label": "glowing tennis ball"
+      },
+      {
+        "type": "badge",
+        "side": "left",
+        "tone": "primary",
+        "label": "colorful tennis shoe"
+      },
+      {
+        "type": "badge",
+        "side": "right",
+        "tone": "primary",
+        "label": "colorful tennis shoe"
+      },
+      {
+        "type": "star",
+        "side": "left",
+        "tone": "accent",
+        "label": "left star accent"
+      },
+      {
+        "type": "star",
+        "side": "right",
+        "tone": "accent",
+        "label": "right star accent"
+      }
+    ],
+    "notes": [
+      "The character features a vibrant green skin tone, oversized head with large expressive eyes, and a cheerful smile.",
+      "Includes a star-shaped antenna and a sporty headband.",
+      "Holds a glowing tennis ball and a tennis racket, with colorful tennis shoes."
+    ]
+  },
+  "reactCssFaithfulness": {
+    "ok": true,
+    "failures": []
+  },
+  "reactCssRepairNotes": [],
+  "validation": {
+    "ok": true,
+    "errors": []
+  },
+  "coverage": {
+    "ok": true,
+    "checks": [
+      {
+        "id": "star-accents",
+        "label": "star accents",
+        "ok": true,
+        "count": 6,
+        "minimumCount": 2,
+        "layers": [
+          "spark-8",
+          "spark-9",
+          "spark-10",
+          "spark-11",
+          "spark-12",
+          "star-7"
+        ]
+      }
+    ],
+    "missingRequiredDetails": []
+  },
+  "enrichments": [],
+  "options": {
+    "enrichmentEnabled": true,
+    "coverageMode": "enforced",
+    "commitRequested": true
+  },
+  "repairs": 0
+}
