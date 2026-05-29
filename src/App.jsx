@@ -1790,20 +1790,38 @@ function Test5HandCodedAvatar({ character, status = 'listening' }) {
   const hasPart = (type, side) => parts.some(part => part.type === type && (!side || part.side === side));
   const hasAnchoredPart = (type, side) => parts.some(part => part.type === type && (part.side === side || (!part.side && side === 'right') || (part.side === 'center' && side === 'right')));
   const partClass = (part) => `test5-dude-part part-${part.type || 'badge'} side-${part.side || 'center'} tone-${part.tone || 'primary'}`;
+  const customPrimitives = Array.isArray(character.customPrimitives) ? character.customPrimitives : [];
+  const renderCustomPrimitives = (anchor) => customPrimitives
+    .filter(item => item.anchor === anchor)
+    .map(item => <span
+      key={item.id || `${anchor}-${item.label}`}
+      className={`test5-dude-custom-primitive custom-shape-${item.shape || 'oval'} tone-${item.tone || 'accent'}${item.outline === false ? ' no-outline' : ''}`}
+      title={item.label || ''}
+      aria-label={item.label || undefined}
+      style={{
+        '--custom-x': `${Number(item.x) || 0}px`,
+        '--custom-y': `${Number(item.y) || 0}px`,
+        '--custom-w': `${Number(item.width) || 44}px`,
+        '--custom-h': `${Number(item.height) || 44}px`,
+        '--custom-rot': `${Number(item.rotate) || 0}deg`,
+      }}
+    />);
   const renderHand = (side) => {
     const holdingWand = hasAnchoredPart('wand', side);
-    return <div className={`test5-dude-arm ${side}`}><span className={`test5-dude-hand${holdingWand ? ' holding-wand' : ''}`}>{holdingWand && <i className="test5-dude-wand grip-wand-shaft wand-handle-in-hand" />}</span></div>;
+    return <div className={`test5-dude-arm ${side}`}><span className={`test5-dude-hand${holdingWand ? ' holding-wand' : ''}`}>{holdingWand && <i className="test5-dude-wand grip-wand-shaft wand-handle-in-hand" />}{renderCustomPrimitives(`${side}Hand`)}</span></div>;
   };
   const isWizard = hasPart('robe') || hasPart('wand') || hasPart('hat');
   const isMushroom = character.headShape === 'mushroom' || hasPart('mushroomCap');
-  const renderFoot = (side) => <div className={`test5-dude-leg ${side}`}><span className={`test5-dude-foot${isWizard ? ' wizardShoe' : ''}${isMushroom ? ' mushroomShoe' : ''}`}>{hasAnchoredPart('boot', side) && <b className="test5-dude-boot" />}{hasAnchoredPart('flame', side) && <i className="test5-dude-flame" />}</span></div>;
+  const renderFoot = (side) => <div className={`test5-dude-leg ${side}`}><span className={`test5-dude-foot${isWizard ? ' wizardShoe' : ''}${isMushroom ? ' mushroomShoe' : ''}`}>{hasAnchoredPart('boot', side) && <b className="test5-dude-boot" />}{hasAnchoredPart('flame', side) && <i className="test5-dude-flame" />}{renderCustomPrimitives(`${side}Foot`)}</span></div>;
   return <div className={`avatar-card test5-dude-card ${status} built`} style={vars}>
     <div className={`test5-dude-character head-${character.headShape || 'rounded'} body-${character.bodyShape || 'compact'} expression-${character.expression || 'friendly'}`}>
+      {renderCustomPrimitives('root')}
       {hasPart('tail') && <div className="test5-dude-tail" aria-hidden="true" />}
       {hasPart('wing', 'left') && <div className="test5-dude-wing left" aria-hidden="true" />}
       {hasPart('wing', 'right') && <div className="test5-dude-wing right" aria-hidden="true" />}
       <div className="test5-dude-antenna" />
       <div className="test5-dude-head">
+        {renderCustomPrimitives('head')}{renderCustomPrimitives('headTop')}{renderCustomPrimitives('headLeft')}{renderCustomPrimitives('headRight')}
         {character.headShape === 'mushroom' && <>
           <div className="test5-dude-mushroom-cap"><span/><span/><span/></div>
           <div className="test5-dude-mushroom-gills"><i/><i/><i/><i/></div>
@@ -1816,7 +1834,7 @@ function Test5HandCodedAvatar({ character, status = 'listening' }) {
         {hasPart('hat') && <div className="test5-dude-hat" />}
         {hasPart('helmet') && <div className="test5-dude-helmet" />}
         <div className="test5-dude-shine" />
-        <div className={`test5-dude-eyes ${character.expression || 'friendly'}`}><span/><span/></div>
+        <div className={`test5-dude-eyes ${character.expression || 'friendly'}`}><span>{renderCustomPrimitives('leftEye')}</span><span>{renderCustomPrimitives('rightEye')}</span></div>
         {hasPart('glasses') && <div className="test5-dude-glasses"><i/><i/></div>}
         {hasPart('star', 'left') && <div className="test5-dude-star left">★</div>}
         {hasPart('star', 'right') && <div className="test5-dude-star right">★</div>}
@@ -1826,6 +1844,7 @@ function Test5HandCodedAvatar({ character, status = 'listening' }) {
       <div className="test5-dude-lower">
         {renderHand('left')}
         <div className="test5-dude-body">
+          {renderCustomPrimitives('body')}{renderCustomPrimitives('bodyFront')}
           {hasPart('robe') && <div className="test5-dude-robe"><span className="test5-dude-robe-collar" /><span className="test5-dude-robe-trim" /><span className="test5-dude-robe-belt" /><span className="test5-dude-robe-gem" /><span className="test5-dude-robe-hem" /></div>}
           {hasPart('panel') && <div className="test5-dude-panel" />}
           {hasPart('badge') && <div className="test5-dude-badge" />}

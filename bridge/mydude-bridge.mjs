@@ -422,12 +422,17 @@ Required JSON shape:
     { "type": "ear", "side": "left", "label": "fox ear", "tone": "primary" },
     { "type": "glasses", "label": "star goggles", "tone": "accent" }
   ],
+  "customPrimitives": [
+    { "id": "tennis-racket", "label": "tennis racket", "anchor": "rightHand", "shape": "ring", "x": 48, "y": -50, "width": 72, "height": 92, "rotate": -20, "tone": "accent", "outline": true },
+    { "id": "racket-handle", "label": "racket handle", "anchor": "rightHand", "shape": "capsule", "x": 20, "y": 8, "width": 16, "height": 82, "rotate": -22, "tone": "dark" }
+  ],
   "notes": ["which details are custom to the prompt"]
 }
 Rules:
 - Think like the original blue-dude React/CSS author: first lock a polished mascot scaffold, then customize CSS variables and named div parts.
 - Keep a single connected character, not floating stickers.
 - Include prompt-specific parts when relevant: ears, tail, snout, horns, wings, hat, glasses, star, boots, flame, wand, badge, scarf, antenna, spots, stripes, panel, robe, helmet.
+- For any prompt-specific object, clothing detail, sports gear, tool, vehicle clue, instrument, food, or prop that is not already one of those named scaffold parts, create it in customPrimitives from safe geometric atoms. Do not collapse it to a generic badge. Compose multiple customPrimitives when needed (for example a tennis racket = ring head + capsule handle + string lines, tennis ball = circle + arc stripes, shoe = capsule + sole stripe).
 - For mushroom prompts, do not stop at headShape:"mushroom". Include explicit parts {"type":"mushroomCap"}, {"type":"mushroomGills"}, and at least two {"type":"spot"} cap markings; avoid animal ears, snout, tail, and wings unless the user explicitly asks for them.
 - Always decide explicit colors for body, arms, hands, legs, and feet in cssVariables. Wizard bodies should normally read as a robe/body color distinct from skin/hand color; do not leave limbs to inherit random accent colors.
 - For mushroom wizards specifically: treat the visible body/torso and legs as a wizard robe (deep indigo/navy/purple), arms as robe sleeves, and hands/feet or stem-like exposed parts as pale mushroom-stem cream/blue. The blue should primarily belong to the mushroom cap unless the user asks for blue robe/body.
@@ -445,7 +450,16 @@ function fallbackReactCssCharacter(prompt = '', designBrief = {}) {
   const isMushroom = /mushroom|toadstool|fungus/.test(text);
   const primary = isFox ? '#fb923c' : /purple|wizard|space/.test(text) && !isMushroom ? '#a78bfa' : /green/.test(text) ? '#34d399' : /pink/.test(text) ? '#f472b6' : '#38bdf8';
   const parts = [];
+  const customPrimitives = [];
   const add = (type, label, opts = {}) => parts.push({ type, label, tone: opts.tone || 'primary', side: opts.side || 'center' });
+  const custom = (id, label, anchor, shape, opts = {}) => customPrimitives.push({
+    id, label, anchor, shape,
+    x: opts.x || 0, y: opts.y || 0,
+    width: opts.width || 44, height: opts.height || 44,
+    rotate: opts.rotate || 0,
+    tone: opts.tone || 'accent',
+    outline: opts.outline !== false,
+  });
   if (isMushroom) {
     add('mushroomCap', 'wide blue mushroom cap', { tone: 'primary' });
     add('mushroomGills', 'visible cap gills underneath', { tone: 'secondary' });
@@ -487,6 +501,7 @@ function fallbackReactCssCharacter(prompt = '', designBrief = {}) {
     bodyShape: isRobot ? 'robot' : isWizard ? 'robe' : isPilot ? 'pilot' : 'compact',
     expression: /sleepy/.test(text) ? 'sleepy' : /focus|angry/.test(text) ? 'focused' : /excited|happy/.test(text) ? 'excited' : 'friendly',
     parts: parts.slice(0, 12),
+    customPrimitives: customPrimitives.slice(0, 18),
     notes: (designBrief.visualChecklist || []).slice(0, 8),
   };
 }
@@ -514,7 +529,72 @@ function validateReactCssFaithfulness(character = {}, prompt = '', designBrief =
   }
   if (/wand|staff|sword|lantern/.test(text) && !parts.some(part => ['wand'].includes(part.type) && ['left','right'].includes(part.side))) failures.push('held wand/staff must have side left/right so it can attach to a hand');
   if (/boot/.test(text) && (!has('boot', 'left') || !has('boot', 'right'))) failures.push('boots must include left and right foot-worn boot parts');
+  const customText = (Array.isArray(character.customPrimitives) ? character.customPrimitives : []).map(p => `${p.label || ''} ${p.id || ''} ${p.anchor || ''} ${p.shape || ''}`).join(' ').toLowerCase();
+  if (/tennis|racket|racquet/.test(text) && !/racket|racquet/.test(customText)) failures.push('tennis prompt must include customPrimitives for the racket instead of a generic badge');
+  if (/tennis|ball/.test(text) && /tennis/.test(text) && !/ball/.test(customText)) failures.push('tennis prompt must include customPrimitives for the ball instead of a generic badge');
   return { ok: failures.length === 0, failures };
+}
+
+function primitiveHintsFromUnknownParts(sourceParts = []) {
+  const hints = [];
+  const push = (id, label, anchor, shape, opts = {}) => hints.push({
+    id, label, anchor, shape,
+    x: opts.x || 0, y: opts.y || 0,
+    width: opts.width || 44, height: opts.height || 44,
+    rotate: opts.rotate || 0,
+    tone: opts.tone || 'accent',
+    outline: opts.outline !== false,
+  });
+  for (const part of sourceParts) {
+    const text = `${part?.type || ''} ${part?.label || ''}`.toLowerCase();
+    const side = part?.side === 'left' ? 'left' : part?.side === 'right' ? 'right' : '';
+    if (/racket|racquet/.test(text)) {
+      const anchor = side === 'left' ? 'leftHand' : 'rightHand';
+      push(`${slugify(text)}-head`, part?.label || 'racket head', anchor, 'ring', { x: side === 'left' ? -58 : 58, y: -52, width: 78, height: 100, rotate: side === 'left' ? 18 : -18 });
+      push(`${slugify(text)}-handle`, `${part?.label || 'racket'} handle`, anchor, 'capsule', { x: side === 'left' ? -24 : 24, y: 18, width: 16, height: 92, rotate: side === 'left' ? 20 : -20, tone: 'dark' });
+    } else if (/ball|orb|bubble|planet/.test(text)) {
+      push(slugify(text), part?.label || 'round prompt prop', side === 'right' ? 'rightHand' : side === 'left' ? 'leftHand' : 'bodyFront', 'circle', { x: side === 'right' ? 28 : side === 'left' ? -28 : 0, y: -18, width: 48, height: 48 });
+    } else if (/shoe|sneaker|skate/.test(text)) {
+      push(slugify(text), part?.label || 'custom shoe', side === 'right' ? 'rightFoot' : 'leftFoot', 'capsule', { x: side === 'right' ? 10 : -10, y: 14, width: 72, height: 28, rotate: side === 'right' ? 8 : -8 });
+    } else if (/headband|band|visor/.test(text)) {
+      push(slugify(text), part?.label || 'head band', 'headTop', 'capsule', { y: 54, width: 176, height: 18, rotate: -3, tone: part?.tone || 'accent' });
+    }
+    if (hints.length >= 12) break;
+  }
+  return hints;
+}
+
+function sanitizeCustomPrimitives(rawPrimitives = [], fallbackPrimitives = [], hintPrimitives = []) {
+  const allowedAnchors = new Set(['head','headTop','headLeft','headRight','body','bodyFront','leftHand','rightHand','leftFoot','rightFoot','leftEye','rightEye','root']);
+  const allowedShapes = new Set(['circle','oval','capsule','ring','line','rect','triangle','star','arc']);
+  const allowedTones = new Set(['primary','secondary','accent','cream','dark','eye']);
+  const source = Array.isArray(rawPrimitives) && rawPrimitives.length ? rawPrimitives : [];
+  const combined = [...source, ...hintPrimitives, ...(Array.isArray(fallbackPrimitives) ? fallbackPrimitives : [])];
+  const clamp = (value, min, max, fb = 0) => Math.max(min, Math.min(max, Number.isFinite(Number(value)) ? Number(value) : fb));
+  const seen = new Set();
+  const out = [];
+  for (const primitive of combined) {
+    if (!primitive || typeof primitive !== 'object') continue;
+    const label = String(primitive.label || primitive.id || 'custom primitive').replace(/[<>]/g, '').slice(0, 80);
+    const id = slugify(primitive.id || label || `primitive-${out.length + 1}`) || `primitive-${out.length + 1}`;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    out.push({
+      id,
+      label,
+      anchor: allowedAnchors.has(primitive.anchor) ? primitive.anchor : 'bodyFront',
+      shape: allowedShapes.has(primitive.shape) ? primitive.shape : 'oval',
+      x: clamp(primitive.x, -180, 180),
+      y: clamp(primitive.y, -180, 180),
+      width: clamp(primitive.width, 4, 180, 44),
+      height: clamp(primitive.height, 4, 180, 44),
+      rotate: clamp(primitive.rotate, -180, 180),
+      tone: allowedTones.has(primitive.tone) ? primitive.tone : 'accent',
+      outline: primitive.outline !== false,
+    });
+    if (out.length >= 18) break;
+  }
+  return out;
 }
 
 function sanitizeReactCssCharacter(raw, prompt = '', designBrief = {}) {
@@ -541,6 +621,7 @@ function sanitizeReactCssCharacter(raw, prompt = '', designBrief = {}) {
   const allowedSides = new Set(['left','right','center']);
   const allowedTones = new Set(['primary','secondary','accent','cream','dark','eye']);
   const sourceParts = Array.isArray(clean.parts) && clean.parts.length ? [...clean.parts] : [];
+  const primitiveHints = primitiveHintsFromUnknownParts(sourceParts.filter(part => !allowedPartTypes.has(part?.type)));
   for (const fallbackPart of fallback.parts) {
     if (!sourceParts.some(part => part?.type === fallbackPart.type && (part?.side || 'center') === (fallbackPart.side || 'center'))) sourceParts.push(fallbackPart);
   }
@@ -551,6 +632,7 @@ function sanitizeReactCssCharacter(raw, prompt = '', designBrief = {}) {
     label: String(part?.label || `${part?.type || 'detail'} ${index + 1}`).replace(/[<>]/g, '').slice(0, 80),
   })).slice(0, 16);
   const parts = suppressUnrequestedAnimalParts(mappedParts, prompt, designBrief).slice(0, 12);
+  const customPrimitives = sanitizeCustomPrimitives(clean.customPrimitives, fallback.customPrimitives, primitiveHints);
   return {
     kind: 'react-css-character',
     componentName: String(clean.componentName || fallback.componentName).replace(/[^A-Za-z0-9]/g, '').slice(0, 40) || fallback.componentName,
@@ -562,6 +644,7 @@ function sanitizeReactCssCharacter(raw, prompt = '', designBrief = {}) {
     bodyShape: isMushroomWizard ? 'robe' : oneOf(clean.bodyShape, ['compact','round','suited','robot','robe','pilot'], fallback.bodyShape),
     expression: oneOf(clean.expression, ['friendly','sleepy','focused','excited','curious'], fallback.expression),
     parts: parts.length ? parts : fallback.parts,
+    customPrimitives,
     notes: (Array.isArray(clean.notes) ? clean.notes : fallback.notes).map(n => String(n).replace(/[<>]/g, '').slice(0, 140)).filter(Boolean).slice(0, 8),
   };
 }

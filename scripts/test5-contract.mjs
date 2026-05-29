@@ -33,6 +33,8 @@ assert(/commitRequested/.test(bridge), 'test5 artifacts must record whether comm
 assert(/generateTest5ReactCssCharacter\s*\(/.test(bridge), 'test5 must generate a GPT-authored React/CSS character blueprint, not only SceneSpec layers');
 assert(/sanitizeReactCssCharacter\s*\(/.test(bridge), 'test5 must sanitize the React/CSS character blueprint before the browser renders it');
 assert(/reactCssCharacter/.test(bridge), 'test5 artifacts/results must include the GPT-authored React/CSS character receipt');
+assert(/customPrimitives/.test(bridge), 'React/CSS blueprint must support LLM-authored prompt-specific dynamic primitives instead of collapsing unknown details to badges');
+assert(/test5-dude-custom-primitive/.test(app), 'frontend must render LLM-authored custom primitives with prompt-specific placement');
 assert(/function Test5HandCodedAvatar\s*\(/.test(app), 'frontend must render a hand-coded React/CSS character component for /test5');
 assert(/<Test5HandCodedAvatar\s+character=\{reactCssCharacter\}/.test(app), 'frontend must prefer the React/CSS character blueprint when available');
 const css = fs.readFileSync('src/styles.css', 'utf8');
