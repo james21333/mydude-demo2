@@ -1789,28 +1789,102 @@ function Test5HandCodedAvatar({ character, status = 'listening' }) {
   const parts = Array.isArray(character.parts) ? character.parts : [];
   const hasPart = (type, side) => parts.some(part => part.type === type && (!side || part.side === side));
   const hasAnchoredPart = (type, side) => parts.some(part => part.type === type && (part.side === side || (!part.side && side === 'right') || (part.side === 'center' && side === 'right')));
-  const partClass = (part) => `test5-dude-part part-${part.type || 'badge'} side-${part.side || 'center'} tone-${part.tone || 'primary'}`;
+  const labelSlug = (value = '') => String(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48);
+  const partClass = (part) => {
+    const label = String(part.label || part.type || 'part');
+    const semantic = /baseball|curved front brim|panel seams/i.test(label) ? ' semantic-baseball-cap' : /wizard|magic|pointy/i.test(label) ? ' semantic-wizard-hat' : '';
+    return `test5-dude-part part-${part.type || 'badge'} side-${part.side || 'center'} tone-${part.tone || 'primary'} label-${labelSlug(label)}${semantic}`;
+  };
   const customPrimitives = Array.isArray(character.customPrimitives) ? character.customPrimitives : [];
-  const renderCustomPrimitives = (anchor) => customPrimitives
-    .filter(item => item.anchor === anchor)
-    .map(item => <span
-      key={item.id || `${anchor}-${item.label}`}
-      className={`test5-dude-custom-primitive custom-shape-${item.shape || 'oval'} tone-${item.tone || 'accent'}${item.outline === false ? ' no-outline' : ''}`}
+  const renderPrimitive = (item, anchor, key, offset = { x: 0, y: 0 }) => {
+    const width = Number(item.width) || 44;
+    const height = Number(item.height) || 44;
+    const gripX = Math.max(0, Math.min(1, Number(item.gripX ?? 0.5)));
+    const gripY = Math.max(0, Math.min(1, Number(item.gripY ?? 0.5)));
+    const x = (Number(item.x) || 0) - (Number(offset.x) || 0);
+    const y = (Number(item.y) || 0) - (Number(offset.y) || 0);
+    const isHeld = item.held === true && (anchor === 'leftHand' || anchor === 'rightHand');
+    const primitiveSemantic = labelSlug(`${item.groupId || ''} ${item.id || ''} ${item.label || ''}`);
+    return <span
+      key={key || item.id || `${anchor}-${item.label}`}
+      className={`test5-dude-custom-primitive custom-shape-${item.shape || 'oval'} tone-${item.tone || 'accent'} semantic-${primitiveSemantic}${item.outline === false ? ' no-outline' : ''}${isHeld ? ' held-custom grip-aligned' : ''}`}
       title={item.label || ''}
       aria-label={item.label || undefined}
       style={{
-        '--custom-x': `${Number(item.x) || 0}px`,
-        '--custom-y': `${Number(item.y) || 0}px`,
-        '--custom-w': `${Number(item.width) || 44}px`,
-        '--custom-h': `${Number(item.height) || 44}px`,
+        '--custom-x': `${x}px`,
+        '--custom-y': `${y}px`,
+        '--custom-w': `${width}px`,
+        '--custom-h': `${height}px`,
         '--custom-rot': `${Number(item.rotate) || 0}deg`,
+        '--custom-grip-x': `${gripX * 100}%`,
+        '--custom-grip-y': `${gripY * 100}%`,
       }}
-    />);
+    />;
+  };
+  const renderCustomPrimitives = (anchor) => customPrimitives
+    .filter(item => item.anchor === anchor && !(item.held === true && (anchor === 'leftHand' || anchor === 'rightHand')))
+    .map(item => renderPrimitive(item, anchor));
+  const heldGripPoint = (item) => {
+    const width = Number(item.width) || 44;
+    const height = Number(item.height) || 44;
+    const gripX = Math.max(0, Math.min(1, Number(item.gripX ?? 0.5)));
+    const gripY = Math.max(0, Math.min(1, Number(item.gripY ?? 0.5)));
+    return { x: (Number(item.x) || 0) + (gripX - 0.5) * width, y: (Number(item.y) || 0) + (gripY - 0.5) * height };
+  };
+  const heldGroupKey = (item) => item.groupId || String(item.id || item.label || 'held-object').replace(/-(body|handle|head|shaft|blade|string|strap|page|screen)$/i, '').replace(/\b(body|handle|head|shaft|blade|string|strap|page|screen)\b/ig, '').trim() || 'held-object';
+  const classifyHeldSemantic = (groupId, items = []) => {
+    const text = `${groupId || ''} ${items.map(item => `${item.id || ''} ${item.label || ''} ${item.shape || ''}`).join(' ')}`.toLowerCase();
+    if (/gavel|mallet/.test(text)) return 'gavel';
+    if (/baseball.*bat|\bbat\b|slugger/.test(text)) return 'baseball-bat';
+    if (/glove|mitt/.test(text)) return 'baseball-glove';
+    if (/briefcase|case/.test(text)) return 'briefcase';
+    if (/document|paper|folder|legal/.test(text)) return 'documents';
+    if (/racket|racquet/.test(text)) return 'racket';
+    return '';
+  };
+  const renderSemanticHeldObject = (semantic, side, groupId) => {
+    if (!semantic) return null;
+    return <span className={`test5-held-semantic held-${side} semantic-${semantic}`} data-held-semantic={semantic} data-held-group={groupId} aria-label={semantic.replace(/-/g, ' ')}>
+      {semantic === 'gavel' && <><i className="prop-gavel-handle" /><i className="prop-gavel-head" /><i className="prop-gavel-band left" /><i className="prop-gavel-band right" /></>}
+      {semantic === 'baseball-bat' && <><i className="prop-bat-barrel" /><i className="prop-bat-handle" /><i className="prop-bat-knob" /></>}
+      {semantic === 'baseball-glove' && <><i className="prop-glove-palm" /><i className="prop-glove-thumb" /><i className="prop-glove-web" /></>}
+      {semantic === 'briefcase' && <><i className="prop-briefcase-body" /><i className="prop-briefcase-handle" /><i className="prop-briefcase-latch" /></>}
+      {semantic === 'documents' && <><i className="prop-doc page-one" /><i className="prop-doc page-two" /><i className="prop-doc-lines" /></>}
+      {semantic === 'racket' && <><i className="prop-racket-head" /><i className="prop-racket-strings" /><i className="prop-racket-handle" /></>}
+    </span>;
+  };
+  const renderHeldPrimitiveGroups = (side) => {
+    const anchor = `${side}Hand`;
+    const groups = new Map();
+    for (const item of customPrimitives.filter(p => p.anchor === anchor && p.held === true)) {
+      const key = heldGroupKey(item);
+      groups.set(key, [...(groups.get(key) || []), item]);
+    }
+    const renderedSemantics = new Set();
+    return [...groups.entries()].map(([groupId, items], index) => {
+      const semantic = classifyHeldSemantic(groupId, items);
+      if (semantic) {
+        if (renderedSemantics.has(semantic)) return null;
+        renderedSemantics.add(semantic);
+        return <span key={`${anchor}-${groupId}`} className={`test5-dude-held-object held-${side} semantic-${semantic}`} data-held-group={groupId} style={{ '--held-index': index }}>
+          {renderSemanticHeldObject(semantic, side, groupId)}
+        </span>;
+      }
+      const gripItem = items.find(item => /handle|grip|strap|shaft/i.test(`${item.id || ''} ${item.label || ''}`)) || items[0];
+      const grip = heldGripPoint(gripItem);
+      const primitiveSemantic = labelSlug(`${groupId} ${items.map(item => `${item.id || ''} ${item.label || ''}`).join(' ')}`);
+      return <span key={`${anchor}-${groupId}`} className={`test5-dude-held-object held-${side} semantic-${primitiveSemantic}`} data-held-group={groupId} style={{ '--held-index': index }}>
+        {items.map(item => renderPrimitive(item, anchor, item.id || `${groupId}-${item.label}`, grip))}
+      </span>;
+    });
+  };
   const renderHand = (side) => {
     const holdingWand = hasAnchoredPart('wand', side);
-    return <div className={`test5-dude-arm ${side}`}><span className={`test5-dude-hand${holdingWand ? ' holding-wand' : ''}`}>{holdingWand && <i className="test5-dude-wand grip-wand-shaft wand-handle-in-hand" />}{renderCustomPrimitives(`${side}Hand`)}</span></div>;
+    const heldCustom = customPrimitives.some(item => item.anchor === `${side}Hand` && item.held === true);
+    return <div className={`test5-dude-arm ${side}`}><span className={`test5-dude-hand${holdingWand ? ' holding-wand' : ''}${heldCustom ? ' holding-custom' : ''}`}>{holdingWand && <i className="test5-dude-wand grip-wand-shaft wand-handle-in-hand" />}{renderHeldPrimitiveGroups(side)}{renderCustomPrimitives(`${side}Hand`)}</span></div>;
   };
-  const isWizard = hasPart('robe') || hasPart('wand') || hasPart('hat');
+  const hasWizardHat = parts.some(part => part.type === 'hat' && /wizard|magic|pointy/i.test(String(part.label || '')));
+  const isWizard = hasPart('robe') || hasPart('wand') || hasWizardHat;
   const isMushroom = character.headShape === 'mushroom' || hasPart('mushroomCap');
   const renderFoot = (side) => <div className={`test5-dude-leg ${side}`}><span className={`test5-dude-foot${isWizard ? ' wizardShoe' : ''}${isMushroom ? ' mushroomShoe' : ''}`}>{hasAnchoredPart('boot', side) && <b className="test5-dude-boot" />}{hasAnchoredPart('flame', side) && <i className="test5-dude-flame" />}{renderCustomPrimitives(`${side}Foot`)}</span></div>;
   return <div className={`avatar-card test5-dude-card ${status} built`} style={vars}>
@@ -1819,7 +1893,6 @@ function Test5HandCodedAvatar({ character, status = 'listening' }) {
       {hasPart('tail') && <div className="test5-dude-tail" aria-hidden="true" />}
       {hasPart('wing', 'left') && <div className="test5-dude-wing left" aria-hidden="true" />}
       {hasPart('wing', 'right') && <div className="test5-dude-wing right" aria-hidden="true" />}
-      <div className="test5-dude-antenna" />
       <div className="test5-dude-head">
         {renderCustomPrimitives('head')}{renderCustomPrimitives('headTop')}{renderCustomPrimitives('headLeft')}{renderCustomPrimitives('headRight')}
         {character.headShape === 'mushroom' && <>
@@ -1831,7 +1904,9 @@ function Test5HandCodedAvatar({ character, status = 'listening' }) {
         {hasPart('ear', 'right') && <div className="test5-dude-ear right" />}
         {hasPart('horn', 'left') && <div className="test5-dude-horn left" />}
         {hasPart('horn', 'right') && <div className="test5-dude-horn right" />}
-        {hasPart('hat') && <div className="test5-dude-hat" />}
+        {hasAnchoredPart('antenna', 'left') && <div className="test5-dude-antenna left" aria-label="left antenna attached to head" />}
+        {hasAnchoredPart('antenna', 'right') && <div className="test5-dude-antenna right" aria-label="right antenna attached to head" />}
+        {parts.filter(part => part.type === 'hat').map((part, idx) => <div key={`hat-${idx}`} className={`test5-dude-hat ${partClass(part)}`} aria-label={part.label || 'hat'} />)}
         {hasPart('helmet') && <div className="test5-dude-helmet" />}
         <div className="test5-dude-shine" />
         <div className={`test5-dude-eyes ${character.expression || 'friendly'}`}><span>{renderCustomPrimitives('leftEye')}</span><span>{renderCustomPrimitives('rightEye')}</span></div>
@@ -2017,30 +2092,55 @@ function Test5AvatarLab() {
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [objectRetryCount, setObjectRetryCount] = useState(0);
   const [useEnrichment, setUseEnrichment] = useState(() => !/enrichment=0|fallback=0/.test(window.location.search));
 
-  async function generate() {
+  async function generate(overrides = {}) {
+    const { throwOnError = false, ...requestOverrides } = overrides || {};
     const text = prompt.trim();
     if (!text || busy) return;
     setBusy(true);
     setError('');
-    setStatus('expanding prompt into a hidden art-direction brief…');
+    setStatus(requestOverrides.heldObjectFallback ? `visual retry ${requestOverrides.heldObjectFallback.attempt || 1}/3: asking for a different hand-held object…` : 'expanding prompt into a hidden art-direction brief…');
     try {
+      const requestBody = { prompt: text, commit: true, enrichment: useEnrichment, coverageMode: useEnrichment ? 'enforced' : 'report-only', ...requestOverrides };
       const res = await fetch(`${test5BridgeOrigin()}/test5/avatar`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ prompt: text, commit: true, enrichment: useEnrichment, coverageMode: useEnrichment ? 'enforced' : 'report-only' }),
+        body: JSON.stringify(requestBody),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok || !json.ok) throw new Error(json.error || `HTTP ${res.status}`);
       setResult(json);
       setStatus(`rendered + saved${json.commit?.ok ? ` + committed ${json.commit.hash}${json.commit?.push?.ok ? ' + pushed' : json.commit?.push?.attempted ? ' (push failed)' : ''}` : json.commit?.attempted ? ' (commit failed; artifact saved)' : ''}`);
+      return json;
     } catch (err) {
       setError(String(err?.message || err));
       setStatus('failed');
+      if (throwOnError) throw err;
+      return null;
     } finally {
       setBusy(false);
     }
+  }
+
+  async function retryHeldObjectFallback() {
+    if (busy || !prompt.trim()) return;
+    const badObject = result?.visualRetryPlan?.currentObject || result?.visualRetryPlan?.badObject || 'unclear held object';
+    let lastError = null;
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      setObjectRetryCount(attempt);
+      try {
+        await generate({ throwOnError: true, heldObjectFallback: { enabled: true, badObject, attempt, maxAttempts: 3 } });
+        setStatus(`visual retry ${attempt}/3 rendered an alternate held object; inspect the screenshot`);
+        return;
+      } catch (err) {
+        lastError = err;
+      }
+    }
+    setError(String(lastError?.message || lastError || 'alternate held-object retries failed'));
+    setStatus('alternate held-object retries failed');
+    setBusy(false);
   }
 
   const scene = result?.sceneSpec;
@@ -2061,7 +2161,7 @@ function Test5AvatarLab() {
         <textarea
           id="test5-prompt"
           value={prompt}
-          onChange={(e) => setPrompt(e.target.value.slice(0, 1200))}
+          onChange={(e) => { setPrompt(e.target.value.slice(0, 1200)); setObjectRetryCount(0); }}
           rows={5}
           style={{ width: '100%', borderRadius: 16, border: '1px solid rgba(148,163,184,.28)', background: 'rgba(15,23,42,.74)', color: 'white', padding: 14, resize: 'vertical', fontSize: 15, lineHeight: 1.4 }}
           placeholder="Example: blue mushroom wizard with sleepy eyes and a tiny glowing staff"
@@ -2072,7 +2172,8 @@ function Test5AvatarLab() {
         </label>
         <div className="debug-pill" style={{ marginTop: 8 }}>comparison mode: {useEnrichment ? 'LLM + enrichment, coverage enforced' : 'LLM only, enrichment off, coverage report-only'}</div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginTop: 12 }}>
-          <button className="primary" onClick={generate} disabled={busy || !prompt.trim()}>{busy ? 'Generating…' : 'Generate Avatar'}</button>
+          <button className="primary" onClick={() => generate()} disabled={busy || !prompt.trim()}>{busy ? 'Generating…' : 'Generate Avatar'}</button>
+          {result ? <button className="secondary" onClick={retryHeldObjectFallback} disabled={busy || !prompt.trim()} title="If the hand-held object still looks wrong after the normal generation tries, run up to three more attempts with a different prompt-fitting object.">Object looks wrong: try alternate ×3</button> : null}
           <span className="debug-pill">status: {status}</span>
         </div>
         {error ? <div className="error-box" style={{ marginTop: 12 }}>Error: {error}</div> : null}
@@ -2082,6 +2183,7 @@ function Test5AvatarLab() {
           <div><strong>Commit:</strong> {result.commit?.ok ? result.commit.hash : result.commit?.error || 'not committed'}</div>
           <div><strong>Push:</strong> {result.commit?.push?.ok ? 'pushed to GitHub' : result.commit?.push?.attempted ? result.commit.push.error || 'push failed' : 'not pushed'}</div>
           <div><strong>Repairs:</strong> {result.repairs}</div>
+          <div><strong>Visual retry plan:</strong> {result.visualRetryPlan?.currentObject || 'no held object detected'}{result.visualRetryPlan?.alternateObject ? ` → alternate available: ${result.visualRetryPlan.alternateObject}` : ''}{objectRetryCount ? ` (retry ${objectRetryCount}/3)` : ''}</div>
           <div><strong>Mode:</strong> {result.options?.enrichmentEnabled ? 'LLM + fallback reusable shape primitives' : 'LLM only; fallback shape primitives off'} / coverage {result.options?.coverageMode || 'enforced'}</div>
           <div><strong>Coverage:</strong> {result.coverage?.ok ? 'passed' : 'failed'}{result.coverage?.missingRequiredDetails?.length ? ` — missing ${result.coverage.missingRequiredDetails.join(', ')}` : ''}</div>
           <div><strong>React/CSS component:</strong> {result.reactCssCharacter?.componentName || 'not returned'} ({result.reactCssCharacter?.styleSystem || 'unknown'})</div>

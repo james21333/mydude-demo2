@@ -256,6 +256,79 @@ function parseJsonObject(text = '') {
   throw new Error('LLM did not return a JSON object');
 }
 
+function headItemQuestionForPrompt(prompt = '', subject = '') {
+  const raw = String(subject || prompt || 'the requested avatar').trim().replace(/[?.!]+$/g, '');
+  const compact = raw.replace(/^(a|an|the)\s+/i, '').split(/\s+/).slice(0, 8).join(' ') || 'requested avatar';
+  const article = /^[aeiou]/i.test(compact) ? 'an' : 'a';
+  return `What would ${article} ${compact} have on their head?`;
+}
+
+
+function normalizeHeldObjectSemantic(value = '') {
+  const text = String(value || '').toLowerCase();
+  if (/baseball[- ]?bat|slugger|\bbat\b/.test(text)) return 'baseball-bat';
+  if (/glove|mitt/.test(text)) return 'baseball-glove';
+  if (/gavel|mallet/.test(text)) return 'gavel';
+  if (/briefcase|\bcase\b/.test(text)) return 'briefcase';
+  if (/document|paper|folder/.test(text)) return 'documents';
+  if (/racket|racquet/.test(text)) return 'racket';
+  return '';
+}
+
+function inferHeldObjectSemanticFromCharacter(character = {}) {
+  const primitives = Array.isArray(character?.customPrimitives) ? character.customPrimitives : [];
+  const held = primitives.filter(p => p?.held === true || ['leftHand','rightHand'].includes(p?.anchor));
+  const heldText = held.map(p => `${p.groupId || ''} ${p.id || ''} ${p.label || ''} ${p.shape || ''}`).join(' ');
+  return normalizeHeldObjectSemantic(heldText);
+}
+
+function alternateHeldObjectForPrompt(prompt = '', badObject = '') {
+  const text = String(prompt || '').toLowerCase();
+  const bad = normalizeHeldObjectSemantic(badObject);
+  if (/baseball|slugger|batter|pitcher|catcher/.test(text) || ['baseball-bat','baseball-glove'].includes(bad)) {
+    return bad === 'baseball-glove' ? 'baseball-bat' : 'baseball-glove';
+  }
+  if (bad === 'gavel') return 'documents';
+  if (bad === 'briefcase') return 'documents';
+  if (bad === 'documents') return 'briefcase';
+  if (bad === 'racket') return 'briefcase';
+  return '';
+}
+
+function buildHeldObjectRetryPlan(prompt = '', designBrief = {}, character = {}, options = {}) {
+  const currentObject = inferHeldObjectSemanticFromCharacter(character) || normalizeHeldObjectSemantic(`${prompt} ${designBrief?.expandedPrompt || ''} ${(designBrief?.visualChecklist || []).join(' ')}`);
+  const userBadObject = normalizeHeldObjectSemantic(options?.badObject || options?.badHeldObject || currentObject);
+  const requested = Boolean(options?.enabled || options?.heldObjectFallback || options?.objectFallback || options?.badObject || options?.badHeldObject);
+  const badObject = userBadObject || currentObject;
+  const alternateObject = requested ? alternateHeldObjectForPrompt(prompt, badObject) : '';
+  return {
+    requested,
+    currentObject,
+    badObject,
+    alternateObject,
+    maxAlternateAttempts: 3,
+    instruction: alternateObject ? `Visual retry: avoid ${badObject || 'the previous unclear held object'} and use a clearly readable ${alternateObject} instead, still attached to the character hand and fitting the original prompt.` : '',
+  };
+}
+
+function applyHeldObjectRetryToBrief(designBrief = {}, retryPlan = {}) {
+  if (!retryPlan?.requested || !retryPlan?.alternateObject) return designBrief;
+  const label = retryPlan.alternateObject.replace(/-/g, ' ');
+  const badLabel = (retryPlan.badObject || 'unclear held object').replace(/-/g, ' ');
+  return {
+    ...designBrief,
+    expandedPrompt: `${designBrief.expandedPrompt || ''} Visual retry override: the previous ${badLabel} did not read clearly in the screenshot, so render a clearly recognizable hand-held ${label} instead. Do not render the previous ${badLabel}.`,
+    visualChecklist: [
+      `Visual retry fallback: avoid ${badLabel}; use a clear hand-held ${label} that still fits the character prompt`,
+      ...(Array.isArray(designBrief.visualChecklist) ? designBrief.visualChecklist : []),
+    ].slice(0, 14),
+    requiredDetails: [
+      `clear hand-held ${label}`,
+      ...(Array.isArray(designBrief.requiredDetails) ? designBrief.requiredDetails : []),
+    ].slice(0, 8),
+  };
+}
+
 function test5ExpanderSystemPrompt() {
   return `You are the /test5 My Dude avatar art director. Expand a short user request into a detailed, renderer-aware avatar design brief.
 Return STRICT JSON only. No markdown, comments, HTML, SVG, CSS, JavaScript, image URLs, base64, or prose.
@@ -276,8 +349,13 @@ Required JSON shape:
 }
 Rules:
 - Preserve the user's concept, but add the missing details in the background.
-- Include at least one anatomy detail, one color/material detail, one expression detail, one accessory/marking, and one accent/glow/detail layer.
-- Favor details that can be represented with simple mascot parts: horns, ears, wings, tail, patches, spots, stripes, glasses, hats, wand/staff, badge, sparkles, music notes, screen/panel, boots, hooves, claws.
+- Include at least one anatomy detail, one color/material detail, one expression detail, and one body-attached accessory/marking/clothing detail.
+- For every prompt, explicitly ask in visualChecklist: "Head item question: What would a/an <prompt subject> have on their head?" Example: alien => "What would an alien have on their head?".
+- Then explicitly answer in visualChecklist: "Head item decision: yes/no — <reason and exact attached head item if yes>" for whether the requested character would naturally have something on its head. If yes, specify the attached head item (baseball cap with curved front brim, crown, helmet, antenna, hair/headband, etc.); if no, say no and rely on native head/anatomy details.
+- Do not invent ceremonial/legal headwear for judges. Judges should read through robe, glasses/hair when relevant, courtroom seriousness, and a hand-held gavel/document, not a generic "judicial hat".
+- For baseball prompts, if a cap is chosen, call it a "baseball cap with rounded crown, panel seams, top button, and curved front brim". Do not let it degrade into a flat rectangle hat.
+- For now, do NOT request detached scene objects, loose balls, floating props, or sticker-like objects. Every requested detail must be attached to the avatar: in a hand, on the head, on torso/clothes, or on feet.
+- Favor details that can be represented as attached mascot parts: alien antenna, glasses, baseball cap, suit/tie/robe, badge, scarf, boots, hooves, claws, or a hand-held tool/briefcase/staff/gavel/bat/glove with a clear grip.
 - requiredRenderableDetails is a contract. Include only details that can be checked against layers. For star goggles, require glasses plus star/spark near eyes. For rocket boots, require two boot layers and flame/spark accents. For fox, require ears, snout, and tail.
 - Keep it cute, centered, and at the same polish level as the default blue My Dude avatar.`;
 }
@@ -367,13 +445,37 @@ function normalizeDesignBrief(raw, prompt) {
     brief[key] = Array.isArray(brief[key]) ? brief[key].map(v => String(v).slice(0, 180)).filter(Boolean).slice(0, key === 'visualChecklist' ? 14 : 8) : fallback[key];
   }
   if (!brief.visualChecklist.length) brief.visualChecklist = fallback.visualChecklist;
+  const headQuestion = headItemQuestionForPrompt(prompt, brief.subject);
+  if (!brief.visualChecklist.some(item => /head item question/i.test(item))) {
+    brief.visualChecklist.unshift(`Head item question: ${headQuestion}`);
+  }
+  if (!brief.visualChecklist.some(item => /head item decision/i.test(item))) {
+    const promptText = `${prompt || ''} ${brief.subject || ''} ${brief.expandedPrompt || ''}`.toLowerCase();
+    const isJudgePrompt = /\b(judge|courtroom|judicial|gavel)\b/.test(promptText);
+    const isBaseballPrompt = /\b(baseball|slugger|batter|pitcher|catcher)\b/.test(promptText);
+    const likelyHeadItem = !isJudgePrompt && (/\b(hat|helmet|crown|cap|hood|headband|antenna|horn|hair|visor|goggles|glasses|mushroom|wizard|alien|robot|pirate|chef|king|queen)\b/.test(promptText) || isBaseballPrompt);
+    const answer = isJudgePrompt ? 'no — judges usually do not wear hats; use robe/glasses/hair and a hand-held gavel instead' : isBaseballPrompt ? 'yes — baseball cap with rounded crown, panel seams, top button, and curved front brim' : likelyHeadItem ? 'yes — choose an attached, prompt-natural head detail/headwear' : 'no — no natural head item requested; keep head clean except anatomy';
+    brief.visualChecklist.unshift(`Head item decision: ${answer}`);
+  }
+  const checklistText = `${prompt || ''} ${brief.subject || ''} ${brief.expandedPrompt || ''}`.toLowerCase();
+  if (/\b(judge|courtroom|judicial|gavel)\b/.test(checklistText)) {
+    brief.visualChecklist = brief.visualChecklist.map(item => /head item decision/i.test(String(item || ''))
+      ? 'Head item decision: no — judges usually do not wear hats; use robe/glasses/hair and a hand-held gavel instead'
+      : item);
+  } else if (/\b(baseball|slugger|batter|pitcher|catcher)\b/.test(checklistText)) {
+    brief.visualChecklist = brief.visualChecklist.map(item => /head item decision/i.test(String(item || ''))
+      ? 'Head item decision: yes — baseball cap with rounded crown, panel seams, top button, and curved front brim'
+      : item);
+  }
+  brief.visualChecklist = brief.visualChecklist.slice(0, 14);
   if (!brief.requiredDetails.length) brief.requiredDetails = fallback.requiredDetails;
   brief.requiredRenderableDetails = normalizeRenderableDetails(brief.requiredRenderableDetails, prompt, brief);
   return brief;
 }
 
 async function expandTest5Prompt(prompt) {
-  const userContent = `User avatar request: ${prompt.trim().slice(0, 1200)}\nExpand it into the required JSON art direction brief. Add all missing details in the background.`;
+  const headQuestion = headItemQuestionForPrompt(prompt);
+  const userContent = `User avatar request: ${prompt.trim().slice(0, 1200)}\nHeadwear planning question to answer in visualChecklist: ${headQuestion}\nExpand it into the required JSON art direction brief. Add all missing details in the background.`;
   const result = await callTest5Chat({ system: test5ExpanderSystemPrompt(), userContent, temperature: 0.52, maxTokens: 1300, stage: 'expand' });
   const designBrief = normalizeDesignBrief(parseJsonObject(result.content), prompt);
   return { ...result, designBrief };
@@ -423,16 +525,21 @@ Required JSON shape:
     { "type": "glasses", "label": "star goggles", "tone": "accent" }
   ],
   "customPrimitives": [
-    { "id": "tennis-racket", "label": "tennis racket", "anchor": "rightHand", "shape": "ring", "x": 48, "y": -50, "width": 72, "height": 92, "rotate": -20, "tone": "accent", "outline": true },
-    { "id": "racket-handle", "label": "racket handle", "anchor": "rightHand", "shape": "capsule", "x": 20, "y": 8, "width": 16, "height": 82, "rotate": -22, "tone": "dark" }
+    { "id": "briefcase-body", "groupId": "briefcase", "label": "lawyer briefcase body", "anchor": "rightHand", "shape": "rect", "x": 42, "y": 34, "width": 84, "height": 56, "rotate": -8, "tone": "dark", "outline": true, "held": true, "gripX": 0.5, "gripY": 0.08 },
+    { "id": "briefcase-handle", "groupId": "briefcase", "label": "briefcase handle through hand", "anchor": "rightHand", "shape": "arc", "x": 26, "y": 8, "width": 42, "height": 34, "rotate": -8, "tone": "accent", "outline": true, "held": true, "gripX": 0.5, "gripY": 0.25 }
   ],
   "notes": ["which details are custom to the prompt"]
 }
 Rules:
 - Think like the original blue-dude React/CSS author: first lock a polished mascot scaffold, then customize CSS variables and named div parts.
-- Keep a single connected character, not floating stickers.
-- Include prompt-specific parts when relevant: ears, tail, snout, horns, wings, hat, glasses, star, boots, flame, wand, badge, scarf, antenna, spots, stripes, panel, robe, helmet.
-- For any prompt-specific object, clothing detail, sports gear, tool, vehicle clue, instrument, food, or prop that is not already one of those named scaffold parts, create it in customPrimitives from safe geometric atoms. Do not collapse it to a generic badge. Compose multiple customPrimitives when needed (for example a tennis racket = ring head + capsule handle + string lines, tennis ball = circle + arc stripes, shoe = capsule + sole stripe).
+- Keep a single connected character, not floating stickers. For now, do not create balls or detached objects at all.
+- Include prompt-specific parts when relevant: alien antenna, glasses, hat, suit/tie, boots, flame, wand, badge, scarf, spots, stripes, panel, robe, helmet.
+- For any prompt-specific held object or clothing detail that is not already one of those named scaffold parts, create it in customPrimitives from safe geometric atoms, anchored only to rightHand/leftHand/headTop/bodyFront/leftFoot/rightFoot. Do not collapse it to a generic badge. Compose multiple customPrimitives when needed (for example a briefcase = rect body + arc handle; a tennis racket = ring head + capsule handle + string lines; shoe = capsule + sole stripe).
+- Hand-held customPrimitives MUST use anchor leftHand or rightHand, the same groupId for all pieces of the same object, held:true, plus gripX/gripY on the handle/grip piece. The renderer solves placement for the whole group so the chosen grip point is inside the hand; x/y are local coordinates within the object group, not free screen coordinates. The renderer draws a hand clasp above held groups.
+- Before deciding headShape/parts, ask the brief's exact headwear question: "What would a/an <prompt subject> have on their head?" Use the Head item question and Head item decision checklist items.
+- If Head item decision says yes, the blueprint MUST visibly put that exact thing on the head using part type hat/helmet/crown/antenna/glasses or customPrimitives anchored to headTop/headLeft/headRight. Do not merely mention it in notes/checklist.
+- If Head item decision says no, do not invent unrelated headwear.
+- Hats/headwear must use part type hat/helmet/crown/antenna or customPrimitives anchored to headTop/headLeft/headRight. Clothing must use bodyShape suited/robe/pilot, bodyFront primitives, or stripe/badge/scarf parts. Footwear must use boot parts or leftFoot/rightFoot primitives.
 - For mushroom prompts, do not stop at headShape:"mushroom". Include explicit parts {"type":"mushroomCap"}, {"type":"mushroomGills"}, and at least two {"type":"spot"} cap markings; avoid animal ears, snout, tail, and wings unless the user explicitly asks for them.
 - Always decide explicit colors for body, arms, hands, legs, and feet in cssVariables. Wizard bodies should normally read as a robe/body color distinct from skin/hand color; do not leave limbs to inherit random accent colors.
 - For mushroom wizards specifically: treat the visible body/torso and legs as a wizard robe (deep indigo/navy/purple), arms as robe sleeves, and hands/feet or stem-like exposed parts as pale mushroom-stem cream/blue. The blue should primarily belong to the mushroom cap unless the user asks for blue robe/body.
@@ -448,7 +555,11 @@ function fallbackReactCssCharacter(prompt = '', designBrief = {}) {
   const isWizard = /wizard|magic|wand|staff/.test(text);
   const isPilot = /pilot|aviator|rocket/.test(text);
   const isMushroom = /mushroom|toadstool|fungus/.test(text);
-  const primary = isFox ? '#fb923c' : /purple|wizard|space/.test(text) && !isMushroom ? '#a78bfa' : /green/.test(text) ? '#34d399' : /pink/.test(text) ? '#f472b6' : '#38bdf8';
+  const isAlien = /\balien|extraterrestrial|martian|ufo/.test(text);
+  const isJudge = /\b(judge|courtroom|judicial|gavel)\b/.test(text);
+  const isLawyer = /lawyer|attorney|legal|briefcase|suit|tie/.test(text) && !isJudge;
+  const isBaseball = /\b(baseball|slugger|batter|pitcher|catcher)\b/.test(text);
+  const primary = isFox ? '#fb923c' : isAlien ? '#34d399' : isBaseball ? '#2563eb' : /purple|wizard|space/.test(text) && !isMushroom ? '#a78bfa' : /green/.test(text) ? '#34d399' : /pink/.test(text) ? '#f472b6' : '#38bdf8';
   const parts = [];
   const customPrimitives = [];
   const add = (type, label, opts = {}) => parts.push({ type, label, tone: opts.tone || 'primary', side: opts.side || 'center' });
@@ -459,6 +570,10 @@ function fallbackReactCssCharacter(prompt = '', designBrief = {}) {
     rotate: opts.rotate || 0,
     tone: opts.tone || 'accent',
     outline: opts.outline !== false,
+    held: opts.held === true,
+    gripX: opts.gripX,
+    gripY: opts.gripY,
+    groupId: opts.groupId,
   });
   if (isMushroom) {
     add('mushroomCap', 'wide blue mushroom cap', { tone: 'primary' });
@@ -467,14 +582,35 @@ function fallbackReactCssCharacter(prompt = '', designBrief = {}) {
     add('spot', 'right white cap spot', { side: 'right', tone: 'eye' });
   }
   if (isFox || /\b(cat|dog|animal)\b/.test(text)) { add('ear', 'left animal ear', { side: 'left' }); add('ear', 'right animal ear', { side: 'right' }); add('snout', 'soft snout', { tone: 'cream' }); add('tail', 'curved tail', { side: 'right' }); }
-  if (/goggle|glasses|visor/.test(text)) add('glasses', 'prompt eyewear', { tone: 'dark' });
+  if (isAlien) { add('antenna', 'left alien antenna attached to head', { side: 'left', tone: 'accent' }); add('antenna', 'right alien antenna attached to head', { side: 'right', tone: 'accent' }); add('spot', 'subtle alien cheek marking', { side: 'left', tone: 'accent' }); }
+  if (/goggle|glasses|visor/.test(text) || isLawyer) add('glasses', isLawyer ? 'lawyer glasses' : 'prompt eyewear', { tone: 'dark' });
   if (/star/.test(text)) { add('star', 'left star accent', { side: 'left', tone: 'accent' }); add('star', 'right star accent', { side: 'right', tone: 'accent' }); }
   if (/boot/.test(text)) { add('boot', 'left boot', { side: 'left', tone: 'dark' }); add('boot', 'right boot', { side: 'right', tone: 'dark' }); }
   if (/flame|rocket/.test(text)) { add('flame', 'left rocket flame', { side: 'left', tone: 'accent' }); add('flame', 'right rocket flame', { side: 'right', tone: 'accent' }); }
   if (isWizard) { add('hat', 'soft wizard hat', { tone: 'accent' }); add('wand', 'tiny glowing staff', { side: 'right', tone: 'accent' }); add('robe', 'simple robe panel', { tone: 'secondary' }); }
-  if (isRobot) { add('antenna', 'robot antenna', { tone: 'accent' }); add('panel', 'screen body panel', { tone: 'accent' }); }
+  if (isBaseball) {
+    const wantsGloveFallback = /visual retry|avoid baseball bat|baseball glove|catcher's mitt|catchers mitt|\bmitt\b/.test(text) && !/must use.*bat/.test(text);
+    add('hat', 'baseball cap with rounded crown panel seams top button and curved front brim', { tone: 'accent' });
+    add('stripe', 'baseball jersey front stripe', { tone: 'eye' });
+    if (wantsGloveFallback) {
+      custom('baseball-glove-palm', 'hand-held baseball glove palm', 'rightHand', 'oval', { x: 28, y: -6, width: 74, height: 64, rotate: 8, tone: 'accent', held: true, gripX: 0.5, gripY: 0.68, groupId: 'baseball-glove' });
+      custom('baseball-glove-thumb', 'baseball glove thumb lobe', 'rightHand', 'oval', { x: 62, y: -12, width: 34, height: 42, rotate: -28, tone: 'accent', held: true, gripX: 0.32, gripY: 0.72, groupId: 'baseball-glove' });
+      custom('baseball-glove-web', 'baseball glove webbing', 'rightHand', 'rect', { x: 16, y: -18, width: 40, height: 30, rotate: 6, tone: 'dark', held: true, gripX: 0.5, gripY: 0.75, groupId: 'baseball-glove' });
+    } else {
+      custom('baseball-bat-barrel', 'hand-held baseball bat barrel', 'rightHand', 'capsule', { x: 26, y: -34, width: 18, height: 96, rotate: -31, tone: 'cream', held: true, gripX: 0.5, gripY: 0.88, groupId: 'baseball-bat' });
+      custom('baseball-bat-handle', 'baseball bat handle gripped by hand', 'rightHand', 'capsule', { x: 8, y: 16, width: 10, height: 58, rotate: -31, tone: 'dark', held: true, gripX: 0.5, gripY: 0.72, groupId: 'baseball-bat' });
+    }
+  }
+  if (isJudge) { add('glasses', 'round old-lady judge glasses', { tone: 'dark' }); add('robe', 'black judicial robe', { tone: 'dark' }); custom('judge-gavel-head', 'hand-held judge gavel head', 'rightHand', 'rect', { x: 32, y: -44, width: 58, height: 24, rotate: -22, tone: 'dark', held: true, gripX: 0.5, gripY: 0.5, groupId: 'gavel' }); custom('judge-gavel-handle', 'judge gavel handle gripped by hand', 'rightHand', 'capsule', { x: 12, y: 12, width: 14, height: 82, rotate: -22, tone: 'accent', held: true, gripX: 0.5, gripY: 0.82, groupId: 'gavel' }); }
+  if (isRobot) { add('antenna', 'left robot antenna attached to head', { side: 'left', tone: 'accent' }); add('antenna', 'right robot antenna attached to head', { side: 'right', tone: 'accent' }); add('panel', 'screen body panel', { tone: 'accent' }); }
   if (isPilot) add('scarf', 'pilot scarf', { tone: 'accent' });
-  if (!parts.length) { add('antenna', 'glowing antenna', { tone: 'accent' }); add('badge', 'prompt badge', { tone: 'accent' }); }
+  if (isLawyer) {
+    add('badge', 'gold legal lapel badge', { tone: 'accent' });
+    add('stripe', 'courtroom tie stripe', { tone: 'dark' });
+    custom('lawyer-briefcase-body', 'lawyer briefcase body', 'rightHand', 'rect', { x: 42, y: 34, width: 84, height: 56, rotate: -8, tone: 'dark', held: true, gripX: 0.5, gripY: 0.08, groupId: 'briefcase' });
+    custom('lawyer-briefcase-handle', 'briefcase handle gripped by hand', 'rightHand', 'arc', { x: 25, y: 8, width: 42, height: 34, rotate: -8, tone: 'accent', held: true, gripX: 0.5, gripY: 0.25, groupId: 'briefcase' });
+  }
+  if (!parts.length) { add('badge', 'prompt badge attached to torso', { tone: 'accent' }); }
   const mushroomStem = '#dbeafe';
   const wizardRobe = isMushroom ? '#312e81' : '#1e293b';
   const wizardLimb = isMushroom ? '#4338ca' : primary;
@@ -491,14 +627,14 @@ function fallbackReactCssCharacter(prompt = '', designBrief = {}) {
       '--dude-eye': /sleepy/.test(text) ? '#e0f2fe' : '#f8fafc',
       '--dude-panel': 'rgba(255,255,255,.18)',
       '--dude-mouth': '#0f172a',
-      '--dude-body': isWizard ? wizardRobe : primary,
-      '--dude-arm': isWizard ? wizardLimb : primary,
+      '--dude-body': isWizard || isJudge ? wizardRobe : isLawyer ? '#111827' : primary,
+      '--dude-arm': isWizard || isJudge ? wizardLimb : isLawyer ? '#1f2937' : primary,
       '--dude-hand': isWizard ? wizardHandsFeet : primary,
-      '--dude-leg': isWizard ? wizardRobe : primary,
-      '--dude-foot': isWizard ? wizardHandsFeet : primary,
+      '--dude-leg': isWizard || isJudge ? wizardRobe : isLawyer ? '#111827' : primary,
+      '--dude-foot': isWizard || isJudge ? wizardHandsFeet : isLawyer ? '#0f172a' : primary,
     },
     headShape: isMushroom ? 'mushroom' : isFox ? 'animal' : isRobot ? 'screen' : 'rounded',
-    bodyShape: isRobot ? 'robot' : isWizard ? 'robe' : isPilot ? 'pilot' : 'compact',
+    bodyShape: isRobot ? 'robot' : isWizard || isJudge ? 'robe' : isLawyer ? 'suited' : isPilot ? 'pilot' : 'compact',
     expression: /sleepy/.test(text) ? 'sleepy' : /focus|angry/.test(text) ? 'focused' : /excited|happy/.test(text) ? 'excited' : 'friendly',
     parts: parts.slice(0, 12),
     customPrimitives: customPrimitives.slice(0, 18),
@@ -514,11 +650,24 @@ function suppressUnrequestedAnimalParts(parts = [], prompt = '', designBrief = {
   return parts.filter(part => !animalish.has(part.type));
 }
 
+function headItemDecisionWantsVisibleHeadItem(designBrief = {}) {
+  const decision = (Array.isArray(designBrief.visualChecklist) ? designBrief.visualChecklist : [])
+    .find(item => /head item decision/i.test(String(item || '')));
+  return /head item decision:\s*yes\b/i.test(String(decision || ''));
+}
+
 function validateReactCssFaithfulness(character = {}, prompt = '', designBrief = {}) {
   const text = `${prompt} ${designBrief.expandedPrompt || ''} ${(designBrief.visualChecklist || []).join(' ')}`.toLowerCase();
   const parts = Array.isArray(character.parts) ? character.parts : [];
+  const customPrimitives = Array.isArray(character.customPrimitives) ? character.customPrimitives : [];
   const has = (type, side) => parts.some(part => part.type === type && (!side || part.side === side));
+  const hasVisibleHeadItem = () => {
+    const headPartTypes = new Set(['hat','helmet','crown','antenna','glasses','mushroomCap','mushroomGills','horn']);
+    return parts.some(part => headPartTypes.has(part.type)) || customPrimitives.some(p => ['headTop','headLeft','headRight','head'].includes(p.anchor));
+  };
   const failures = [];
+  if (headItemDecisionWantsVisibleHeadItem(designBrief) && !hasVisibleHeadItem()) failures.push('Head item decision says yes, so the React/CSS blueprint must visibly render that head item on headTop/headLeft/headRight or as hat/helmet/crown/antenna/glasses');
+  if (/\b(alien|extraterrestrial|martian|ufo)\b/.test(text) && (!has('antenna', 'left') || !has('antenna', 'right'))) failures.push('alien prompts must include explicit left and right antenna parts so both are visible and attached to the head');
   if (/mushroom|toadstool|fungus/.test(text)) {
     if (character.headShape !== 'mushroom') failures.push('mushroom prompt must use headShape:"mushroom"');
     if (!has('mushroomCap')) failures.push('mushroom prompt must include mushroomCap part for a wide cap silhouette');
@@ -529,9 +678,12 @@ function validateReactCssFaithfulness(character = {}, prompt = '', designBrief =
   }
   if (/wand|staff|sword|lantern/.test(text) && !parts.some(part => ['wand'].includes(part.type) && ['left','right'].includes(part.side))) failures.push('held wand/staff must have side left/right so it can attach to a hand');
   if (/boot/.test(text) && (!has('boot', 'left') || !has('boot', 'right'))) failures.push('boots must include left and right foot-worn boot parts');
-  const customText = (Array.isArray(character.customPrimitives) ? character.customPrimitives : []).map(p => `${p.label || ''} ${p.id || ''} ${p.anchor || ''} ${p.shape || ''}`).join(' ').toLowerCase();
-  if (/tennis|racket|racquet/.test(text) && !/racket|racquet/.test(customText)) failures.push('tennis prompt must include customPrimitives for the racket instead of a generic badge');
-  if (/tennis|ball/.test(text) && /tennis/.test(text) && !/ball/.test(customText)) failures.push('tennis prompt must include customPrimitives for the ball instead of a generic badge');
+  const customText = customPrimitives.map(p => `${p.label || ''} ${p.id || ''} ${p.anchor || ''} ${p.shape || ''}`).join(' ').toLowerCase();
+  if (/tennis|racket|racquet/.test(text) && !/racket|racquet/.test(customText)) failures.push('tennis prompt must include a hand-held customPrimitives racket instead of a generic badge');
+  if (/lawyer|attorney|court|legal|briefcase/.test(text) && !/briefcase|case|document|legal|gavel/.test(customText)) failures.push('lawyer/judge prompt must include a hand-held legal prop such as a briefcase, document, or gavel');
+  if (/baseball/.test(text) && /\b(glove|mitt|bat)\b/.test(text) && !/\b(glove|mitt|bat)\b/.test(customText)) failures.push('baseball prompt that mentions a glove or bat must render it as a hand-held custom primitive, not as a generic badge');
+  if (/\b(ball|orb|bubble|planet)\b/.test(customText)) failures.push('for now React/CSS custom primitives must not include balls or detached round props');
+  if (customPrimitives.some(p => ['root','body','bodyFront','head'].includes(p.anchor) && /prop|tool|case|racket|wand|staff|briefcase|document|gavel|bat|glove|mitt/.test(`${p.label || ''} ${p.id || ''}`.toLowerCase()))) failures.push('held objects such as bats, gloves, gavels, rackets, documents, and briefcases must be anchored to leftHand or rightHand, not floating on root/body/bodyFront/head');
   return { ok: failures.length === 0, failures };
 }
 
@@ -544,6 +696,10 @@ function primitiveHintsFromUnknownParts(sourceParts = []) {
     rotate: opts.rotate || 0,
     tone: opts.tone || 'accent',
     outline: opts.outline !== false,
+    held: opts.held === true,
+    gripX: opts.gripX,
+    gripY: opts.gripY,
+    groupId: opts.groupId,
   });
   for (const part of sourceParts) {
     const text = `${part?.type || ''} ${part?.label || ''}`.toLowerCase();
@@ -553,7 +709,11 @@ function primitiveHintsFromUnknownParts(sourceParts = []) {
       push(`${slugify(text)}-head`, part?.label || 'racket head', anchor, 'ring', { x: side === 'left' ? -58 : 58, y: -52, width: 78, height: 100, rotate: side === 'left' ? 18 : -18 });
       push(`${slugify(text)}-handle`, `${part?.label || 'racket'} handle`, anchor, 'capsule', { x: side === 'left' ? -24 : 24, y: 18, width: 16, height: 92, rotate: side === 'left' ? 20 : -20, tone: 'dark' });
     } else if (/ball|orb|bubble|planet/.test(text)) {
-      push(slugify(text), part?.label || 'round prompt prop', side === 'right' ? 'rightHand' : side === 'left' ? 'leftHand' : 'bodyFront', 'circle', { x: side === 'right' ? 28 : side === 'left' ? -28 : 0, y: -18, width: 48, height: 48 });
+      continue;
+    } else if (/briefcase|case|document|folder/.test(text)) {
+      const anchor = side === 'left' ? 'leftHand' : 'rightHand';
+      push(`${slugify(text)}-body`, part?.label || 'hand-held briefcase body', anchor, 'rect', { x: side === 'left' ? -42 : 42, y: 34, width: 84, height: 56, rotate: side === 'left' ? 8 : -8, tone: 'dark', held: true, gripX: 0.5, gripY: 0.08, groupId: slugify(text).replace(/-(body|handle)$/,'') || 'briefcase' });
+      push(`${slugify(text)}-handle`, `${part?.label || 'briefcase'} handle`, anchor, 'arc', { x: side === 'left' ? -25 : 25, y: 8, width: 42, height: 34, rotate: side === 'left' ? 8 : -8, tone: 'accent', held: true, gripX: 0.5, gripY: 0.25, groupId: slugify(text).replace(/-(body|handle)$/,'') || 'briefcase' });
     } else if (/shoe|sneaker|skate/.test(text)) {
       push(slugify(text), part?.label || 'custom shoe', side === 'right' ? 'rightFoot' : 'leftFoot', 'capsule', { x: side === 'right' ? 10 : -10, y: 14, width: 72, height: 28, rotate: side === 'right' ? 8 : -8 });
     } else if (/headband|band|visor/.test(text)) {
@@ -565,7 +725,7 @@ function primitiveHintsFromUnknownParts(sourceParts = []) {
 }
 
 function sanitizeCustomPrimitives(rawPrimitives = [], fallbackPrimitives = [], hintPrimitives = []) {
-  const allowedAnchors = new Set(['head','headTop','headLeft','headRight','body','bodyFront','leftHand','rightHand','leftFoot','rightFoot','leftEye','rightEye','root']);
+  const allowedAnchors = new Set(['head','headTop','headLeft','headRight','body','bodyFront','leftHand','rightHand','leftFoot','rightFoot','leftEye','rightEye']);
   const allowedShapes = new Set(['circle','oval','capsule','ring','line','rect','triangle','star','arc']);
   const allowedTones = new Set(['primary','secondary','accent','cream','dark','eye']);
   const source = Array.isArray(rawPrimitives) && rawPrimitives.length ? rawPrimitives : [];
@@ -576,9 +736,13 @@ function sanitizeCustomPrimitives(rawPrimitives = [], fallbackPrimitives = [], h
   for (const primitive of combined) {
     if (!primitive || typeof primitive !== 'object') continue;
     const label = String(primitive.label || primitive.id || 'custom primitive').replace(/[<>]/g, '').slice(0, 80);
+    const labelText = `${label} ${primitive.id || ''}`.toLowerCase();
+    if (/\b(ball|orb|bubble|planet)\b/.test(labelText)) continue;
     const id = slugify(primitive.id || label || `primitive-${out.length + 1}`) || `primitive-${out.length + 1}`;
-    if (seen.has(id)) continue;
+    const semanticKey = `${label.toLowerCase().replace(/\b(left|right|the|a|an|gripped|through|by|hand)\b/g, '').replace(/[^a-z0-9]+/g, '-')}|${primitive.anchor || ''}|${primitive.shape || ''}`;
+    if (seen.has(id) || seen.has(semanticKey)) continue;
     seen.add(id);
+    seen.add(semanticKey);
     out.push({
       id,
       label,
@@ -591,6 +755,10 @@ function sanitizeCustomPrimitives(rawPrimitives = [], fallbackPrimitives = [], h
       rotate: clamp(primitive.rotate, -180, 180),
       tone: allowedTones.has(primitive.tone) ? primitive.tone : 'accent',
       outline: primitive.outline !== false,
+      held: primitive.held === true || ['leftHand','rightHand'].includes(primitive.anchor),
+      gripX: clamp(primitive.gripX, 0, 1, 0.5),
+      gripY: clamp(primitive.gripY, 0, 1, 0.5),
+      groupId: slugify(primitive.groupId || label.replace(/\b(left|right|the|a|an|gripped|through|by|hand|body|handle|head|shaft|blade|strap|page|screen)\b/ig, '')) || id.replace(/-(body|handle|head|shaft|blade|strap|page|screen)$/i, ''),
     });
     if (out.length >= 18) break;
   }
@@ -609,12 +777,21 @@ function sanitizeReactCssCharacter(raw, prompt = '', designBrief = {}) {
   for (const key of allowedVars) cssVariables[key] = validColor(clean.cssVariables?.[key], fallback.cssVariables[key]);
   const promptText = `${prompt} ${designBrief.expandedPrompt || ''}`.toLowerCase();
   const isMushroomWizard = /\b(mushroom|toadstool|fungus)\b/.test(promptText) && /\b(wizard|magic|wand|staff)\b/.test(promptText);
+  const isJudge = /\b(judge|courtroom|judicial|gavel)\b/.test(promptText);
+  const isLawyer = /\b(lawyer|attorney|legal|briefcase|suit|tie)\b/.test(promptText) && !isJudge;
+  const isAlien = /\b(alien|extraterrestrial|martian|ufo)\b/.test(promptText);
   if (isMushroomWizard) {
     cssVariables['--dude-body'] = '#312e81';
     cssVariables['--dude-arm'] = '#4338ca';
     cssVariables['--dude-hand'] = '#dbeafe';
     cssVariables['--dude-leg'] = '#312e81';
     cssVariables['--dude-foot'] = '#dbeafe';
+  } else if (isLawyer || isJudge) {
+    cssVariables['--dude-body'] = '#111827';
+    cssVariables['--dude-arm'] = '#1f2937';
+    cssVariables['--dude-leg'] = '#111827';
+    cssVariables['--dude-foot'] = '#0f172a';
+    if (isAlien) cssVariables['--dude-hand'] = '#34d399';
   }
   const oneOf = (value, allowed, fb) => allowed.includes(value) ? value : fb;
   const allowedPartTypes = new Set(['ear','tail','snout','horn','wing','hat','glasses','star','boot','flame','wand','badge','scarf','antenna','spot','stripe','panel','robe','helmet','crown','spark','mushroomCap','mushroomGills']);
@@ -641,7 +818,7 @@ function sanitizeReactCssCharacter(raw, prompt = '', designBrief = {}) {
     summary: String(clean.summary || fallback.summary).replace(/[<>]/g, '').slice(0, 240),
     cssVariables,
     headShape: oneOf(clean.headShape, ['rounded','animal','helmet','screen','mushroom','crown'], fallback.headShape),
-    bodyShape: isMushroomWizard ? 'robe' : oneOf(clean.bodyShape, ['compact','round','suited','robot','robe','pilot'], fallback.bodyShape),
+    bodyShape: isMushroomWizard || isJudge ? 'robe' : oneOf(clean.bodyShape, ['compact','round','suited','robot','robe','pilot'], fallback.bodyShape),
     expression: oneOf(clean.expression, ['friendly','sleepy','focused','excited','curious'], fallback.expression),
     parts: parts.length ? parts : fallback.parts,
     customPrimitives,
@@ -891,7 +1068,7 @@ function test5OptionEnabled(value, fallback = true) {
   return !/^(0|false|off|no)$/i.test(String(value));
 }
 
-async function saveTest5Artifact({ prompt, designBrief, expandedContent, provider, rawContent, rawSceneSpec, sceneSpec, rawReactCssCharacterContent, rawReactCssCharacter, reactCssCharacter, reactCssFaithfulness, reactCssRepairNotes, validation, coverage, enrichments, repairs, options = {} }) {
+async function saveTest5Artifact({ prompt, designBrief, expandedContent, provider, rawContent, rawSceneSpec, sceneSpec, rawReactCssCharacterContent, rawReactCssCharacter, reactCssCharacter, reactCssFaithfulness, reactCssRepairNotes, validation, coverage, enrichments, repairs, visualRetryPlan, options = {} }) {
   const createdAt = new Date().toISOString();
   const stamp = createdAt.replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
   const relPath = `artifacts/test5/generated/${stamp}-${slugify(prompt)}.json`;
@@ -918,10 +1095,13 @@ async function saveTest5Artifact({ prompt, designBrief, expandedContent, provide
     validation,
     coverage,
     enrichments,
+    visualRetryPlan,
     options: {
       enrichmentEnabled: options.enrichmentEnabled !== false,
       coverageMode: options.coverageMode || 'enforced',
       commitRequested: options.commit !== false,
+      heldObjectFallback: options.heldObjectFallback || options.objectFallback || null,
+      visualRetryPlan: options.visualRetryPlan || visualRetryPlan || null,
     },
     repairs,
   };
@@ -955,9 +1135,15 @@ async function saveTest5Artifact({ prompt, designBrief, expandedContent, provide
 
 async function generateTest5Avatar(prompt, options = {}) {
   const expanded = await expandTest5Prompt(prompt);
-  const designBrief = expanded.designBrief;
+  let designBrief = expanded.designBrief;
+  const initialRetryPlan = buildHeldObjectRetryPlan(prompt, designBrief, null, options.heldObjectFallback || options.objectFallback || {});
+  if (initialRetryPlan.requested && initialRetryPlan.alternateObject) {
+    designBrief = applyHeldObjectRetryToBrief(designBrief, initialRetryPlan);
+    designBrief.requiredRenderableDetails = normalizeRenderableDetails(designBrief.requiredRenderableDetails, prompt, designBrief);
+  }
   const characterResult = await generateFaithfulTest5ReactCssCharacter(prompt, designBrief);
   const reactCssCharacter = characterResult.reactCssCharacter;
+  const visualRetryPlan = buildHeldObjectRetryPlan(prompt, designBrief, reactCssCharacter, options.heldObjectFallback || options.objectFallback || {});
   let first = await generateTest5SceneSpec(prompt, designBrief);
   let rawSceneSpec = coerceTest5RawScene(parseJsonObject(first.content), prompt);
   let validation = validateTest5Scene(rawSceneSpec);
@@ -1011,8 +1197,8 @@ async function generateTest5Avatar(prompt, options = {}) {
   }
   if (!coverage.ok && coverageMode !== 'report-only') throw new Error(`Generated avatar failed detail coverage: ${coverage.missingRequiredDetails.join('; ')}`);
 
-  const saved = await saveTest5Artifact({ prompt, designBrief, expandedContent: expanded.content, provider, rawContent, rawSceneSpec, sceneSpec, rawReactCssCharacterContent: characterResult.content, rawReactCssCharacter: characterResult.rawReactCssCharacter, reactCssCharacter, reactCssFaithfulness: characterResult.reactCssFaithfulness, reactCssRepairNotes: characterResult.reactCssRepairNotes, validation, coverage, enrichments, repairs, options: { ...options, enrichmentEnabled, coverageMode } });
-  return { ok: true, prompt, userPrompt: prompt, expandedPrompt: designBrief.expandedPrompt, designBrief, reactCssCharacter, reactCssFaithfulness: characterResult.reactCssFaithfulness, reactCssRepairNotes: characterResult.reactCssRepairNotes || [], visualChecklist: designBrief.visualChecklist || [], requiredDetails: designBrief.requiredDetails || [], requiredRenderableDetails: designBrief.requiredRenderableDetails || [], coverage, enrichments, options: { enrichmentEnabled, coverageMode, commitRequested: options.commit !== false }, provider, rawSceneSpec, sceneSpec, validation, repairs, artifactPath: saved.relPath, commit: saved.commit };
+  const saved = await saveTest5Artifact({ prompt, designBrief, expandedContent: expanded.content, provider, rawContent, rawSceneSpec, sceneSpec, rawReactCssCharacterContent: characterResult.content, rawReactCssCharacter: characterResult.rawReactCssCharacter, reactCssCharacter, reactCssFaithfulness: characterResult.reactCssFaithfulness, reactCssRepairNotes: characterResult.reactCssRepairNotes, validation, coverage, enrichments, repairs, visualRetryPlan, options: { ...options, enrichmentEnabled, coverageMode, visualRetryPlan } });
+  return { ok: true, prompt, userPrompt: prompt, expandedPrompt: designBrief.expandedPrompt, designBrief, reactCssCharacter, reactCssFaithfulness: characterResult.reactCssFaithfulness, reactCssRepairNotes: characterResult.reactCssRepairNotes || [], visualChecklist: designBrief.visualChecklist || [], requiredDetails: designBrief.requiredDetails || [], requiredRenderableDetails: designBrief.requiredRenderableDetails || [], coverage, enrichments, visualRetryPlan, options: { enrichmentEnabled, coverageMode, commitRequested: options.commit !== false, visualRetryPlan }, provider, rawSceneSpec, sceneSpec, validation, repairs, artifactPath: saved.relPath, commit: saved.commit };
 }
 
 async function readJsonBody(req, maxBytes = 64_000) {
@@ -1038,7 +1224,8 @@ async function handleTest5Avatar(req, res) {
     const enrichmentEnabled = test5OptionEnabled(body.enrichment ?? body.enableEnrichment ?? process.env.TEST5_ENABLE_ENRICHMENT, true);
     const coverageMode = String(body.coverageMode || (enrichmentEnabled ? 'enforced' : 'report-only'));
     const commit = body.commit === false ? false : true;
-    const result = await generateTest5Avatar(prompt, { enrichmentEnabled, coverageMode, commit });
+    const heldObjectFallback = body.heldObjectFallback || body.objectFallback || null;
+    const result = await generateTest5Avatar(prompt, { enrichmentEnabled, coverageMode, commit, heldObjectFallback });
     res.writeHead(200, corsHeaders());
     res.end(JSON.stringify(result));
   } catch (error) {

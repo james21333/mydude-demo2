@@ -9,6 +9,7 @@ function assert(condition, message) {
 
 const app = fs.readFileSync('src/App.jsx', 'utf8');
 const bridge = fs.readFileSync('bridge/mydude-bridge.mjs', 'utf8');
+const css = fs.readFileSync('src/styles.css', 'utf8');
 
 assert(/function Test5AvatarLab\s*\(/.test(app), 'frontend Test5AvatarLab component is missing');
 assert(/\/test5\(\\\/\|\$\)/.test(app) || /test5/.test(app), 'RootRouter does not expose /test5');
@@ -35,10 +36,16 @@ assert(/sanitizeReactCssCharacter\s*\(/.test(bridge), 'test5 must sanitize the R
 assert(/reactCssCharacter/.test(bridge), 'test5 artifacts/results must include the GPT-authored React/CSS character receipt');
 assert(/customPrimitives/.test(bridge), 'React/CSS blueprint must support LLM-authored prompt-specific dynamic primitives instead of collapsing unknown details to badges');
 assert(/test5-dude-custom-primitive/.test(app), 'frontend must render LLM-authored custom primitives with prompt-specific placement');
+assert(/test5-dude-held-object/.test(app) && /heldGroupKey/.test(app), 'held custom primitives must render as solved groups, not independent floating pieces');
+assert(/classifyHeldSemantic/.test(app) && /test5-held-semantic/.test(app) && /semantic-gavel/.test(css) && /semantic-baseball-bat/.test(css), 'held object renderer must promote recognizable prompt props like gavels and bats into readable semantic held compositions');
+assert(/Object looks wrong: try alternate ×3/.test(app) && /heldObjectFallback/.test(app) && /visualRetryPlan/.test(bridge) && /alternateHeldObjectForPrompt/.test(bridge) && /applyHeldObjectRetryToBrief/.test(bridge), 'test5 must expose a durable 3-attempt visual retry path that swaps unclear held objects for alternate prompt-fitting objects');
+assert(/groupId/.test(bridge) && /Head item decision/.test(bridge) && /Head item question/.test(bridge) && /What would an alien have on their head\?/.test(bridge) && /headItemDecisionWantsVisibleHeadItem/.test(bridge) && /must visibly render that head item/.test(bridge), 'bridge must support held-object group IDs and enforce the generic what-would-this-prompt-have-on-their-head loop');
 assert(/function Test5HandCodedAvatar\s*\(/.test(app), 'frontend must render a hand-coded React/CSS character component for /test5');
 assert(/<Test5HandCodedAvatar\s+character=\{reactCssCharacter\}/.test(app), 'frontend must prefer the React/CSS character blueprint when available');
-const css = fs.readFileSync('src/styles.css', 'utf8');
 assert(/test5-dude-head/.test(app) && /test5-dude-head/.test(css), 'frontend must include original-blue-dude-style head/body CSS scaffold');
+assert(/hasAnchoredPart\('antenna', 'left'\)/.test(app) && /hasAnchoredPart\('antenna', 'right'\)/.test(app), 'antennae must render as explicit left and right head-attached parts, not a single generic top stem');
+assert(/test5-dude-antenna\.left/.test(css) && /test5-dude-antenna\.right/.test(css), 'antennae CSS must visibly place separate left and right antennae on the head');
+assert(/alien prompts must include explicit left and right antenna/.test(bridge), 'React/CSS faithfulness must fail alien prompts unless both left and right antenna parts exist');
 assert(/test5-dude-hand/.test(app) && /test5-dude-hand/.test(css), 'hand-held props such as wands must be nested in an explicit hand anchor');
 assert(/holding-wand/.test(app) && /holding-wand/.test(css), 'hand-held wands need a visible hand grip/clasp so they do not look detached');
 assert(/grip-wand-shaft/.test(app) && /grip-wand-shaft/.test(css), 'hand-held staff must pass through the hand grip near the staff middle, not put the wrong end in the hand');
