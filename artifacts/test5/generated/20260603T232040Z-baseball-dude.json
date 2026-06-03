@@ -1,0 +1,652 @@
+{
+  "prompt": "baseball dude",
+  "userPrompt": "baseball dude",
+  "createdAt": "2026-06-03T23:20:40.318Z",
+  "provider": "github-copilot/gpt-4o-mini + github-copilot/gpt-4o-mini + github-copilot/gpt-4o-mini",
+  "expandedPrompt": "A cheerful baseball dude with an oversized expressive head, featuring a rounded face and bright smile. He wears a baseball cap with rounded crown, panel seams, top button, and curved front brim. His body is compact and connected, dressed in a classic baseball jersey with stripes and a number on the back, paired with baseball pants. The avatar has a baseball glove on one hand and a baseball bat resting on the other shoulder. His shoes are sporty with visible laces and a sleek design. The color palette includes vibrant reds, whites, and blues, enhancing the playful and energetic vibe of the character.",
+  "designBrief": {
+    "title": "Baseball Dude",
+    "expandedPrompt": "A cheerful baseball dude with an oversized expressive head, featuring a rounded face and bright smile. He wears a baseball cap with rounded crown, panel seams, top button, and curved front brim. His body is compact and connected, dressed in a classic baseball jersey with stripes and a number on the back, paired with baseball pants. The avatar has a baseball glove on one hand and a baseball bat resting on the other shoulder. His shoes are sporty with visible laces and a sleek design. The color palette includes vibrant reds, whites, and blues, enhancing the playful and energetic vibe of the character.",
+    "subject": "baseball player mascot",
+    "mood": "energetic",
+    "palettePlan": {
+      "primary": "red",
+      "secondary": "white",
+      "accent": "blue"
+    },
+    "styleTags": [
+      "cute mascot",
+      "glossy SVG",
+      "blue-avatar quality"
+    ],
+    "visualChecklist": [
+      "Oversized expressive head with a rounded face and bright smile.",
+      "Baseball cap with rounded crown, panel seams, top button, and curved front brim.",
+      "Classic baseball jersey with stripes and a number on the back.",
+      "Baseball glove on one hand.",
+      "Baseball bat resting on the other shoulder.",
+      "Sporty shoes with visible laces.",
+      "Compact connected body shape.",
+      "Bright and vibrant color palette of red, white, and blue.",
+      "Head item question: What would a baseball dude have on their head?",
+      "Head item decision: yes — baseball cap with rounded crown, panel seams, top button, and curved front brim"
+    ],
+    "requiredDetails": [
+      "Oversized expressive head with bright smile.",
+      "Baseball cap with rounded crown.",
+      "Baseball glove attached to one hand.",
+      "Baseball jersey with stripes."
+    ],
+    "requiredRenderableDetails": [],
+    "forbiddenDetails": [
+      "raw SVG",
+      "HTML",
+      "unvalidated custom shapes",
+      "external images"
+    ],
+    "qualityConstraints": [
+      "oversized expressive head",
+      "compact connected body",
+      "readable silhouette",
+      "valid renderer sockets only"
+    ]
+  },
+  "visualChecklist": [
+    "Oversized expressive head with a rounded face and bright smile.",
+    "Baseball cap with rounded crown, panel seams, top button, and curved front brim.",
+    "Classic baseball jersey with stripes and a number on the back.",
+    "Baseball glove on one hand.",
+    "Baseball bat resting on the other shoulder.",
+    "Sporty shoes with visible laces.",
+    "Compact connected body shape.",
+    "Bright and vibrant color palette of red, white, and blue.",
+    "Head item question: What would a baseball dude have on their head?",
+    "Head item decision: yes — baseball cap with rounded crown, panel seams, top button, and curved front brim"
+  ],
+  "requiredDetails": [
+    "Oversized expressive head with bright smile.",
+    "Baseball cap with rounded crown.",
+    "Baseball glove attached to one hand.",
+    "Baseball jersey with stripes."
+  ],
+  "expandedContent": "{\n  \"title\": \"Baseball Dude\",\n  \"expandedPrompt\": \"A cheerful baseball dude with an oversized expressive head, featuring a rounded face and bright smile. He wears a baseball cap with rounded crown, panel seams, top button, and curved front brim. His body is compact and connected, dressed in a classic baseball jersey with stripes and a number on the back, paired with baseball pants. The avatar has a baseball glove on one hand and a baseball bat resting on the other shoulder. His shoes are sporty with visible laces and a sleek design. The color palette includes vibrant reds, whites, and blues, enhancing the playful and energetic vibe of the character.\",\n  \"subject\": \"baseball player mascot\",\n  \"mood\": \"energetic\",\n  \"palettePlan\": { \"primary\": \"red\", \"secondary\": \"white\", \"accent\": \"blue\" },\n  \"styleTags\": [\"cute mascot\", \"glossy SVG\", \"blue-avatar quality\"],\n  \"visualChecklist\": [\n    \"Oversized expressive head with a rounded face and bright smile.\",\n    \"Baseball cap with rounded crown, panel seams, top button, and curved front brim.\",\n    \"Classic baseball jersey with stripes and a number on the back.\",\n    \"Baseball glove on one hand.\",\n    \"Baseball bat resting on the other shoulder.\",\n    \"Sporty shoes with visible laces.\",\n    \"Compact connected body shape.\",\n    \"Bright and vibrant color palette of red, white, and blue.\",\n    \"Head item question: What would a baseball dude have on their head?\",\n    \"Head item decision: yes — baseball cap with rounded crown, panel seams, top button, and curved front brim.\"\n  ],\n  \"requiredDetails\": [\n    \"Oversized expressive head with bright smile.\",\n    \"Baseball cap with rounded crown.\",\n    \"Baseball glove attached to one hand.\",\n    \"Baseball jersey with stripes.\"\n  ],\n  \"requiredRenderableDetails\": [\n    { \"id\": \"cap\", \"label\": \"baseball cap\", \"acceptableShapes\": [\"capShape\"], \"acceptableSockets\": [\"head.socket\"], \"minimumCount\": 1 },\n    { \"id\": \"glove\", \"label\": \"baseball glove\", \"acceptableShapes\": [\"gloveShape\"], \"acceptableSockets\": [\"hand.socket\"], \"minimumCount\": 1 },\n    { \"id\": \"bat\", \"label\": \"baseball bat\", \"acceptableShapes\": [\"batShape\"], \"acceptableSockets\": [\"hand.socket\"], \"minimumCount\": 1 },\n    { \"id\": \"jersey\", \"label\": \"baseball jersey\", \"acceptableShapes\": [\"jerseyShape\"], \"acceptableSockets\": [\"torso.socket\"], \"minimumCount\": 1 }\n  ],\n  \"forbiddenDetails\": [\"raw SVG\", \"HTML\", \"unvalidated custom shapes\", \"external images\"],\n  \"qualityConstraints\": [\"oversized expressive head\", \"compact connected body\", \"readable silhouette\", \"valid renderer sockets only\"]\n}",
+  "rawContent": "{\n  \"title\": \"Baseball Dude\",\n  \"summary\": \"A cheerful baseball dude with an oversized expressive head, wearing a baseball cap, jersey, and equipped with a glove and bat.\",\n  \"palette\": \"red\",\n  \"scene\": \"scene_city\",\n  \"body\": \"body_capsule\",\n  \"head\": \"head_round\",\n  \"eyes\": \"eyes_googly\",\n  \"mouth\": \"mouth_smile\",\n  \"primitives\": [\n    \"body_blob\",\n    \"head_round\",\n    \"eyes_googly\",\n    \"mouth_smile\",\n    \"body_box\",\n    \"body_triangle\",\n    \"body_capsule\",\n    \"body_cloud\",\n    \"body_flame\",\n    \"body_mushroom\"\n  ],\n  \"layers\": [\n    {\"shape\":\"body_capsule\",\"anchor\":\"body\",\"x\":0,\"y\":0,\"scale\":[0.8,0.9],\"rotate\":0,\"material\":\"glossyRed\",\"role\":\"part\",\"z\":2,\"attach\":{\"socket\":\"body.center\"}},\n    {\"shape\":\"head_round\",\"anchor\":\"head\",\"x\":0,\"y\":60,\"scale\":[0.9,0.9],\"rotate\":0,\"material\":\"glossyWhite\",\"role\":\"part\",\"z\":8,\"attach\":{\"socket\":\"head.center\"}},\n    {\"shape\":\"googlyEye\",\"anchor\":\"face\",\"x\":-20,\"y\":-10,\"scale\":[0.2,0.2],\"rotate\":0,\"material\":\"softWhite\",\"role\":\"eye\",\"z\":20,\"attach\":{\"socket\":\"head.leftEye\"}},\n    {\"shape\":\"googlyEye\",\"anchor\":\"face\",\"x\":20,\"y\":-10,\"scale\":[0.2,0.2],\"rotate\":0,\"material\":\"softWhite\",\"role\":\"eye\",\"z\":20,\"attach\":{\"socket\":\"head.rightEye\"}},\n    {\"shape\":\"mouthSmile\",\"anchor\":\"face\",\"x\":0,\"y\":20,\"scale\":[0.5,0.2],\"rotate\":0,\"material\":\"charcoalRubber\",\"role\":\"mouth\",\"z\":31,\"attach\":{\"socket\":\"head.mouth\"}},\n    {\"shape\":\"cap\",\"anchor\":\"head\",\"x\":0,\"y\":-30,\"scale\":[0.8,0.8],\"rotate\":0,\"material\":\"glossyBlue\",\"role\":\"part\",\"z\":5,\"attach\":{\"socket\":\"head.top\"}},\n    {\"shape\":\"body_box\",\"anchor\":\"body\",\"x\":0,\"y\":0,\"scale\":[0.8,0.4],\"rotate\":0,\"material\":\"glossyWhite\",\"role\":\"part\",\"z\":3,\"attach\":{\"socket\":\"body.center\"}},\n    {\"shape\":\"body_triangle\",\"anchor\":\"body\",\"x\":0,\"y\":-30,\"scale\":[0.5,0.5],\"rotate\":0,\"material\":\"glossyRed\",\"role\":\"part\",\"z\":4,\"attach\":{\"socket\":\"body.front\"}},\n    {\"shape\":\"body_blob\",\"anchor\":\"body\",\"x\":-40,\"y\":0,\"scale\":[0.2,0.2],\"rotate\":0,\"material\":\"glossyRed\",\"role\":\"part\",\"z\":6,\"attach\":{\"socket\":\"body.leftHand\"}},\n    {\"shape\":\"body_blob\",\"anchor\":\"body\",\"x\":40,\"y\":0,\"scale\":[0.2,0.2],\"rotate\":0,\"material\":\"glossyRed\",\"role\":\"part\",\"z\":6,\"attach\":{\"socket\":\"body.rightHand\"}},\n    {\"shape\":\"body_flame\",\"anchor\":\"body\",\"x\":-20,\"y\":-20,\"scale\":[0.3,0.3],\"rotate\":0,\"material\":\"glossyBlue\",\"role\":\"part\",\"z\":7,\"attach\":{\"socket\":\"body.leftShoulder\"}},\n    {\"shape\":\"body_flame\",\"anchor\":\"body\",\"x\":20,\"y\":-20,\"scale\":[0.3,0.3],\"rotate\":0,\"material\":\"glossyBlue\",\"role\":\"part\",\"z\":7,\"attach\":{\"socket\":\"body.rightShoulder\"}},\n    {\"shape\":\"body_mushroom\",\"anchor\":\"body\",\"x\":0,\"y\":-50,\"scale\":[0.5,0.5],\"rotate\":0,\"material\":\"glossyWhite\",\"role\":\"part\",\"z\":9,\"attach\":{\"socket\":\"body.back\"}},\n    {\"shape\":\"body_cloud\",\"anchor\":\"body\",\"x\":0,\"y\":-20,\"scale\":[0.5,0.5],\"rotate\":0,\"material\":\"glossyWhite\",\"role\":\"part\",\"z\":10,\"attach\":{\"socket\":\"body.bottom\"}},\n    {\"shape\":\"body_box\",\"anchor\":\"body\",\"x\":0,\"y\":0,\"scale\":[0.5,0.5],\"rotate\":0,\"material\":\"glossyBlue\",\"role\":\"part\",\"z\":11,\"attach\":{\"socket\":\"body.rightFoot\"}},\n    {\"shape\":\"body_box\",\"anchor\":\"body\",\"x\":0,\"y\":0,\"scale\":[0.5,0.5],\"rotate\":0,\"material\":\"glossyBlue\",\"role\":\"part\",\"z\":11,\"attach\":{\"socket\":\"body.leftFoot\"}},\n    {\"shape\":\"body_triangle\",\"anchor\":\"body\",\"x\":0,\"y\":-10,\"scale\":[0.5,0.5],\"rotate\":0,\"material\":\"glossyRed\",\"role\":\"part\",\"z\":12,\"attach\":{\"socket\":\"body.front\"}},\n    {\"shape\":\"body_triangle\",\"anchor\":\"body\",\"x\":0,\"y\":-10,\"scale\":[0.5,0.5],\"rotate\":0,\"material\":\"glossyRed\",\"role\":\"part\",\"z\":12,\"attach\":{\"socket\":\"body.back\"}}\n  ]\n}",
+  "rawSceneSpec": {
+    "title": "Baseball Dude",
+    "summary": "A cheerful baseball dude with an oversized expressive head, wearing a baseball cap, jersey, and equipped with a glove and bat.",
+    "palette": "red",
+    "scene": "scene_city",
+    "body": "body_capsule",
+    "head": "head_round",
+    "eyes": "eyes_googly",
+    "mouth": "mouth_smile",
+    "primitives": [
+      "body_blob",
+      "head_round",
+      "eyes_googly",
+      "mouth_smile",
+      "body_box",
+      "body_triangle",
+      "body_capsule",
+      "body_cloud",
+      "body_flame",
+      "body_mushroom"
+    ],
+    "layers": [
+      {
+        "shape": "mascotHead",
+        "anchor": "head",
+        "x": 0,
+        "y": 60,
+        "scale": [
+          0.9,
+          0.9
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "shape": "googlyEye",
+        "anchor": "face",
+        "x": -20,
+        "y": -10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "shape": "googlyEye",
+        "anchor": "face",
+        "x": 20,
+        "y": -10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "shape": "mouthSmile",
+        "anchor": "face",
+        "x": 0,
+        "y": 20,
+        "scale": [
+          0.5,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "charcoalRubber",
+        "role": "mouth",
+        "z": 31,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      },
+      {
+        "shape": "cap",
+        "anchor": "head",
+        "x": 0,
+        "y": -30,
+        "scale": [
+          0.8,
+          0.8
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "shape": "mascotBody",
+        "anchor": "body",
+        "x": -40,
+        "y": 0,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "glossyRed",
+        "role": "part",
+        "z": 6,
+        "attach": {
+          "socket": "body.leftHand"
+        }
+      },
+      {
+        "shape": "mascotBody",
+        "anchor": "body",
+        "x": 40,
+        "y": 0,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "glossyRed",
+        "role": "part",
+        "z": 6,
+        "attach": {
+          "socket": "body.rightHand"
+        }
+      }
+    ]
+  },
+  "sanitizedSceneSpec": {
+    "title": "Baseball Dude",
+    "summary": "A cheerful baseball dude with an oversized expressive head, wearing a baseball cap, jersey, and equipped with a glove and bat.",
+    "palette": "red",
+    "scene": "scene_city",
+    "body": "body_capsule",
+    "head": "head_round",
+    "eyes": "eyes_googly",
+    "mouth": "mouth_smile",
+    "primitives": [
+      "body_blob",
+      "head_round",
+      "eyes_googly",
+      "mouth_smile",
+      "body_box",
+      "body_triangle",
+      "body_capsule",
+      "body_cloud",
+      "body_flame",
+      "body_mushroom",
+      "scene_sky",
+      "eyes_cartoon",
+      "object_spark"
+    ],
+    "layers": [
+      {
+        "id": "cap-4",
+        "shape": "cap",
+        "anchor": "free",
+        "x": 0,
+        "y": -30,
+        "scale": [
+          0.8,
+          0.8
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "id": "mascotBody-5",
+        "shape": "mascotBody",
+        "anchor": "free",
+        "x": -40,
+        "y": 0,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "glossyRed",
+        "opacity": 1,
+        "role": "part",
+        "z": 6,
+        "attach": {
+          "socket": "body.center"
+        }
+      },
+      {
+        "id": "mascotBody-6",
+        "shape": "mascotBody",
+        "anchor": "free",
+        "x": 40,
+        "y": 0,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "glossyRed",
+        "opacity": 1,
+        "role": "part",
+        "z": 6,
+        "attach": {
+          "socket": "body.center"
+        }
+      },
+      {
+        "id": "mascotHead-0",
+        "shape": "mascotHead",
+        "anchor": "free",
+        "x": 0,
+        "y": 60,
+        "scale": [
+          0.9,
+          0.9
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "id": "googlyEye-1",
+        "shape": "googlyEye",
+        "anchor": "free",
+        "x": -20,
+        "y": -10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "id": "googlyEye-2",
+        "shape": "googlyEye",
+        "anchor": "free",
+        "x": 20,
+        "y": -10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "id": "mouthSmile-3",
+        "shape": "mouthSmile",
+        "anchor": "free",
+        "x": 0,
+        "y": 20,
+        "scale": [
+          0.5,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "charcoalRubber",
+        "opacity": 1,
+        "role": "mouth",
+        "z": 31,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      }
+    ]
+  },
+  "rawReactCssCharacterContent": "{\n  \"componentName\": \"BaseballDude\",\n  \"styleSystem\": \"my-dude-react-css-scaffold\",\n  \"title\": \"Baseball Dude\",\n  \"summary\": \"A cheerful baseball dude with an oversized expressive head and sporty attire, ready to hit a home run.\",\n  \"cssVariables\": {\n    \"--dude-primary\": \"#ff0000\",\n    \"--dude-secondary\": \"#ffffff\",\n    \"--dude-accent\": \"#0000ff\",\n    \"--dude-eye\": \"#e0f2fe\",\n    \"--dude-panel\": \"rgba(255,255,255,.18)\",\n    \"--dude-mouth\": \"#0f172a\",\n    \"--dude-body\": \"#1e293b\",\n    \"--dude-arm\": \"#ff0000\",\n    \"--dude-hand\": \"#facc15\",\n    \"--dude-leg\": \"#1e293b\",\n    \"--dude-foot\": \"#facc15\"\n  },\n  \"headShape\": \"rounded\",\n  \"bodyShape\": \"compact\",\n  \"expression\": \"excited\",\n  \"parts\": [\n    { \"type\": \"hat\", \"side\": \"headTop\", \"label\": \"baseball cap\", \"tone\": \"primary\" },\n    { \"type\": \"glove\", \"side\": \"leftHand\", \"label\": \"baseball glove\", \"tone\": \"accent\" },\n    { \"type\": \"jersey\", \"side\": \"bodyFront\", \"label\": \"baseball jersey\", \"tone\": \"secondary\" },\n    { \"type\": \"pants\", \"side\": \"bodyFront\", \"label\": \"baseball pants\", \"tone\": \"body\" },\n    { \"type\": \"shoes\", \"side\": \"leftFoot\", \"label\": \"sporty shoes\", \"tone\": \"hand\" }\n  ],\n  \"customPrimitives\": [\n    { \"id\": \"baseball-bat-body\", \"groupId\": \"baseball-bat\", \"label\": \"baseball bat body\", \"anchor\": \"rightHand\", \"shape\": \"rect\", \"x\": 10, \"y\": 0, \"width\": 10, \"height\": 80, \"rotate\": 15, \"tone\": \"primary\", \"outline\": true, \"held\": true, \"gripX\": 0.5, \"gripY\": 0.95 },\n    { \"id\": \"baseball-bat-end\", \"groupId\": \"baseball-bat\", \"label\": \"baseball bat end\", \"anchor\": \"rightHand\", \"shape\": \"circle\", \"x\": 10, \"y\": 80, \"width\": 20, \"height\": 20, \"tone\": \"accent\", \"outline\": true, \"held\": true, \"gripX\": 0.5, \"gripY\": 0.5 }\n  ],\n  \"notes\": [\n    \"The character features an oversized expressive head with a bright smile.\",\n    \"The baseball cap is designed with a rounded crown, panel seams, top button, and curved front brim.\",\n    \"The baseball glove is attached to the left hand, and the bat is held in the right hand.\"\n  ]\n}",
+  "rawReactCssCharacter": {
+    "componentName": "BaseballDude",
+    "styleSystem": "my-dude-react-css-scaffold",
+    "title": "Baseball Dude",
+    "summary": "A cheerful baseball dude with an oversized expressive head and sporty attire, ready to hit a home run.",
+    "cssVariables": {
+      "--dude-primary": "#ff0000",
+      "--dude-secondary": "#ffffff",
+      "--dude-accent": "#0000ff",
+      "--dude-eye": "#e0f2fe",
+      "--dude-panel": "rgba(255,255,255,.18)",
+      "--dude-mouth": "#0f172a",
+      "--dude-body": "#1e293b",
+      "--dude-arm": "#ff0000",
+      "--dude-hand": "#facc15",
+      "--dude-leg": "#1e293b",
+      "--dude-foot": "#facc15"
+    },
+    "headShape": "rounded",
+    "bodyShape": "compact",
+    "expression": "excited",
+    "parts": [
+      {
+        "type": "hat",
+        "side": "headTop",
+        "label": "baseball cap",
+        "tone": "primary"
+      },
+      {
+        "type": "glove",
+        "side": "leftHand",
+        "label": "baseball glove",
+        "tone": "accent"
+      },
+      {
+        "type": "jersey",
+        "side": "bodyFront",
+        "label": "baseball jersey",
+        "tone": "secondary"
+      },
+      {
+        "type": "pants",
+        "side": "bodyFront",
+        "label": "baseball pants",
+        "tone": "body"
+      },
+      {
+        "type": "shoes",
+        "side": "leftFoot",
+        "label": "sporty shoes",
+        "tone": "hand"
+      }
+    ],
+    "customPrimitives": [
+      {
+        "id": "baseball-bat-body",
+        "groupId": "baseball-bat",
+        "label": "baseball bat body",
+        "anchor": "rightHand",
+        "shape": "rect",
+        "x": 10,
+        "y": 0,
+        "width": 10,
+        "height": 80,
+        "rotate": 15,
+        "tone": "primary",
+        "outline": true,
+        "held": true,
+        "gripX": 0.5,
+        "gripY": 0.95
+      },
+      {
+        "id": "baseball-bat-end",
+        "groupId": "baseball-bat",
+        "label": "baseball bat end",
+        "anchor": "rightHand",
+        "shape": "circle",
+        "x": 10,
+        "y": 80,
+        "width": 20,
+        "height": 20,
+        "tone": "accent",
+        "outline": true,
+        "held": true,
+        "gripX": 0.5,
+        "gripY": 0.5
+      }
+    ],
+    "notes": [
+      "The character features an oversized expressive head with a bright smile.",
+      "The baseball cap is designed with a rounded crown, panel seams, top button, and curved front brim.",
+      "The baseball glove is attached to the left hand, and the bat is held in the right hand."
+    ]
+  },
+  "reactCssCharacter": {
+    "kind": "react-css-character",
+    "componentName": "BaseballDude",
+    "styleSystem": "my-dude-react-css-scaffold",
+    "title": "Baseball Dude",
+    "summary": "A cheerful baseball dude with an oversized expressive head and sporty attire, ready to hit a home run.",
+    "cssVariables": {
+      "--dude-primary": "#ff0000",
+      "--dude-secondary": "#ffffff",
+      "--dude-accent": "#0000ff",
+      "--dude-eye": "#e0f2fe",
+      "--dude-panel": "rgba(255,255,255,.18)",
+      "--dude-mouth": "#0f172a",
+      "--dude-body": "#1e293b",
+      "--dude-arm": "#ff0000",
+      "--dude-hand": "#facc15",
+      "--dude-leg": "#1e293b",
+      "--dude-foot": "#facc15"
+    },
+    "headShape": "rounded",
+    "bodyShape": "compact",
+    "expression": "excited",
+    "parts": [
+      {
+        "type": "hat",
+        "side": "center",
+        "tone": "primary",
+        "label": "baseball cap"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "accent",
+        "label": "baseball glove"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "secondary",
+        "label": "baseball jersey"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "primary",
+        "label": "baseball pants"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "primary",
+        "label": "sporty shoes"
+      },
+      {
+        "type": "hat",
+        "side": "center",
+        "tone": "accent",
+        "label": "baseball cap with rounded crown panel seams top button and curved front brim"
+      },
+      {
+        "type": "stripe",
+        "side": "center",
+        "tone": "eye",
+        "label": "baseball jersey front stripe"
+      }
+    ],
+    "customPrimitives": [
+      {
+        "id": "baseball-bat-body",
+        "label": "baseball bat body",
+        "anchor": "rightHand",
+        "shape": "rect",
+        "x": 10,
+        "y": 0,
+        "width": 10,
+        "height": 80,
+        "rotate": 15,
+        "tone": "primary",
+        "outline": true,
+        "held": true,
+        "gripX": 0.5,
+        "gripY": 0.95,
+        "groupId": "baseball-bat"
+      },
+      {
+        "id": "baseball-bat-end",
+        "label": "baseball bat end",
+        "anchor": "rightHand",
+        "shape": "circle",
+        "x": 10,
+        "y": 80,
+        "width": 20,
+        "height": 20,
+        "rotate": 0,
+        "tone": "accent",
+        "outline": true,
+        "held": true,
+        "gripX": 0.5,
+        "gripY": 0.5,
+        "groupId": "baseball-bat"
+      },
+      {
+        "id": "shoes-sporty-shoes",
+        "label": "sporty shoes",
+        "anchor": "leftFoot",
+        "shape": "capsule",
+        "x": -10,
+        "y": 14,
+        "width": 72,
+        "height": 28,
+        "rotate": -8,
+        "tone": "accent",
+        "outline": true,
+        "held": false,
+        "gripX": 0.5,
+        "gripY": 0.5,
+        "groupId": "sporty-shoes"
+      },
+      {
+        "id": "baseball-bat-barrel",
+        "label": "hand-held baseball bat barrel",
+        "anchor": "rightHand",
+        "shape": "capsule",
+        "x": 26,
+        "y": -34,
+        "width": 18,
+        "height": 96,
+        "rotate": -31,
+        "tone": "cream",
+        "outline": true,
+        "held": true,
+        "gripX": 0.5,
+        "gripY": 0.88,
+        "groupId": "baseball-bat"
+      },
+      {
+        "id": "baseball-bat-handle",
+        "label": "baseball bat handle gripped by hand",
+        "anchor": "rightHand",
+        "shape": "capsule",
+        "x": 8,
+        "y": 16,
+        "width": 10,
+        "height": 58,
+        "rotate": -31,
+        "tone": "dark",
+        "outline": true,
+        "held": true,
+        "gripX": 0.5,
+        "gripY": 0.72,
+        "groupId": "baseball-bat"
+      }
+    ],
+    "notes": [
+      "The character features an oversized expressive head with a bright smile.",
+      "The baseball cap is designed with a rounded crown, panel seams, top button, and curved front brim.",
+      "The baseball glove is attached to the left hand, and the bat is held in the right hand."
+    ]
+  },
+  "reactCssFaithfulness": {
+    "ok": true,
+    "failures": []
+  },
+  "reactCssRepairNotes": [],
+  "validation": {
+    "ok": true,
+    "errors": []
+  },
+  "coverage": {
+    "ok": true,
+    "checks": [],
+    "missingRequiredDetails": []
+  },
+  "enrichments": [],
+  "options": {
+    "enrichmentEnabled": true,
+    "coverageMode": "enforced",
+    "commitRequested": true
+  },
+  "repairs": 0
+}
