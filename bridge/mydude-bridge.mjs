@@ -548,6 +548,23 @@ async function callTest5Chat({ system, userContent, temperature = 0.38, maxToken
   return { provider: `github-copilot/${MODEL}`, content: json?.choices?.[0]?.message?.content || '{}' };
 }
 
+function promptPassCueQuestion(prompt = '', brief = {}) {
+  const subject = String(brief?.subject || prompt || 'this character').trim() || 'this character';
+  return `Prompt-pass cue question: To make ${subject} unmistakable in the screenshot, what is one clearly visible thing to put on the head, hand/hands, feet, clothing/body, neck, or body-attached area? Choose prompt-natural cues; prefer worn/attached cues over fragile held props when held objects fail.`;
+}
+
+function promptPassCueDecision(prompt = '', brief = {}) {
+  const text = `${prompt || ''} ${brief?.subject || ''} ${brief?.expandedPrompt || ''}`.toLowerCase();
+  const cues = [];
+  if (/(female|girl|woman|lady)/.test(text)) cues.push('female cue: visible hair shape or ponytail/headband plus fitted/clearly styled uniform/clothing; color alone is not enough');
+  if (/(baseball|slugger|batter|pitcher|catcher)/.test(text)) cues.push('baseball cue: cap plus jersey front/number/stripes, cleats, and optionally glove/bat only if it survives inspection');
+  if (/alien|extraterrestrial|martian|ufo/.test(text)) cues.push('alien cue: paired antennae/nonhuman eyes/green or unusual skin');
+  if (/(robot|android|mech)/.test(text)) cues.push('robot cue: screen/panel head, bolts, segmented limbs');
+  if (/wizard|magic|mage/.test(text)) cues.push('wizard cue: hat/robe/belt plus wand or stars if readable');
+  if (!cues.length) cues.push('choose the most prompt-specific attached cue on head, clothing/body, neck, feet, or hands before relying on a held prop');
+  return `Prompt-pass cue decision: ${cues.join('; ')}`;
+}
+
 function normalizeDesignBrief(raw, prompt) {
   const fallback = {
     title: `${prompt.split(/\s+/).slice(0, 5).join(' ') || 'Custom'} Buddy`,
@@ -556,7 +573,7 @@ function normalizeDesignBrief(raw, prompt) {
     mood: 'playful and friendly',
     palettePlan: { primary: 'glossy blue', secondary: 'soft white', accent: 'cyan glow' },
     styleTags: ['cute mascot', 'glossy SVG', 'blue-avatar quality'],
-    visualChecklist: ['oversized head', 'compact body', 'two expressive eyes', 'one small smile', 'connected arms', 'connected feet', 'one accessory', 'one accent detail'],
+    visualChecklist: ['oversized head', 'compact body', 'two expressive eyes', 'one small smile', 'connected arms', 'connected feet', 'one accessory', 'one accent detail', 'prompt-pass cue question', 'prompt-pass cue decision'],
     requiredDetails: ['prompt-specific subject feature', 'prompt-specific color/material', 'prompt-specific accessory', 'prompt-specific marking/accent'],
     requiredRenderableDetails: [],
     forbiddenDetails: ['raw SVG', 'HTML', 'JavaScript', 'external images'],
@@ -568,7 +585,7 @@ function normalizeDesignBrief(raw, prompt) {
   brief.expandedPrompt = String(brief.expandedPrompt || fallback.expandedPrompt).slice(0, 1800);
   brief.subject = String(brief.subject || prompt).slice(0, 180);
   for (const key of ['styleTags', 'visualChecklist', 'requiredDetails', 'forbiddenDetails', 'qualityConstraints']) {
-    brief[key] = Array.isArray(brief[key]) ? brief[key].map(v => String(v).slice(0, 180)).filter(Boolean).slice(0, key === 'visualChecklist' ? 14 : 8) : fallback[key];
+    brief[key] = Array.isArray(brief[key]) ? brief[key].map(v => String(v).slice(0, 180)).filter(Boolean).slice(0, key === 'visualChecklist' ? 18 : 8) : fallback[key];
   }
   if (!brief.visualChecklist.length) brief.visualChecklist = fallback.visualChecklist;
   const headQuestion = headItemQuestionForPrompt(prompt, brief.subject);
@@ -583,6 +600,12 @@ function normalizeDesignBrief(raw, prompt) {
     const answer = isJudgePrompt ? 'no — judges usually do not wear hats; use robe/glasses/hair and a hand-held gavel instead' : isBaseballPrompt ? 'yes — baseball cap with rounded crown, panel seams, top button, and curved front brim' : likelyHeadItem ? 'yes — choose an attached, prompt-natural head detail/headwear' : 'no — no natural head item requested; keep head clean except anatomy';
     brief.visualChecklist.unshift(`Head item decision: ${answer}`);
   }
+  if (!brief.visualChecklist.some(item => /prompt-pass cue question/i.test(String(item || '')))) {
+    brief.visualChecklist.unshift(promptPassCueQuestion(prompt, brief));
+  }
+  if (!brief.visualChecklist.some(item => /prompt-pass cue decision/i.test(String(item || '')))) {
+    brief.visualChecklist.unshift(promptPassCueDecision(prompt, brief));
+  }
   const checklistText = `${prompt || ''} ${brief.subject || ''} ${brief.expandedPrompt || ''}`.toLowerCase();
   if (/\b(judge|courtroom|judicial|gavel)\b/.test(checklistText)) {
     brief.visualChecklist = brief.visualChecklist.map(item => /head item decision/i.test(String(item || ''))
@@ -593,7 +616,7 @@ function normalizeDesignBrief(raw, prompt) {
       ? 'Head item decision: yes — baseball cap with rounded crown, panel seams, top button, and curved front brim'
       : item);
   }
-  brief.visualChecklist = brief.visualChecklist.slice(0, 14);
+  brief.visualChecklist = brief.visualChecklist.slice(0, 18);
   if (!brief.requiredDetails.length) brief.requiredDetails = fallback.requiredDetails;
   brief.requiredRenderableDetails = normalizeRenderableDetails(brief.requiredRenderableDetails, prompt, brief);
   return brief;
@@ -663,6 +686,8 @@ Rules:
 - For any prompt-specific held object or clothing detail that is not already one of those named scaffold parts, create it in customPrimitives from safe geometric atoms, anchored only to rightHand/leftHand/headTop/bodyFront/leftFoot/rightFoot. Do not collapse it to a generic badge. Compose multiple customPrimitives when needed (for example a briefcase = rect body + arc handle; a tennis racket = ring head + capsule handle + string lines; shoe = capsule + sole stripe).
 - Hand-held customPrimitives MUST use anchor leftHand or rightHand, the same groupId for all pieces of the same object, held:true, plus gripX/gripY on the handle/grip piece. The renderer solves placement for the whole group so the chosen grip point is inside the hand; x/y are local coordinates within the object group, not free screen coordinates. The renderer draws a hand clasp above held groups.
 - Before deciding headShape/parts, ask the brief's exact headwear question: "What would a/an <prompt subject> have on their head?" Use the Head item question and Head item decision checklist items.
+- Before finalizing parts/customPrimitives, ask the Prompt-pass cue question: "what one visible cue on head, hand/hands, feet, clothing/body, neck, or body-attached area would make this prompt pass screenshot inspection?" Then actually render that cue as a visible part/customPrimitive. This is generic for any prompt: if the prompt identity is weak or a held prop fails, strengthen attached/worn cues instead of relying on metadata.
+- Inspect every zone in the blueprint mentally before returning: head, face, neck, body/clothing, both hands, both feet, and near-foot area. Remove or replace stray foot/hand artifacts and stray artifacts around the feet/hands that do not serve the prompt.
 - If Head item decision says yes, the blueprint MUST visibly put that exact thing on the head using part type hat/helmet/crown/antenna/glasses or customPrimitives anchored to headTop/headLeft/headRight. Do not merely mention it in notes/checklist.
 - If Head item decision says no, do not invent unrelated headwear.
 - Hats/headwear must use part type hat/helmet/crown/antenna or customPrimitives anchored to headTop/headLeft/headRight. Clothing must use bodyShape suited/robe/pilot, bodyFront primitives, or stripe/badge/scarf parts. Footwear must use boot parts or leftFoot/rightFoot primitives.
