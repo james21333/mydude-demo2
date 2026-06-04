@@ -2093,6 +2093,8 @@ function Test5AvatarLab() {
   const [result, setResult] = useState(null);
   const [busy, setBusy] = useState(false);
   const [objectRetryCount, setObjectRetryCount] = useState(0);
+  const [replacementRetryCount, setReplacementRetryCount] = useState(0);
+  const [objectFallbackPhase, setObjectFallbackPhase] = useState('initial');
   const [visualInspectionDone, setVisualInspectionDone] = useState(false);
   const [useEnrichment, setUseEnrichment] = useState(() => !/enrichment=0|fallback=0/.test(window.location.search));
 
@@ -2105,8 +2107,10 @@ function Test5AvatarLab() {
     const retryMode = requestOverrides.heldObjectFallback?.mode || requestOverrides.heldObjectFallback?.action || '';
     setStatus(requestOverrides.heldObjectFallback
       ? retryMode === 'drop'
-        ? 'final fallback: rendering without the failed held object…'
-        : `visual retry ${requestOverrides.heldObjectFallback.attempt || 1}/3: trying the same hand-held object again, clearer…`
+        ? 'final fallback: rendering without any failed held object…'
+        : /replacement|replace|alternate/.test(retryMode)
+          ? `first fallback ${requestOverrides.heldObjectFallback.attempt || 1}/3: asking for/rendering a different hand-held object…`
+          : `visual retry ${requestOverrides.heldObjectFallback.attempt || 1}/3: trying the same hand-held object again, clearer…`
       : 'expanding prompt into a hidden art-direction brief…');
     try {
       const requestBody = { prompt: text, commit: true, enrichment: useEnrichment, coverageMode: useEnrichment ? 'enforced' : 'report-only', ...requestOverrides };
@@ -2118,6 +2122,11 @@ function Test5AvatarLab() {
       const json = await res.json().catch(() => ({}));
       if (!res.ok || !json.ok) throw new Error(json.error || `HTTP ${res.status}`);
       setResult(json);
+      if (!requestOverrides.heldObjectFallback) {
+        setObjectRetryCount(0);
+        setReplacementRetryCount(0);
+        setObjectFallbackPhase('initial');
+      }
       setVisualInspectionDone(false);
       setStatus(`rendered + saved${json.commit?.ok ? ` + committed ${json.commit.hash}${json.commit?.push?.ok ? ' + pushed' : json.commit?.push?.attempted ? ' (push failed)' : ''}` : json.commit?.attempted ? ' (commit failed; artifact saved)' : ''}; next step: screenshot inspection`);
       return json;
@@ -2139,13 +2148,28 @@ function Test5AvatarLab() {
       return;
     }
     const badObject = result?.visualRetryPlan?.badObject || result?.visualRetryPlan?.currentObject || 'unclear held object';
-    const nextAttempt = Math.min(3, objectRetryCount + 1);
+    const replacementObject = result?.visualRetryPlan?.targetObject || result?.visualRetryPlan?.replacementObject || '';
     try {
-      if (objectRetryCount >= 3) {
-        const dropped = await generate({ throwOnError: true, heldObjectFallback: { enabled: true, mode: 'drop', action: 'drop-held-object', dropObject: true, badObject, attempt: 3, maxAttempts: 3 } });
-        if (dropped) setStatus('rendered without the failed held object; inspect final avatar');
+      if (objectFallbackPhase === 'replacement') {
+        if (replacementRetryCount >= 3) {
+          const dropped = await generate({ throwOnError: true, heldObjectFallback: { enabled: true, mode: 'drop', action: 'drop-held-object', dropObject: true, badObject, replacementObject, attempt: 3, maxAttempts: 3 } });
+          if (dropped) setStatus('rendered without the failed held object after replacement fallback failed; inspect final avatar');
+          return;
+        }
+        const nextReplacementAttempt = Math.min(3, replacementRetryCount + 1);
+        setReplacementRetryCount(nextReplacementAttempt);
+        const replaced = await generate({ throwOnError: true, heldObjectFallback: { enabled: true, mode: 'replacement', action: 'replacement-held-object', askForReplacement: true, badObject, replacementObject, attempt: nextReplacementAttempt, maxAttempts: 3 } });
+        if (replaced) setStatus(`replacement object fallback ${nextReplacementAttempt}/3 rendered; inspect it honestly`);
         return;
       }
+      if (objectRetryCount >= 3) {
+        setObjectFallbackPhase('replacement');
+        setReplacementRetryCount(1);
+        const replaced = await generate({ throwOnError: true, heldObjectFallback: { enabled: true, mode: 'replacement', action: 'replacement-held-object', askForReplacement: true, badObject, attempt: 1, maxAttempts: 3 } });
+        if (replaced) setStatus('first fallback rendered a different hand-held object; inspect it honestly');
+        return;
+      }
+      const nextAttempt = Math.min(3, objectRetryCount + 1);
       setObjectRetryCount(nextAttempt);
       const retried = await generate({ throwOnError: true, heldObjectFallback: { enabled: true, mode: 'retry-same', action: 'retry-same-object', badObject, attempt: nextAttempt, maxAttempts: 3 } });
       if (retried) setStatus(`visual retry ${nextAttempt}/3 rendered the same object again; inspect it honestly`);
@@ -2174,7 +2198,7 @@ function Test5AvatarLab() {
         <textarea
           id="test5-prompt"
           value={prompt}
-          onChange={(e) => { setPrompt(e.target.value.slice(0, 1200)); setObjectRetryCount(0); setVisualInspectionDone(false); }}
+          onChange={(e) => { setPrompt(e.target.value.slice(0, 1200)); setObjectRetryCount(0); setReplacementRetryCount(0); setObjectFallbackPhase('initial'); setVisualInspectionDone(false); }}
           rows={5}
           style={{ width: '100%', borderRadius: 16, border: '1px solid rgba(148,163,184,.28)', background: 'rgba(15,23,42,.74)', color: 'white', padding: 14, resize: 'vertical', fontSize: 15, lineHeight: 1.4 }}
           placeholder="Example: blue mushroom wizard with sleepy eyes and a tiny glowing staff"
@@ -2187,7 +2211,7 @@ function Test5AvatarLab() {
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginTop: 12 }}>
           <button className="primary" onClick={() => generate()} disabled={busy || !prompt.trim()}>{busy ? 'Generating…' : 'Generate Avatar'}</button>
           {result ? <button className="secondary" onClick={() => { setVisualInspectionDone(true); setError(''); setStatus('screenshot inspected; visual problem confirmed'); }} disabled={busy} title="Step 2: inspect the final screenshot/avatar honestly before any retry, replacement, or drop decision.">Step 2: screenshot inspected — something looks bad</button> : null}
-          {result ? <button className="secondary" onClick={retryHeldObjectFallback} disabled={busy || !prompt.trim() || !visualInspectionDone} title="Only after screenshot inspection: retry that same object up to three times. After the third bad try, render without the object.">{!visualInspectionDone ? 'Inspect screenshot first' : objectRetryCount >= 3 ? 'Third try still bad: render without object' : `Object still wrong: retry same object ${objectRetryCount + 1}/3`}</button> : null}
+          {result ? <button className="secondary" onClick={retryHeldObjectFallback} disabled={busy || !prompt.trim() || !visualInspectionDone} title="Only after screenshot inspection: retry the same object three times, then ask for a different prompt-fitting hand object and run three tries, then render without held objects if that also fails.">{!visualInspectionDone ? 'Inspect screenshot first' : objectFallbackPhase === 'replacement' ? replacementRetryCount >= 3 ? 'Replacement still bad: render without object' : `Replacement object wrong: retry replacement ${replacementRetryCount + 1}/3` : objectRetryCount >= 3 ? 'First fallback: ask LLM for new hand object 1/3' : `Object still wrong: retry same object ${objectRetryCount + 1}/3`}</button> : null}
           <span className="debug-pill">status: {status}</span>
         </div>
         {error ? <div className="error-box" style={{ marginTop: 12 }}>Error: {error}</div> : null}
@@ -2198,7 +2222,8 @@ function Test5AvatarLab() {
           <div><strong>Push:</strong> {result.commit?.push?.ok ? 'pushed to GitHub' : result.commit?.push?.attempted ? result.commit.push.error || 'push failed' : 'not pushed'}</div>
           <div><strong>Repairs:</strong> {result.repairs}</div>
           <div><strong>Screenshot inspection:</strong> {visualInspectionDone ? 'completed — visual problem confirmed' : 'required before retry/drop'}</div>
-          <div><strong>Visual retry plan:</strong> {result.visualRetryPlan?.currentObject || result.visualRetryPlan?.badObject || 'no held object detected'}{result.visualRetryPlan?.action ? ` → ${result.visualRetryPlan.action}` : ''}{result.visualRetryPlan?.targetObject ? `: ${result.visualRetryPlan.targetObject}` : ''}{objectRetryCount ? ` (same-object retry ${objectRetryCount}/3)` : ''}</div>
+          <div><strong>Visual fallback sequence:</strong> initial object 3 tries → ask LLM for replacement hand object 3 tries → remove held object</div>
+          <div><strong>Visual retry plan:</strong> {result.visualRetryPlan?.currentObject || result.visualRetryPlan?.badObject || 'no held object detected'}{result.visualRetryPlan?.action ? ` → ${result.visualRetryPlan.action}` : ''}{result.visualRetryPlan?.targetObject ? `: ${result.visualRetryPlan.targetObject}` : ''}{objectRetryCount ? ` (same-object retry ${objectRetryCount}/3)` : ''}{replacementRetryCount ? ` (replacement retry ${replacementRetryCount}/3)` : ''}</div>
           <div><strong>Mode:</strong> {result.options?.enrichmentEnabled ? 'LLM + fallback reusable shape primitives' : 'LLM only; fallback shape primitives off'} / coverage {result.options?.coverageMode || 'enforced'}</div>
           <div><strong>Coverage:</strong> {result.coverage?.ok ? 'passed' : 'failed'}{result.coverage?.missingRequiredDetails?.length ? ` — missing ${result.coverage.missingRequiredDetails.join(', ')}` : ''}</div>
           <div><strong>React/CSS component:</strong> {result.reactCssCharacter?.componentName || 'not returned'} ({result.reactCssCharacter?.styleSystem || 'unknown'})</div>

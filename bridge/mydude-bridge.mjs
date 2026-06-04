@@ -294,25 +294,34 @@ function isHeldObjectRequirement(value = '', badObject = '') {
 
 function buildHeldObjectRetryPlan(prompt = '', designBrief = {}, character = {}, options = {}) {
   const currentObject = inferHeldObjectSemanticFromCharacter(character) || normalizeHeldObjectSemantic(`${prompt} ${designBrief?.expandedPrompt || ''} ${(designBrief?.visualChecklist || []).join(' ')}`);
-  const requested = Boolean(options?.enabled || options?.heldObjectFallback || options?.objectFallback || options?.badObject || options?.badHeldObject || options?.dropObject || options?.dropHeldObject);
+  const requested = Boolean(options?.enabled || options?.heldObjectFallback || options?.objectFallback || options?.badObject || options?.badHeldObject || options?.dropObject || options?.dropHeldObject || options?.replacementObject || options?.askForReplacement);
   const badObject = normalizeHeldObjectSemantic(options?.badObject || options?.badHeldObject || currentObject) || currentObject;
   const mode = String(options?.mode || options?.action || '').toLowerCase();
   const dropObject = Boolean(options?.dropObject || options?.dropHeldObject || mode === 'drop' || mode === 'drop-object' || mode === 'without-object');
+  const replacementRequested = Boolean(options?.askForReplacement || options?.replacementObject || mode.includes('replacement') || mode.includes('replace') || mode.includes('alternate')) && !dropObject;
+  const replacementObject = normalizeHeldObjectSemantic(options?.replacementObject || options?.targetObject || options?.alternateObject || '') || String(options?.replacementObject || options?.targetObject || options?.alternateObject || '').trim();
   const attempt = Math.max(1, Math.min(3, Number(options?.attempt || 1) || 1));
   const maxAttempts = Math.max(1, Math.min(3, Number(options?.maxAttempts || 3) || 3));
-  const targetObject = dropObject ? '' : (badObject || currentObject);
+  const action = dropObject ? 'drop-held-object' : replacementRequested ? 'replacement-held-object' : 'retry-same-object';
+  const targetObject = dropObject ? '' : replacementRequested ? replacementObject : (badObject || currentObject);
   return {
     requested,
     currentObject,
     badObject,
+    replacementObject,
     targetObject,
-    action: dropObject ? 'drop-held-object' : 'retry-same-object',
+    action,
     attempt,
     maxAttempts,
-    finalDropAfterAttempts: 3,
+    firstFallbackAfterAttempts: 3,
+    finalDropAfterReplacementAttempts: 3,
     instruction: !requested ? '' : dropObject
-      ? `Visual fallback: the held ${heldObjectLabel(badObject)} failed the final visual inspection after three same-object tries. Render the avatar without any hand-held object; preserve the prompt identity through headwear, clothing, colors, expression, and body-attached details.`
-      : `Visual retry ${attempt}/${maxAttempts}: the held ${heldObjectLabel(targetObject)} did not read clearly in the screenshot. Try the same object again, not an alternate object. Make it oversized, simple, connected to one hand, and recognizable from silhouette alone. If it still fails after three tries, the next step is to render without the object.`,
+      ? `Final visual fallback: the original held ${heldObjectLabel(badObject)} and the replacement-object run both failed honest screenshot inspection. Render the avatar without any hand-held object; preserve the prompt identity through headwear, clothing, colors, expression, and body-attached details.`
+      : replacementRequested
+        ? (replacementObject
+          ? `First fallback replacement retry ${attempt}/${maxAttempts}: the original held ${heldObjectLabel(badObject)} failed three screenshot-inspected tries. Render the replacement hand-held ${heldObjectLabel(replacementObject)} clearly, attached to one hand. If this replacement also fails after three tries, the next step is to render without any held object.`
+          : `First fallback replacement retry ${attempt}/${maxAttempts}: the original held ${heldObjectLabel(badObject)} failed three screenshot-inspected tries. Ask what else this character would naturally have in their hand, choose one simple different hand-held object, and render that replacement clearly. Do not render the failed ${heldObjectLabel(badObject)}. If this replacement also fails after three tries, the next step is to render without any held object.`)
+        : `Visual retry ${attempt}/${maxAttempts}: the held ${heldObjectLabel(targetObject)} did not read clearly in the screenshot. Try the same object again, not an alternate object yet. Make it oversized, simple, connected to one hand, and recognizable from silhouette alone. If it still fails after three tries, the first fallback is to ask for a different hand-held object that fits the character.`,
   };
 }
 
@@ -335,11 +344,29 @@ function applyHeldObjectRetryToBrief(designBrief = {}, retryPlan = {}) {
     };
   }
   const label = heldObjectLabel(retryPlan.targetObject || retryPlan.badObject || retryPlan.currentObject);
+  if (retryPlan.action === 'replacement-held-object') {
+    const replacementText = retryPlan.targetObject
+      ? `Render the replacement hand-held ${heldObjectLabel(retryPlan.targetObject)} clearly.`
+      : `Ask what else this character would naturally have in their hand, choose one simple different replacement hand-held object, and render it clearly.`;
+    return {
+      ...designBrief,
+      expandedPrompt: `${designBrief.expandedPrompt || ''} First fallback after screenshot inspection: the original hand-held ${badLabel} failed the initial three visual tries. ${replacementText} Do not render the failed ${badLabel}. Keep it attached to one hand, simple, oversized, and readable from silhouette alone. If this replacement object fails after three screenshot-inspected tries, remove hand-held objects entirely.`,
+      visualChecklist: [
+        `First fallback replacement ${retryPlan.attempt || 1}/${retryPlan.maxAttempts || 3}: choose/render a different prompt-fitting hand-held object instead of the failed ${badLabel}`,
+        ...checklist.filter(item => !isHeldObjectRequirement(item, retryPlan.badObject)),
+      ].slice(0, 14),
+      requiredDetails: [
+        retryPlan.targetObject ? `clear replacement hand-held ${heldObjectLabel(retryPlan.targetObject)}` : 'clear replacement hand-held object naturally fitting this character',
+        ...details.filter(item => !isHeldObjectRequirement(item, retryPlan.badObject)),
+      ].slice(0, 8),
+      requiredRenderableDetails: renderable.filter(item => !isHeldObjectRequirement(`${item?.id || ''} ${item?.label || ''}`, retryPlan.badObject)),
+    };
+  }
   return {
     ...designBrief,
-    expandedPrompt: `${designBrief.expandedPrompt || ''} Visual retry ${retryPlan.attempt || 1}/${retryPlan.maxAttempts || 3}: the previous hand-held ${label} did not read clearly in the screenshot. Render the SAME ${label} again, not an alternate object. Make the object large, uncluttered, attached to one hand, with a clear silhouette and distinctive subparts. Baseball bat example: one continuous long tapered barrel, narrow handle, knob, and wood cues.`,
+    expandedPrompt: `${designBrief.expandedPrompt || ''} Visual retry ${retryPlan.attempt || 1}/${retryPlan.maxAttempts || 3}: the previous hand-held ${label} did not read clearly in the screenshot. Render the SAME ${label} again, not an alternate object yet. Make the object large, uncluttered, attached to one hand, with a clear silhouette and distinctive subparts. Baseball bat example: one continuous long tapered barrel, narrow handle, knob, and wood cues.`,
     visualChecklist: [
-      `Visual retry ${retryPlan.attempt || 1}/${retryPlan.maxAttempts || 3}: same object, clearer hand-held ${label}; if third try still fails, drop the object`,
+      `Visual retry ${retryPlan.attempt || 1}/${retryPlan.maxAttempts || 3}: same object, clearer hand-held ${label}; if third try still fails, ask for a different prompt-fitting hand object`,
       ...checklist,
     ].slice(0, 14),
     requiredDetails: [
@@ -1174,7 +1201,7 @@ async function generateTest5Avatar(prompt, options = {}) {
   const expanded = await expandTest5Prompt(prompt);
   let designBrief = expanded.designBrief;
   const initialRetryPlan = buildHeldObjectRetryPlan(prompt, designBrief, null, options.heldObjectFallback || options.objectFallback || {});
-  if (initialRetryPlan.requested && initialRetryPlan.alternateObject) {
+  if (initialRetryPlan.requested) {
     designBrief = applyHeldObjectRetryToBrief(designBrief, initialRetryPlan);
     designBrief.requiredRenderableDetails = normalizeRenderableDetails(designBrief.requiredRenderableDetails, prompt, designBrief);
   }
