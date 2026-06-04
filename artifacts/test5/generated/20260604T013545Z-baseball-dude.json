@@ -1,0 +1,721 @@
+{
+  "prompt": "baseball dude",
+  "userPrompt": "baseball dude",
+  "createdAt": "2026-06-04T01:35:45.569Z",
+  "provider": "github-copilot/gpt-4o-mini + github-copilot/gpt-4o-mini + github-copilot/gpt-4o-mini",
+  "expandedPrompt": "A cheerful baseball dude with an oversized expressive head and a compact connected body. He has a bright smile showcasing excitement for the game. His outfit consists of a classic baseball jersey with stripes, a pair of baseball pants, and a baseball cap with rounded crown, panel seams, top button, and curved front brim. The character's skin is a warm tan color, and he has short, tousled brown hair peeking out from under the cap. His eyes are large and sparkling with enthusiasm. He holds a baseball bat in one hand and wears a pair of white sneakers with blue accents.",
+  "designBrief": {
+    "title": "Baseball Dude",
+    "expandedPrompt": "A cheerful baseball dude with an oversized expressive head and a compact connected body. He has a bright smile showcasing excitement for the game. His outfit consists of a classic baseball jersey with stripes, a pair of baseball pants, and a baseball cap with rounded crown, panel seams, top button, and curved front brim. The character's skin is a warm tan color, and he has short, tousled brown hair peeking out from under the cap. His eyes are large and sparkling with enthusiasm. He holds a baseball bat in one hand and wears a pair of white sneakers with blue accents.",
+    "subject": "a cheerful baseball player",
+    "mood": "playful excitement",
+    "palettePlan": {
+      "primary": "light blue",
+      "secondary": "white",
+      "accent": "red"
+    },
+    "styleTags": [
+      "cute mascot",
+      "glossy SVG",
+      "blue-avatar quality"
+    ],
+    "visualChecklist": [
+      "Head item question: What would a baseball dude have on their head?",
+      "Head item decision: yes — baseball cap with rounded crown, panel seams, top button, and curved front brim",
+      "Facial expression: large smile with bright eyes",
+      "Outfit detail: classic baseball jersey with horizontal stripes",
+      "Accessory detail: holding a baseball bat in one hand",
+      "Footwear detail: white sneakers with blue accents",
+      "Hair detail: short, tousled brown hair",
+      "Skin tone detail: warm tan color",
+      "Body marking detail: baseball pants",
+      "Pose detail: standing with a slight lean, ready to swing the bat"
+    ],
+    "requiredDetails": [
+      "anatomy detail: oversized head",
+      "color/material detail: warm tan skin",
+      "expression detail: cheerful smile",
+      "body-attached accessory detail: baseball bat in hand"
+    ],
+    "requiredRenderableDetails": [],
+    "forbiddenDetails": [
+      "raw SVG",
+      "HTML",
+      "unvalidated custom shapes",
+      "external images"
+    ],
+    "qualityConstraints": [
+      "oversized expressive head",
+      "compact connected body",
+      "readable silhouette",
+      "valid renderer sockets only"
+    ]
+  },
+  "visualChecklist": [
+    "Head item question: What would a baseball dude have on their head?",
+    "Head item decision: yes — baseball cap with rounded crown, panel seams, top button, and curved front brim",
+    "Facial expression: large smile with bright eyes",
+    "Outfit detail: classic baseball jersey with horizontal stripes",
+    "Accessory detail: holding a baseball bat in one hand",
+    "Footwear detail: white sneakers with blue accents",
+    "Hair detail: short, tousled brown hair",
+    "Skin tone detail: warm tan color",
+    "Body marking detail: baseball pants",
+    "Pose detail: standing with a slight lean, ready to swing the bat"
+  ],
+  "requiredDetails": [
+    "anatomy detail: oversized head",
+    "color/material detail: warm tan skin",
+    "expression detail: cheerful smile",
+    "body-attached accessory detail: baseball bat in hand"
+  ],
+  "expandedContent": "{\n  \"title\": \"Baseball Dude\",\n  \"expandedPrompt\": \"A cheerful baseball dude with an oversized expressive head and a compact connected body. He has a bright smile showcasing excitement for the game. His outfit consists of a classic baseball jersey with stripes, a pair of baseball pants, and a baseball cap with rounded crown, panel seams, top button, and curved front brim. The character's skin is a warm tan color, and he has short, tousled brown hair peeking out from under the cap. His eyes are large and sparkling with enthusiasm. He holds a baseball bat in one hand and wears a pair of white sneakers with blue accents.\",\n  \"subject\": \"a cheerful baseball player\",\n  \"mood\": \"playful excitement\",\n  \"palettePlan\": {\n    \"primary\": \"light blue\",\n    \"secondary\": \"white\",\n    \"accent\": \"red\"\n  },\n  \"styleTags\": [\"cute mascot\", \"glossy SVG\", \"blue-avatar quality\"],\n  \"visualChecklist\": [\n    \"Head item question: What would a baseball dude have on their head?\",\n    \"Head item decision: yes — baseball cap with rounded crown, panel seams, top button, and curved front brim\",\n    \"Facial expression: large smile with bright eyes\",\n    \"Outfit detail: classic baseball jersey with horizontal stripes\",\n    \"Accessory detail: holding a baseball bat in one hand\",\n    \"Footwear detail: white sneakers with blue accents\",\n    \"Hair detail: short, tousled brown hair\",\n    \"Skin tone detail: warm tan color\",\n    \"Body marking detail: baseball pants\",\n    \"Pose detail: standing with a slight lean, ready to swing the bat\"\n  ],\n  \"requiredDetails\": [\n    \"anatomy detail: oversized head\",\n    \"color/material detail: warm tan skin\",\n    \"expression detail: cheerful smile\",\n    \"body-attached accessory detail: baseball bat in hand\"\n  ],\n  \"requiredRenderableDetails\": [\n    {\n      \"id\": \"cap\",\n      \"label\": \"baseball cap\",\n      \"acceptableShapes\": [\"capShape\"],\n      \"acceptableSockets\": [\"head.socket\"],\n      \"minimumCount\": 1\n    },\n    {\n      \"id\": \"bat\",\n      \"label\": \"baseball bat\",\n      \"acceptableShapes\": [\"batShape\"],\n      \"acceptableSockets\": [\"hand.socket\"],\n      \"minimumCount\": 1\n    },\n    {\n      \"id\": \"jersey\",\n      \"label\": \"baseball jersey\",\n      \"acceptableShapes\": [\"jerseyShape\"],\n      \"acceptableSockets\": [\"torso.socket\"],\n      \"minimumCount\": 1\n    },\n    {\n      \"id\": \"sneakers\",\n      \"label\": \"white sneakers\",\n      \"acceptableShapes\": [\"sneakerShape\"],\n      \"acceptableSockets\": [\"feet.socket\"],\n      \"minimumCount\": 2\n    }\n  ],\n  \"forbiddenDetails\": [\"raw SVG\", \"HTML\", \"unvalidated custom shapes\", \"external images\"],\n  \"qualityConstraints\": [\"oversized expressive head\", \"compact connected body\", \"readable silhouette\", \"valid renderer sockets only\"]\n}",
+  "rawContent": "{\n  \"title\": \"Baseball Dude\",\n  \"summary\": \"A cheerful baseball dude with an oversized expressive head and a compact connected body, showcasing excitement for the game.\",\n  \"palette\": \"blue\",\n  \"scene\": \"scene_city\",\n  \"body\": \"body_capsule\",\n  \"head\": \"head_round\",\n  \"eyes\": \"eyes_googly\",\n  \"mouth\": \"mouth_smile\",\n  \"primitives\": [\n    \"body_blob\",\n    \"body_capsule\",\n    \"head_round\",\n    \"eyes_googly\",\n    \"mouth_smile\",\n    \"body_cloud\",\n    \"body_triangle\",\n    \"body_box\",\n    \"body_car\",\n    \"body_mushroom\"\n  ],\n  \"layers\": [\n    {\n      \"shape\": \"mascotBody\",\n      \"anchor\": \"free\",\n      \"x\": 0,\n      \"y\": 0,\n      \"scale\": [0.75, 0.6],\n      \"rotate\": 0,\n      \"material\": \"glossyBlue\",\n      \"role\": \"part\",\n      \"z\": 2,\n      \"attach\": {\"socket\": \"body.center\"}\n    },\n    {\n      \"shape\": \"mascotHead\",\n      \"anchor\": \"free\",\n      \"x\": 0,\n      \"y\": 40,\n      \"scale\": [0.8, 0.8],\n      \"rotate\": 0,\n      \"material\": \"glossyBlue\",\n      \"role\": \"part\",\n      \"z\": 8,\n      \"attach\": {\"socket\": \"head.center\"}\n    },\n    {\n      \"shape\": \"stubbyArm\",\n      \"anchor\": \"free\",\n      \"x\": -30,\n      \"y\": 20,\n      \"scale\": [0.3, 0.5],\n      \"rotate\": -15,\n      \"material\": \"glossyBlue\",\n      \"role\": \"part\",\n      \"z\": 5,\n      \"attach\": {\"socket\": \"body.leftHand\"}\n    },\n    {\n      \"shape\": \"stubbyArm\",\n      \"anchor\": \"free\",\n      \"x\": 30,\n      \"y\": 20,\n      \"scale\": [0.3, 0.5],\n      \"rotate\": 15,\n      \"material\": \"glossyBlue\",\n      \"role\": \"part\",\n      \"z\": 5,\n      \"attach\": {\"socket\": \"body.rightHand\"}\n    },\n    {\n      \"shape\": \"cuteEye\",\n      \"anchor\": \"free\",\n      \"x\": -15,\n      \"y\": 10,\n      \"scale\": [0.2, 0.2],\n      \"rotate\": 0,\n      \"material\": \"softWhite\",\n      \"role\": \"eye\",\n      \"z\": 20,\n      \"attach\": {\"socket\": \"head.leftEye\"}\n    },\n    {\n      \"shape\": \"cuteEye\",\n      \"anchor\": \"free\",\n      \"x\": 15,\n      \"y\": 10,\n      \"scale\": [0.2, 0.2],\n      \"rotate\": 0,\n      \"material\": \"softWhite\",\n      \"role\": \"eye\",\n      \"z\": 20,\n      \"attach\": {\"socket\": \"head.rightEye\"}\n    },\n    {\n      \"shape\": \"mouthSmile\",\n      \"anchor\": \"free\",\n      \"x\": 0,\n      \"y\": 20,\n      \"scale\": [0.4, 0.2],\n      \"rotate\": 0,\n      \"material\": \"charcoalRubber\",\n      \"role\": \"mouth\",\n      \"z\": 31,\n      \"attach\": {\"socket\": \"head.mouth\"}\n    },\n    {\n      \"shape\": \"hairTuft\",\n      \"anchor\": \"free\",\n      \"x\": 0,\n      \"y\": -10,\n      \"scale\": [0.4, 0.3],\n      \"rotate\": 0,\n      \"material\": \"softWhite\",\n      \"role\": \"part\",\n      \"z\": 10,\n      \"attach\": {\"socket\": \"head.top\"}\n    },\n    {\n      \"shape\": \"baseballCap\",\n      \"anchor\": \"free\",\n      \"x\": 0,\n      \"y\": -30,\n      \"scale\": [0.5, 0.5],\n      \"rotate\": 0,\n      \"material\": \"glossyRed\",\n      \"role\": \"part\",\n      \"z\": 15,\n      \"attach\": {\"socket\": \"head.center\"}\n    },\n    {\n      \"shape\": \"bodyPatchLeft\",\n      \"anchor\": \"free\",\n      \"x\": -20,\n      \"y\": 0,\n      \"scale\": [0.3, 0.4],\n      \"rotate\": 0,\n      \"material\": \"glossyWhite\",\n      \"role\": \"part\",\n      \"z\": 3,\n      \"attach\": {\"socket\": \"body.left\"}\n    },\n    {\n      \"shape\": \"bodyPatchRight\",\n      \"anchor\": \"free\",\n      \"x\": 20,\n      \"y\": 0,\n      \"scale\": [0.3, 0.4],\n      \"rotate\": 0,\n      \"material\": \"glossyWhite\",\n      \"role\": \"part\",\n      \"z\": 3,\n      \"attach\": {\"socket\": \"body.right\"}\n    },\n    {\n      \"shape\": \"stubbyLeg\",\n      \"anchor\": \"free\",\n      \"x\": -15,\n      \"y\": 70,\n      \"scale\": [0.4, 0.6],\n      \"rotate\": 0,\n      \"material\": \"glossyBlue\",\n      \"role\": \"part\",\n      \"z\": 5,\n      \"attach\": {\"socket\": \"body.leftLeg\"}\n    },\n    {\n      \"shape\": \"stubbyLeg\",\n      \"anchor\": \"free\",\n      \"x\": 15,\n      \"y\": 70,\n      \"scale\": [0.4, 0.6],\n      \"rotate\": 0,\n      \"material\": \"glossyBlue\",\n      \"role\": \"part\",\n      \"z\": 5,\n      \"attach\": {\"socket\": \"body.rightLeg\"}\n    },\n    {\n      \"shape\": \"shoe\",\n      \"anchor\": \"free\",\n      \"x\": -15,\n      \"y\": 80,\n      \"scale\": [0.3, 0.2],\n      \"rotate\": 0,\n      \"material\": \"glossyWhite\",\n      \"role\": \"part\",\n      \"z\": 10,\n      \"attach\": {\"socket\": \"body.leftFoot\"}\n    },\n    {\n      \"shape\": \"shoe\",\n      \"anchor\": \"free\",\n      \"x\": 15,\n      \"y\": 80,\n      \"scale\": [0.3, 0.2],\n      \"rotate\": 0,\n      \"material\": \"glossyWhite\",\n      \"role\": \"part\",\n      \"z\": 10,\n      \"attach\": {\"socket\": \"body.rightFoot\"}\n    },\n    {\n      \"shape\": \"baseballBat\",\n      \"anchor\": \"free\",\n      \"x\": 40,\n      \"y\": 20,\n      \"scale\": [0.5, 0.1],\n      \"rotate\": 15,\n      \"material\": \"glossyBrown\",\n      \"role\": \"part\",\n      \"z\": 20,\n      \"attach\": {\"socket\": \"body.rightHand\"}\n    }\n  ]\n}",
+  "rawSceneSpec": {
+    "title": "Baseball Dude",
+    "summary": "A cheerful baseball dude with an oversized expressive head and a compact connected body, showcasing excitement for the game.",
+    "palette": "blue",
+    "scene": "scene_city",
+    "body": "body_capsule",
+    "head": "head_round",
+    "eyes": "eyes_googly",
+    "mouth": "mouth_smile",
+    "primitives": [
+      "body_blob",
+      "body_capsule",
+      "head_round",
+      "eyes_googly",
+      "mouth_smile",
+      "body_cloud",
+      "body_triangle",
+      "body_box",
+      "body_car",
+      "body_mushroom"
+    ],
+    "layers": [
+      {
+        "shape": "mascotBody",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.75,
+          0.6
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 2,
+        "attach": {
+          "socket": "body.center"
+        }
+      },
+      {
+        "shape": "mascotHead",
+        "anchor": "free",
+        "x": 0,
+        "y": 40,
+        "scale": [
+          0.8,
+          0.8
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "shape": "stubbyArm",
+        "anchor": "free",
+        "x": -30,
+        "y": 20,
+        "scale": [
+          0.3,
+          0.5
+        ],
+        "rotate": -15,
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "body.leftHand"
+        }
+      },
+      {
+        "shape": "stubbyArm",
+        "anchor": "free",
+        "x": 30,
+        "y": 20,
+        "scale": [
+          0.3,
+          0.5
+        ],
+        "rotate": 15,
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "body.rightHand"
+        }
+      },
+      {
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": -15,
+        "y": 10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": 15,
+        "y": 10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "shape": "mouthSmile",
+        "anchor": "free",
+        "x": 0,
+        "y": 20,
+        "scale": [
+          0.4,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "charcoalRubber",
+        "role": "mouth",
+        "z": 31,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      },
+      {
+        "shape": "hairTuft",
+        "anchor": "free",
+        "x": 0,
+        "y": -10,
+        "scale": [
+          0.4,
+          0.3
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "role": "part",
+        "z": 10,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "shape": "stubbyLeg",
+        "anchor": "free",
+        "x": -15,
+        "y": 70,
+        "scale": [
+          0.4,
+          0.6
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 5
+      },
+      {
+        "shape": "stubbyLeg",
+        "anchor": "free",
+        "x": 15,
+        "y": 70,
+        "scale": [
+          0.4,
+          0.6
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "role": "part",
+        "z": 5
+      }
+    ]
+  },
+  "sanitizedSceneSpec": {
+    "title": "Baseball Dude",
+    "summary": "A cheerful baseball dude with an oversized expressive head and a compact connected body, showcasing excitement for the game.",
+    "palette": "blue",
+    "scene": "scene_city",
+    "body": "body_capsule",
+    "head": "head_round",
+    "eyes": "eyes_googly",
+    "mouth": "mouth_smile",
+    "primitives": [
+      "body_blob",
+      "body_capsule",
+      "head_round",
+      "eyes_googly",
+      "mouth_smile",
+      "body_cloud",
+      "body_triangle",
+      "body_box",
+      "body_car",
+      "body_mushroom",
+      "scene_sky",
+      "eyes_cartoon",
+      "object_spark"
+    ],
+    "layers": [
+      {
+        "id": "mascotBody-0",
+        "shape": "mascotBody",
+        "anchor": "free",
+        "x": 0,
+        "y": 0,
+        "scale": [
+          0.68,
+          0.6
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 2,
+        "attach": {
+          "socket": "body.center"
+        }
+      },
+      {
+        "id": "stubbyArm-2",
+        "shape": "stubbyArm",
+        "anchor": "free",
+        "x": -30,
+        "y": 20,
+        "scale": [
+          0.3,
+          0.5
+        ],
+        "rotate": -15,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "body.leftHand"
+        }
+      },
+      {
+        "id": "stubbyArm-3",
+        "shape": "stubbyArm",
+        "anchor": "free",
+        "x": 30,
+        "y": 20,
+        "scale": [
+          0.3,
+          0.5
+        ],
+        "rotate": 15,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "body.rightHand"
+        }
+      },
+      {
+        "id": "stubbyLeg-8",
+        "shape": "stubbyLeg",
+        "anchor": "free",
+        "x": -15,
+        "y": 70,
+        "scale": [
+          0.4,
+          0.6
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "body.leftHip"
+        }
+      },
+      {
+        "id": "stubbyLeg-9",
+        "shape": "stubbyLeg",
+        "anchor": "free",
+        "x": 15,
+        "y": 70,
+        "scale": [
+          0.4,
+          0.6
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 5,
+        "attach": {
+          "socket": "body.rightHip"
+        }
+      },
+      {
+        "id": "mascotHead-1",
+        "shape": "mascotHead",
+        "anchor": "free",
+        "x": 0,
+        "y": 40,
+        "scale": [
+          0.9,
+          0.8
+        ],
+        "rotate": 0,
+        "material": "glossyBlue",
+        "opacity": 1,
+        "role": "part",
+        "z": 8,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "id": "hairTuft-7",
+        "shape": "hairTuft",
+        "anchor": "free",
+        "x": 0,
+        "y": -10,
+        "scale": [
+          0.4,
+          0.3
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "part",
+        "z": 10,
+        "attach": {
+          "socket": "head.center"
+        }
+      },
+      {
+        "id": "cuteEye-4",
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": -15,
+        "y": 10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.leftEye"
+        }
+      },
+      {
+        "id": "cuteEye-5",
+        "shape": "cuteEye",
+        "anchor": "free",
+        "x": 15,
+        "y": 10,
+        "scale": [
+          0.2,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "softWhite",
+        "opacity": 1,
+        "role": "eye",
+        "z": 20,
+        "attach": {
+          "socket": "head.rightEye"
+        }
+      },
+      {
+        "id": "mouthSmile-6",
+        "shape": "mouthSmile",
+        "anchor": "free",
+        "x": 0,
+        "y": 20,
+        "scale": [
+          0.4,
+          0.2
+        ],
+        "rotate": 0,
+        "material": "charcoalRubber",
+        "opacity": 1,
+        "role": "mouth",
+        "z": 31,
+        "attach": {
+          "socket": "head.mouth"
+        }
+      }
+    ]
+  },
+  "rawReactCssCharacterContent": "{\n  \"componentName\": \"BaseballDude\",\n  \"styleSystem\": \"my-dude-react-css-scaffold\",\n  \"title\": \"Baseball Dude\",\n  \"summary\": \"A cheerful baseball player with an oversized head and a compact body, ready to swing his bat.\",\n  \"cssVariables\": {\n    \"--dude-primary\": \"#38bdf8\",\n    \"--dude-secondary\": \"#ffffff\",\n    \"--dude-accent\": \"#ff0000\",\n    \"--dude-eye\": \"#e0f2fe\",\n    \"--dude-panel\": \"rgba(255,255,255,.18)\",\n    \"--dude-mouth\": \"#0f172a\",\n    \"--dude-body\": \"#d69e6e\",\n    \"--dude-arm\": \"#d69e6e\",\n    \"--dude-hand\": \"#facc15\",\n    \"--dude-leg\": \"#1e293b\",\n    \"--dude-foot\": \"#facc15\"\n  },\n  \"headShape\": \"rounded\",\n  \"bodyShape\": \"suited\",\n  \"expression\": \"excited\",\n  \"parts\": [\n    { \"type\": \"hat\", \"label\": \"baseball cap\", \"tone\": \"primary\" },\n    { \"type\": \"eye\", \"label\": \"large sparkling eyes\", \"tone\": \"eye\" },\n    { \"type\": \"mouth\", \"label\": \"bright smile\", \"tone\": \"mouth\" },\n    { \"type\": \"body\", \"label\": \"baseball jersey with stripes\", \"tone\": \"secondary\" },\n    { \"type\": \"body\", \"label\": \"baseball pants\", \"tone\": \"leg\" },\n    { \"type\": \"foot\", \"label\": \"white sneakers with blue accents\", \"tone\": \"foot\" }\n  ],\n  \"customPrimitives\": [\n    {\n      \"id\": \"baseball-bat\",\n      \"groupId\": \"baseball\",\n      \"label\": \"baseball bat\",\n      \"anchor\": \"rightHand\",\n      \"shape\": \"rect\",\n      \"x\": 10,\n      \"y\": 0,\n      \"width\": 10,\n      \"height\": 60,\n      \"rotate\": 0,\n      \"tone\": \"primary\",\n      \"outline\": true,\n      \"held\": true,\n      \"gripX\": 0.5,\n      \"gripY\": 0.9\n    }\n  ],\n  \"notes\": [\n    \"Character has a baseball cap on his head.\",\n    \"The outfit includes a classic baseball jersey and pants.\",\n    \"He holds a baseball bat in his right hand.\"\n  ]\n}",
+  "rawReactCssCharacter": {
+    "componentName": "BaseballDude",
+    "styleSystem": "my-dude-react-css-scaffold",
+    "title": "Baseball Dude",
+    "summary": "A cheerful baseball player with an oversized head and a compact body, ready to swing his bat.",
+    "cssVariables": {
+      "--dude-primary": "#38bdf8",
+      "--dude-secondary": "#ffffff",
+      "--dude-accent": "#ff0000",
+      "--dude-eye": "#e0f2fe",
+      "--dude-panel": "rgba(255,255,255,.18)",
+      "--dude-mouth": "#0f172a",
+      "--dude-body": "#d69e6e",
+      "--dude-arm": "#d69e6e",
+      "--dude-hand": "#facc15",
+      "--dude-leg": "#1e293b",
+      "--dude-foot": "#facc15"
+    },
+    "headShape": "rounded",
+    "bodyShape": "suited",
+    "expression": "excited",
+    "parts": [
+      {
+        "type": "hat",
+        "label": "baseball cap",
+        "tone": "primary"
+      },
+      {
+        "type": "eye",
+        "label": "large sparkling eyes",
+        "tone": "eye"
+      },
+      {
+        "type": "mouth",
+        "label": "bright smile",
+        "tone": "mouth"
+      },
+      {
+        "type": "body",
+        "label": "baseball jersey with stripes",
+        "tone": "secondary"
+      },
+      {
+        "type": "body",
+        "label": "baseball pants",
+        "tone": "leg"
+      },
+      {
+        "type": "foot",
+        "label": "white sneakers with blue accents",
+        "tone": "foot"
+      }
+    ],
+    "customPrimitives": [
+      {
+        "id": "baseball-bat",
+        "groupId": "baseball",
+        "label": "baseball bat",
+        "anchor": "rightHand",
+        "shape": "rect",
+        "x": 10,
+        "y": 0,
+        "width": 10,
+        "height": 60,
+        "rotate": 0,
+        "tone": "primary",
+        "outline": true,
+        "held": true,
+        "gripX": 0.5,
+        "gripY": 0.9
+      }
+    ],
+    "notes": [
+      "Character has a baseball cap on his head.",
+      "The outfit includes a classic baseball jersey and pants.",
+      "He holds a baseball bat in his right hand."
+    ]
+  },
+  "reactCssCharacter": {
+    "kind": "react-css-character",
+    "componentName": "BaseballDude",
+    "styleSystem": "my-dude-react-css-scaffold",
+    "title": "Baseball Dude",
+    "summary": "A cheerful baseball player with an oversized head and a compact body, ready to swing his bat.",
+    "cssVariables": {
+      "--dude-primary": "#38bdf8",
+      "--dude-secondary": "#ffffff",
+      "--dude-accent": "#ff0000",
+      "--dude-eye": "#e0f2fe",
+      "--dude-panel": "rgba(255,255,255,.18)",
+      "--dude-mouth": "#0f172a",
+      "--dude-body": "#d69e6e",
+      "--dude-arm": "#d69e6e",
+      "--dude-hand": "#facc15",
+      "--dude-leg": "#1e293b",
+      "--dude-foot": "#facc15"
+    },
+    "headShape": "rounded",
+    "bodyShape": "suited",
+    "expression": "excited",
+    "parts": [
+      {
+        "type": "hat",
+        "side": "center",
+        "tone": "primary",
+        "label": "baseball cap"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "eye",
+        "label": "large sparkling eyes"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "primary",
+        "label": "bright smile"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "secondary",
+        "label": "baseball jersey with stripes"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "primary",
+        "label": "baseball pants"
+      },
+      {
+        "type": "badge",
+        "side": "center",
+        "tone": "primary",
+        "label": "white sneakers with blue accents"
+      },
+      {
+        "type": "stripe",
+        "side": "center",
+        "tone": "eye",
+        "label": "baseball jersey front stripe"
+      }
+    ],
+    "customPrimitives": [
+      {
+        "id": "baseball-bat",
+        "label": "baseball bat",
+        "anchor": "rightHand",
+        "shape": "rect",
+        "x": 10,
+        "y": 0,
+        "width": 10,
+        "height": 60,
+        "rotate": 0,
+        "tone": "primary",
+        "outline": true,
+        "held": true,
+        "gripX": 0.5,
+        "gripY": 0.9,
+        "groupId": "baseball"
+      },
+      {
+        "id": "foot-white-sneakers-with-blue-accents",
+        "label": "white sneakers with blue accents",
+        "anchor": "leftFoot",
+        "shape": "capsule",
+        "x": -10,
+        "y": 14,
+        "width": 72,
+        "height": 28,
+        "rotate": -8,
+        "tone": "accent",
+        "outline": true,
+        "held": false,
+        "gripX": 0.5,
+        "gripY": 0.5,
+        "groupId": "white-sneakers-with-blue-accents"
+      },
+      {
+        "id": "baseball-bat-barrel",
+        "label": "hand-held baseball bat barrel",
+        "anchor": "rightHand",
+        "shape": "capsule",
+        "x": 26,
+        "y": -34,
+        "width": 18,
+        "height": 96,
+        "rotate": -31,
+        "tone": "cream",
+        "outline": true,
+        "held": true,
+        "gripX": 0.5,
+        "gripY": 0.88,
+        "groupId": "baseball-bat"
+      },
+      {
+        "id": "baseball-bat-handle",
+        "label": "baseball bat handle gripped by hand",
+        "anchor": "rightHand",
+        "shape": "capsule",
+        "x": 8,
+        "y": 16,
+        "width": 10,
+        "height": 58,
+        "rotate": -31,
+        "tone": "dark",
+        "outline": true,
+        "held": true,
+        "gripX": 0.5,
+        "gripY": 0.72,
+        "groupId": "baseball-bat"
+      }
+    ],
+    "notes": [
+      "Character has a baseball cap on his head.",
+      "The outfit includes a classic baseball jersey and pants.",
+      "He holds a baseball bat in his right hand."
+    ]
+  },
+  "reactCssFaithfulness": {
+    "ok": true,
+    "failures": []
+  },
+  "reactCssRepairNotes": [],
+  "validation": {
+    "ok": true,
+    "errors": []
+  },
+  "coverage": {
+    "ok": true,
+    "checks": [],
+    "missingRequiredDetails": []
+  },
+  "enrichments": [],
+  "options": {
+    "enrichmentEnabled": true,
+    "coverageMode": "enforced",
+    "commitRequested": true
+  },
+  "repairs": 0
+}
