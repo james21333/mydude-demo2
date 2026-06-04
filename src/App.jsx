@@ -2094,6 +2094,7 @@ function Test5AvatarLab() {
   const [busy, setBusy] = useState(false);
   const [objectRetryCount, setObjectRetryCount] = useState(0);
   const [replacementRetryCount, setReplacementRetryCount] = useState(0);
+  const [promptCueRetryCount, setPromptCueRetryCount] = useState(0);
   const [objectFallbackPhase, setObjectFallbackPhase] = useState('initial');
   const [visualInspectionDone, setVisualInspectionDone] = useState(false);
   const [useEnrichment, setUseEnrichment] = useState(() => !/enrichment=0|fallback=0/.test(window.location.search));
@@ -2111,7 +2112,9 @@ function Test5AvatarLab() {
         : /replacement|replace|alternate/.test(retryMode)
           ? `first fallback ${requestOverrides.heldObjectFallback.attempt || 1}/3: asking for/rendering a different hand-held object…`
           : `visual retry ${requestOverrides.heldObjectFallback.attempt || 1}/3: trying the same hand-held object again, clearer…`
-      : 'expanding prompt into a hidden art-direction brief…');
+      : requestOverrides.promptCueFallback
+        ? `prompt-pass cue fallback ${requestOverrides.promptCueFallback.attempt || 1}/3: asking what visible cue on head/hands/feet/clothing/neck makes it pass…`
+        : 'expanding prompt into a hidden art-direction brief…');
     try {
       const requestBody = { prompt: text, commit: true, enrichment: useEnrichment, coverageMode: useEnrichment ? 'enforced' : 'report-only', ...requestOverrides };
       const res = await fetch(`${test5BridgeOrigin()}/test5/avatar`, {
@@ -2125,6 +2128,7 @@ function Test5AvatarLab() {
       if (!requestOverrides.heldObjectFallback) {
         setObjectRetryCount(0);
         setReplacementRetryCount(0);
+        setPromptCueRetryCount(0);
         setObjectFallbackPhase('initial');
       }
       setVisualInspectionDone(false);
@@ -2136,6 +2140,26 @@ function Test5AvatarLab() {
       if (throwOnError) throw err;
       return null;
     } finally {
+      setBusy(false);
+    }
+  }
+
+
+  async function retryPromptCueFallback() {
+    if (busy || !prompt.trim()) return;
+    if (!visualInspectionDone) {
+      setError('Screenshot inspection required before prompt-pass cue decisions. Look at all zones first: head, hands, clothing, feet, and near-foot artifacts.');
+      setStatus('waiting for screenshot inspection');
+      return;
+    }
+    const nextCueAttempt = Math.min(3, promptCueRetryCount + 1);
+    setPromptCueRetryCount(nextCueAttempt);
+    try {
+      const cued = await generate({ throwOnError: true, promptCueFallback: { enabled: true, mode: 'prompt-pass-cue', action: 'prompt-pass-cue', askForCue: true, attempt: nextCueAttempt, maxAttempts: 3 } });
+      if (cued) setStatus(`prompt-pass cue fallback ${nextCueAttempt}/3 rendered; screenshot-inspect head/hands/feet/clothing/neck and foot artifacts`);
+    } catch (err) {
+      setError(String(err?.message || err));
+      setStatus('prompt-pass cue fallback failed');
       setBusy(false);
     }
   }
@@ -2198,7 +2222,7 @@ function Test5AvatarLab() {
         <textarea
           id="test5-prompt"
           value={prompt}
-          onChange={(e) => { setPrompt(e.target.value.slice(0, 1200)); setObjectRetryCount(0); setReplacementRetryCount(0); setObjectFallbackPhase('initial'); setVisualInspectionDone(false); }}
+          onChange={(e) => { setPrompt(e.target.value.slice(0, 1200)); setObjectRetryCount(0); setReplacementRetryCount(0); setObjectFallbackPhase('initial'); setPromptCueRetryCount(0); setVisualInspectionDone(false); }}
           rows={5}
           style={{ width: '100%', borderRadius: 16, border: '1px solid rgba(148,163,184,.28)', background: 'rgba(15,23,42,.74)', color: 'white', padding: 14, resize: 'vertical', fontSize: 15, lineHeight: 1.4 }}
           placeholder="Example: blue mushroom wizard with sleepy eyes and a tiny glowing staff"
@@ -2212,6 +2236,7 @@ function Test5AvatarLab() {
           <button className="primary" onClick={() => generate()} disabled={busy || !prompt.trim()}>{busy ? 'Generating…' : 'Generate Avatar'}</button>
           {result ? <button className="secondary" onClick={() => { setVisualInspectionDone(true); setError(''); setStatus('screenshot inspected; visual problem confirmed'); }} disabled={busy} title="Step 2: inspect the final screenshot/avatar honestly before any retry, replacement, or drop decision.">Step 2: screenshot inspected — something looks bad</button> : null}
           {result ? <button className="secondary" onClick={retryHeldObjectFallback} disabled={busy || !prompt.trim() || !visualInspectionDone} title="Only after screenshot inspection: retry the same object three times, then ask for a different prompt-fitting hand object and run three tries, then render without held objects if that also fails.">{!visualInspectionDone ? 'Inspect screenshot first' : objectFallbackPhase === 'replacement' ? replacementRetryCount >= 3 ? 'Replacement still bad: render without object' : `Replacement object wrong: retry replacement ${replacementRetryCount + 1}/3` : objectRetryCount >= 3 ? 'First fallback: ask LLM for new hand object 1/3' : `Object still wrong: retry same object ${objectRetryCount + 1}/3`}</button> : null}
+          {result ? <button className="secondary" onClick={retryPromptCueFallback} disabled={busy || !prompt.trim() || !visualInspectionDone || promptCueRetryCount >= 3} title="After object fallback/removal, ask what visible cue on head, hand/hands, feet, clothing/body, neck, or body-attached area would make the prompt pass; run up to 3 inspected tries.">{!visualInspectionDone ? 'Inspect screenshot first' : promptCueRetryCount >= 3 ? 'Prompt cue still failed: stop' : `Prompt still fails: ask LLM for visible cue ${promptCueRetryCount + 1}/3`}</button> : null}
           <span className="debug-pill">status: {status}</span>
         </div>
         {error ? <div className="error-box" style={{ marginTop: 12 }}>Error: {error}</div> : null}
@@ -2222,7 +2247,7 @@ function Test5AvatarLab() {
           <div><strong>Push:</strong> {result.commit?.push?.ok ? 'pushed to GitHub' : result.commit?.push?.attempted ? result.commit.push.error || 'push failed' : 'not pushed'}</div>
           <div><strong>Repairs:</strong> {result.repairs}</div>
           <div><strong>Screenshot inspection:</strong> {visualInspectionDone ? 'completed — visual problem confirmed' : 'required before retry/drop'}</div>
-          <div><strong>Visual fallback sequence:</strong> initial object 3 tries → ask LLM for replacement hand object 3 tries → remove held object</div>
+          <div><strong>Visual fallback sequence:</strong> initial object 3 tries → ask LLM for replacement hand object 3 tries → remove held object → prompt-pass cue fallback 3 tries on head/hands/feet/clothing/neck</div>
           <div><strong>Visual retry plan:</strong> {result.visualRetryPlan?.currentObject || result.visualRetryPlan?.badObject || 'no held object detected'}{result.visualRetryPlan?.action ? ` → ${result.visualRetryPlan.action}` : ''}{result.visualRetryPlan?.targetObject ? `: ${result.visualRetryPlan.targetObject}` : ''}{objectRetryCount ? ` (same-object retry ${objectRetryCount}/3)` : ''}{replacementRetryCount ? ` (replacement retry ${replacementRetryCount}/3)` : ''}</div>
           <div><strong>Mode:</strong> {result.options?.enrichmentEnabled ? 'LLM + fallback reusable shape primitives' : 'LLM only; fallback shape primitives off'} / coverage {result.options?.coverageMode || 'enforced'}</div>
           <div><strong>Coverage:</strong> {result.coverage?.ok ? 'passed' : 'failed'}{result.coverage?.missingRequiredDetails?.length ? ` — missing ${result.coverage.missingRequiredDetails.join(', ')}` : ''}</div>

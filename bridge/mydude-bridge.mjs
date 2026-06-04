@@ -556,13 +556,41 @@ function promptPassCueQuestion(prompt = '', brief = {}) {
 function promptPassCueDecision(prompt = '', brief = {}) {
   const text = `${prompt || ''} ${brief?.subject || ''} ${brief?.expandedPrompt || ''}`.toLowerCase();
   const cues = [];
-  if (/(female|girl|woman|lady)/.test(text)) cues.push('female cue: visible hair shape or ponytail/headband plus fitted/clearly styled uniform/clothing; color alone is not enough');
+  if (/\b(female|girl|woman|lady)\b/.test(text)) cues.push('female cue: ask what to put on the head to make female read clearly; render visible hair shape, ponytail, or headband attached to the head plus fitted/clearly styled uniform/clothing; color alone is not enough');
   if (/(baseball|slugger|batter|pitcher|catcher)/.test(text)) cues.push('baseball cue: cap plus jersey front/number/stripes, cleats, and optionally glove/bat only if it survives inspection');
   if (/alien|extraterrestrial|martian|ufo/.test(text)) cues.push('alien cue: paired antennae/nonhuman eyes/green or unusual skin');
   if (/(robot|android|mech)/.test(text)) cues.push('robot cue: screen/panel head, bolts, segmented limbs');
   if (/wizard|magic|mage/.test(text)) cues.push('wizard cue: hat/robe/belt plus wand or stars if readable');
   if (!cues.length) cues.push('choose the most prompt-specific attached cue on head, clothing/body, neck, feet, or hands before relying on a held prop');
   return `Prompt-pass cue decision: ${cues.join('; ')}`;
+}
+
+
+function buildPromptCueFallbackPlan(prompt = '', designBrief = {}, request = {}) {
+  const mode = String(request?.mode || request?.action || '').toLowerCase();
+  const requested = Boolean(request?.enabled || request?.askForCue || mode.includes('prompt-pass-cue') || mode.includes('cue'));
+  const attempt = Math.max(1, Math.min(3, Number(request?.attempt || 1) || 1));
+  return {
+    requested,
+    action: 'prompt-pass-cue',
+    attempt,
+    maxAttempts: 3,
+    zoneQuestion: 'What is one thing to put on the head, hand/hands, feet, clothing/body, neck, or body-attached area to make this prompt pass screenshot inspection?',
+    decision: promptPassCueDecision(prompt, designBrief),
+  };
+}
+
+function applyPromptCueFallbackToBrief(designBrief = {}, plan = {}) {
+  if (!plan?.requested) return designBrief;
+  const checklist = Array.isArray(designBrief.visualChecklist) ? [...designBrief.visualChecklist] : [];
+  checklist.unshift('Foot/hand artifact gate: fail and remove any single stray capsule/blob on one foot or near a foot; footwear must be paired left+right.');
+  checklist.unshift(plan.decision);
+  checklist.unshift(`Prompt-pass cue fallback ${plan.attempt}/3: ask what visible cue on head, hand/hands, feet, clothing/body, neck, or body-attached area would make the prompt pass; add it as React/CSS code, then screenshot-inspect it.`);
+  return {
+    ...designBrief,
+    expandedPrompt: `${designBrief.expandedPrompt || ''} Prompt-pass cue fallback ${plan.attempt}/3: the screenshot still failed after object handling. Ask what one visible cue on the head, hand/hands, feet, clothing/body, neck, or body-attached area would make the original prompt unmistakable. Add that cue as inspectable ReactJS/CSS code now. For female/girl prompts, add a visible head cue such as ponytail, hair shape, or headband attached to the head. For baseball prompts, add jersey number/stripes and paired cleats; do not leave any single red/colored capsule or stray blob on one foot.`.trim(),
+    visualChecklist: checklist,
+  };
 }
 
 function normalizeDesignBrief(raw, prompt) {
@@ -686,8 +714,8 @@ Rules:
 - For any prompt-specific held object or clothing detail that is not already one of those named scaffold parts, create it in customPrimitives from safe geometric atoms, anchored only to rightHand/leftHand/headTop/bodyFront/leftFoot/rightFoot. Do not collapse it to a generic badge. Compose multiple customPrimitives when needed (for example a briefcase = rect body + arc handle; a tennis racket = ring head + capsule handle + string lines; shoe = capsule + sole stripe).
 - Hand-held customPrimitives MUST use anchor leftHand or rightHand, the same groupId for all pieces of the same object, held:true, plus gripX/gripY on the handle/grip piece. The renderer solves placement for the whole group so the chosen grip point is inside the hand; x/y are local coordinates within the object group, not free screen coordinates. The renderer draws a hand clasp above held groups.
 - Before deciding headShape/parts, ask the brief's exact headwear question: "What would a/an <prompt subject> have on their head?" Use the Head item question and Head item decision checklist items.
-- Before finalizing parts/customPrimitives, ask the Prompt-pass cue question: "what one visible cue on head, hand/hands, feet, clothing/body, neck, or body-attached area would make this prompt pass screenshot inspection?" Then actually render that cue as a visible part/customPrimitive. This is generic for any prompt: if the prompt identity is weak or a held prop fails, strengthen attached/worn cues instead of relying on metadata.
-- Inspect every zone in the blueprint mentally before returning: head, face, neck, body/clothing, both hands, both feet, and near-foot area. Remove or replace stray foot/hand artifacts and stray artifacts around the feet/hands that do not serve the prompt.
+- Before finalizing parts/customPrimitives, ask the Prompt-pass cue question: "what one visible cue on head, hand/hands, feet, clothing/body, neck, or body-attached area would make this prompt pass screenshot inspection?" Then actually render that cue as a visible part/customPrimitive. This is generic for any prompt: if the prompt identity is weak or a held prop fails, strengthen attached/worn cues instead of relying on metadata. For female/girl prompts, explicitly ask what can go on the head to make female read clearly (ponytail, hair shape, or headband) and render it on head/headTop/headLeft/headRight; do not rely on a badge label.
+- Inspect every zone in the blueprint mentally before returning: head, face, neck, body/clothing, both hands, both feet, and near-foot area. Remove or replace stray foot/hand artifacts and stray artifacts around the feet/hands that do not serve the prompt. Footwear must be paired left+right and rendered as boot parts or mirrored foot primitives; never leave a single colored capsule/blob on one foot.
 - If Head item decision says yes, the blueprint MUST visibly put that exact thing on the head using part type hat/helmet/crown/antenna/glasses or customPrimitives anchored to headTop/headLeft/headRight. Do not merely mention it in notes/checklist.
 - If Head item decision says no, do not invent unrelated headwear.
 - Hats/headwear must use part type hat/helmet/crown/antenna or customPrimitives anchored to headTop/headLeft/headRight. Clothing must use bodyShape suited/robe/pilot, bodyFront primitives, or stripe/badge/scarf parts. Footwear must use boot parts or leftFoot/rightFoot primitives.
@@ -736,7 +764,7 @@ function fallbackReactCssCharacter(prompt = '', designBrief = {}) {
   if (isAlien) { add('antenna', 'left alien antenna attached to head', { side: 'left', tone: 'accent' }); add('antenna', 'right alien antenna attached to head', { side: 'right', tone: 'accent' }); add('spot', 'subtle alien cheek marking', { side: 'left', tone: 'accent' }); }
   if (/goggle|glasses|visor/.test(text) || isLawyer) add('glasses', isLawyer ? 'lawyer glasses' : 'prompt eyewear', { tone: 'dark' });
   if (/star/.test(text)) { add('star', 'left star accent', { side: 'left', tone: 'accent' }); add('star', 'right star accent', { side: 'right', tone: 'accent' }); }
-  if (/boot/.test(text)) { add('boot', 'left boot', { side: 'left', tone: 'dark' }); add('boot', 'right boot', { side: 'right', tone: 'dark' }); }
+  if (/boot|cleat|sneaker|baseball/.test(text)) { add('boot', /baseball|cleat/.test(text) ? 'left baseball cleat worn on foot' : 'left boot', { side: 'left', tone: 'dark' }); add('boot', /baseball|cleat/.test(text) ? 'right baseball cleat worn on foot' : 'right boot', { side: 'right', tone: 'dark' }); }
   if (/flame|rocket/.test(text)) { add('flame', 'left rocket flame', { side: 'left', tone: 'accent' }); add('flame', 'right rocket flame', { side: 'right', tone: 'accent' }); }
   if (isWizard) { add('hat', 'soft wizard hat', { tone: 'accent' }); add('wand', 'tiny glowing staff', { side: 'right', tone: 'accent' }); add('robe', 'simple robe panel', { tone: 'secondary' }); }
   if (isBaseball) {
@@ -753,6 +781,10 @@ function fallbackReactCssCharacter(prompt = '', designBrief = {}) {
     }
   }
   if (isJudge) { add('glasses', 'round old-lady judge glasses', { tone: 'dark' }); add('robe', 'black judicial robe', { tone: 'dark' }); custom('judge-gavel-head', 'hand-held judge gavel head', 'rightHand', 'rect', { x: 32, y: -44, width: 58, height: 24, rotate: -22, tone: 'dark', held: true, gripX: 0.5, gripY: 0.5, groupId: 'gavel' }); custom('judge-gavel-handle', 'judge gavel handle gripped by hand', 'rightHand', 'capsule', { x: 12, y: 12, width: 14, height: 82, rotate: -22, tone: 'accent', held: true, gripX: 0.5, gripY: 0.82, groupId: 'gavel' }); }
+  if (/\b(female|girl|woman|lady)\b/.test(text)) {
+    custom('female-ponytail-head-cue', 'visible ponytail/head hair cue attached to back of cap', 'headRight', 'oval', { x: 68, y: 16, width: 46, height: 72, rotate: 22, tone: 'dark', outline: true });
+    custom('female-headband-cue', 'female headband cue across cap/hair', 'headTop', 'capsule', { x: 0, y: 54, width: 158, height: 14, rotate: -2, tone: 'accent', outline: true });
+  }
   if (isRobot) { add('antenna', 'left robot antenna attached to head', { side: 'left', tone: 'accent' }); add('antenna', 'right robot antenna attached to head', { side: 'right', tone: 'accent' }); add('panel', 'screen body panel', { tone: 'accent' }); }
   if (isPilot) add('scarf', 'pilot scarf', { tone: 'accent' });
   if (isLawyer) {
@@ -835,6 +867,10 @@ function validateReactCssFaithfulness(character = {}, prompt = '', designBrief =
   if (/baseball/.test(text) && /\b(glove|mitt|bat)\b/.test(text) && !/\b(glove|mitt|bat)\b/.test(customText)) failures.push('baseball prompt that mentions a glove or bat must render it as a hand-held custom primitive, not as a generic badge');
   if (/\b(ball|orb|bubble|planet)\b/.test(customText)) failures.push('for now React/CSS custom primitives must not include balls or detached round props');
   if (customPrimitives.some(p => ['root','body','bodyFront','head'].includes(p.anchor) && /prop|tool|case|racket|wand|staff|briefcase|document|gavel|bat|glove|mitt/.test(`${p.label || ''} ${p.id || ''}`.toLowerCase()))) failures.push('held objects such as bats, gloves, gavels, rackets, documents, and briefcases must be anchored to leftHand or rightHand, not floating on root/body/bodyFront/head');
+  const footPrims = customPrimitives.filter(p => ['leftFoot','rightFoot'].includes(p.anchor));
+  if (footPrims.length === 1) failures.push('single foot primitive becomes a stray foot artifact; footwear must be paired on both feet or omitted');
+  if (/\b(female|girl|woman|lady)\b/.test(text) && !/(ponytail|hair|headband)/.test(customText) && !parts.some(p => /ponytail|hair|headband/i.test(String(p.label || '')) && ['hat','badge','scarf'].includes(p.type))) failures.push('female/girl prompts must ask for and visibly render a head cue such as ponytail, hair shape, or headband, not just generic colors');
+  if (/baseball/.test(text) && (!has('boot', 'left') || !has('boot', 'right'))) failures.push('baseball prompts need paired cleats/boots on both feet; one colored foot blob is a fail');
   return { ok: failures.length === 0, failures };
 }
 
@@ -913,7 +949,18 @@ function sanitizeCustomPrimitives(rawPrimitives = [], fallbackPrimitives = [], h
     });
     if (out.length >= 18) break;
   }
-  return out;
+  const footKeys = new Map();
+  for (const item of out) {
+    if (!['leftFoot','rightFoot'].includes(item.anchor)) continue;
+    const key = (item.groupId || item.label || item.id || '').replace(/\b(left|right)\b/g, '').replace(/[^a-z0-9]+/g, '-');
+    footKeys.set(key, new Set([...(footKeys.get(key) || []), item.anchor]));
+  }
+  return out.filter(item => {
+    if (!['leftFoot','rightFoot'].includes(item.anchor)) return true;
+    const key = (item.groupId || item.label || item.id || '').replace(/\b(left|right)\b/g, '').replace(/[^a-z0-9]+/g, '-');
+    const pair = footKeys.get(key);
+    return pair && pair.has('leftFoot') && pair.has('rightFoot');
+  });
 }
 
 function sanitizeReactCssCharacter(raw, prompt = '', designBrief = {}) {
@@ -959,7 +1006,12 @@ function sanitizeReactCssCharacter(raw, prompt = '', designBrief = {}) {
     tone: allowedTones.has(part?.tone) ? part.tone : 'primary',
     label: String(part?.label || `${part?.type || 'detail'} ${index + 1}`).replace(/[<>]/g, '').slice(0, 80),
   })).slice(0, 16);
-  const parts = suppressUnrequestedAnimalParts(mappedParts, prompt, designBrief).slice(0, 12);
+  let parts = suppressUnrequestedAnimalParts(mappedParts, prompt, designBrief).slice(0, 12);
+  if (/baseball/.test(promptText)) {
+    if (!parts.some(part => part.type === 'boot' && part.side === 'left')) parts.push({ type: 'boot', side: 'left', tone: 'dark', label: 'left baseball cleat worn on foot' });
+    if (!parts.some(part => part.type === 'boot' && part.side === 'right')) parts.push({ type: 'boot', side: 'right', tone: 'dark', label: 'right baseball cleat worn on foot' });
+    parts = parts.slice(0, 14);
+  }
   const customPrimitives = sanitizeCustomPrimitives(clean.customPrimitives, fallback.customPrimitives, primitiveHints);
   return {
     kind: 'react-css-character',
@@ -1288,6 +1340,7 @@ async function generateTest5Avatar(prompt, options = {}) {
   const expanded = await expandTest5Prompt(prompt);
   let designBrief = expanded.designBrief;
   const requestedFallback = options.heldObjectFallback || options.objectFallback || {};
+  const promptCuePlan = buildPromptCueFallbackPlan(prompt, designBrief, options.promptCueFallback || options.promptPassCueFallback || {});
   let effectiveFallback = requestedFallback;
   let replacementRecommendation = null;
   const fallbackMode = String(requestedFallback?.mode || requestedFallback?.action || '').toLowerCase();
@@ -1304,6 +1357,10 @@ async function generateTest5Avatar(prompt, options = {}) {
   const initialRetryPlan = buildHeldObjectRetryPlan(prompt, designBrief, null, effectiveFallback);
   if (initialRetryPlan.requested) {
     designBrief = applyHeldObjectRetryToBrief(designBrief, initialRetryPlan);
+    designBrief.requiredRenderableDetails = normalizeRenderableDetails(designBrief.requiredRenderableDetails, prompt, designBrief);
+  }
+  if (promptCuePlan.requested) {
+    designBrief = applyPromptCueFallbackToBrief(designBrief, promptCuePlan);
     designBrief.requiredRenderableDetails = normalizeRenderableDetails(designBrief.requiredRenderableDetails, prompt, designBrief);
   }
   const characterResult = await generateFaithfulTest5ReactCssCharacter(prompt, designBrief);
@@ -1364,7 +1421,7 @@ async function generateTest5Avatar(prompt, options = {}) {
   if (!coverage.ok && coverageMode !== 'report-only') throw new Error(`Generated avatar failed detail coverage: ${coverage.missingRequiredDetails.join('; ')}`);
 
   const saved = await saveTest5Artifact({ prompt, designBrief, expandedContent: expanded.content, provider, rawContent, rawSceneSpec, sceneSpec, rawReactCssCharacterContent: characterResult.content, rawReactCssCharacter: characterResult.rawReactCssCharacter, reactCssCharacter, reactCssFaithfulness: characterResult.reactCssFaithfulness, reactCssRepairNotes: characterResult.reactCssRepairNotes, validation, coverage, enrichments, repairs, visualRetryPlan, options: { ...options, enrichmentEnabled, coverageMode, visualRetryPlan } });
-  return { ok: true, prompt, userPrompt: prompt, expandedPrompt: designBrief.expandedPrompt, designBrief, reactCssCharacter, reactCssFaithfulness: characterResult.reactCssFaithfulness, reactCssRepairNotes: characterResult.reactCssRepairNotes || [], visualChecklist: designBrief.visualChecklist || [], requiredDetails: designBrief.requiredDetails || [], requiredRenderableDetails: designBrief.requiredRenderableDetails || [], coverage, enrichments, visualRetryPlan, options: { enrichmentEnabled, coverageMode, commitRequested: options.commit !== false, visualRetryPlan }, provider, rawSceneSpec, sceneSpec, validation, repairs, artifactPath: saved.relPath, commit: saved.commit };
+  return { ok: true, prompt, userPrompt: prompt, expandedPrompt: designBrief.expandedPrompt, designBrief, promptCuePlan: promptCuePlan.requested ? promptCuePlan : undefined, reactCssCharacter, reactCssFaithfulness: characterResult.reactCssFaithfulness, reactCssRepairNotes: characterResult.reactCssRepairNotes || [], visualChecklist: designBrief.visualChecklist || [], requiredDetails: designBrief.requiredDetails || [], requiredRenderableDetails: designBrief.requiredRenderableDetails || [], coverage, enrichments, visualRetryPlan, options: { enrichmentEnabled, coverageMode, commitRequested: options.commit !== false, visualRetryPlan }, provider, rawSceneSpec, sceneSpec, validation, repairs, artifactPath: saved.relPath, commit: saved.commit };
 }
 
 async function readJsonBody(req, maxBytes = 64_000) {
