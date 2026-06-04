@@ -274,6 +274,67 @@ function normalizeHeldObjectSemantic(value = '') {
   if (/racket|racquet/.test(text)) return 'racket';
   return '';
 }
+function replacementObjectFallbackForPrompt(prompt = '', badObject = '') {
+  const text = `${prompt} ${badObject}`.toLowerCase();
+  const bad = normalizeHeldObjectSemantic(badObject);
+  if (/baseball/.test(text) && bad !== 'baseball-glove') return 'baseball-glove';
+  if (/judge|court|lawyer|legal/.test(text) && bad !== 'documents') return 'documents';
+  if (/business|office|lawyer/.test(text) && bad !== 'briefcase') return 'briefcase';
+  if (/tennis|racket|racquet/.test(text) && bad !== 'tennis-ball') return 'tennis-ball';
+  return 'small badge';
+}
+
+async function recommendReplacementHeldObject(prompt = '', designBrief = {}, badObject = '') {
+  const badLabel = heldObjectLabel(badObject);
+  const fullPromptContext = {
+    userPrompt: String(prompt || '').slice(0, 1200),
+    llmExpandedPrompt: String(designBrief?.expandedPrompt || '').slice(0, 1800),
+    subject: String(designBrief?.subject || '').slice(0, 240),
+    visualChecklist: Array.isArray(designBrief?.visualChecklist) ? designBrief.visualChecklist.slice(0, 14) : [],
+  };
+  const userContent = `The ${badLabel} (the first object tried) in the hand didn't work. What else would you recommend to put in this character's hand?
+
+Full prompt + LLM looped expanded prompt:
+${JSON.stringify(fullPromptContext, null, 2)}
+
+It cannot be a ${badLabel}. Choose exactly one simple replacement hand-held object that naturally fits the character described in the prompt and can be rendered clearly by a cute mascot avatar. Return strict JSON with keys: object, reason, renderingNotes. Do not choose the failed object or a synonym of it.`;
+  try {
+    const result = await callTest5Chat({
+      system: 'You are a /test5 visual fallback art director. Return STRICT JSON only. Pick one replacement hand-held object that naturally fits the prompt, is not the failed object, and is visually easier to render clearly. No markdown or prose.',
+      userContent,
+      temperature: 0.42,
+      maxTokens: 450,
+      stage: 'replacement-object',
+    });
+    const parsed = parseJsonObject(result.content);
+    let object = String(parsed.object || parsed.replacementObject || '').trim().slice(0, 80);
+    const normalizedBad = normalizeHeldObjectSemantic(badObject);
+    const normalizedObject = normalizeHeldObjectSemantic(object);
+    if (!object || (normalizedBad && normalizedObject === normalizedBad) || object.toLowerCase().includes(badLabel.toLowerCase())) {
+      object = replacementObjectFallbackForPrompt(prompt, badObject);
+    }
+    return {
+      provider: result.provider,
+      prompt: userContent,
+      object,
+      normalizedObject: normalizeHeldObjectSemantic(object),
+      reason: String(parsed.reason || '').slice(0, 240),
+      renderingNotes: String(parsed.renderingNotes || '').slice(0, 300),
+    };
+  } catch (error) {
+    const object = replacementObjectFallbackForPrompt(prompt, badObject);
+    return {
+      provider: 'local/replacement-object-fallback',
+      prompt: userContent,
+      object,
+      normalizedObject: normalizeHeldObjectSemantic(object),
+      reason: `LLM replacement-object recommendation failed, so used deterministic prompt-fitting fallback for ${String(prompt || 'avatar').slice(0, 80)}.`,
+      renderingNotes: `Render ${object} large, simple, attached to one hand, and readable from silhouette alone.`,
+      error: String(error?.message || error).slice(0, 300),
+    };
+  }
+}
+
 
 function inferHeldObjectSemanticFromCharacter(character = {}) {
   const primitives = Array.isArray(character?.customPrimitives) ? character.customPrimitives : [];
@@ -309,6 +370,7 @@ function buildHeldObjectRetryPlan(prompt = '', designBrief = {}, character = {},
     currentObject,
     badObject,
     replacementObject,
+    replacementRecommendation: options?.replacementRecommendation || null,
     targetObject,
     action,
     attempt,
@@ -1200,21 +1262,35 @@ async function saveTest5Artifact({ prompt, designBrief, expandedContent, provide
 async function generateTest5Avatar(prompt, options = {}) {
   const expanded = await expandTest5Prompt(prompt);
   let designBrief = expanded.designBrief;
-  const initialRetryPlan = buildHeldObjectRetryPlan(prompt, designBrief, null, options.heldObjectFallback || options.objectFallback || {});
+  const requestedFallback = options.heldObjectFallback || options.objectFallback || {};
+  let effectiveFallback = requestedFallback;
+  let replacementRecommendation = null;
+  const fallbackMode = String(requestedFallback?.mode || requestedFallback?.action || '').toLowerCase();
+  const needsReplacementRecommendation = Boolean(requestedFallback?.askForReplacement || fallbackMode.includes('replacement') || fallbackMode.includes('replace') || fallbackMode.includes('alternate')) && !requestedFallback?.replacementObject && !requestedFallback?.targetObject && !requestedFallback?.dropObject && !requestedFallback?.dropHeldObject;
+  if (needsReplacementRecommendation) {
+    const badObject = normalizeHeldObjectSemantic(requestedFallback?.badObject || requestedFallback?.badHeldObject || '') || String(requestedFallback?.badObject || requestedFallback?.badHeldObject || 'failed held object');
+    replacementRecommendation = await recommendReplacementHeldObject(prompt, designBrief, badObject);
+    effectiveFallback = {
+      ...requestedFallback,
+      replacementObject: replacementRecommendation.normalizedObject || replacementRecommendation.object,
+      replacementRecommendation,
+    };
+  }
+  const initialRetryPlan = buildHeldObjectRetryPlan(prompt, designBrief, null, effectiveFallback);
   if (initialRetryPlan.requested) {
     designBrief = applyHeldObjectRetryToBrief(designBrief, initialRetryPlan);
     designBrief.requiredRenderableDetails = normalizeRenderableDetails(designBrief.requiredRenderableDetails, prompt, designBrief);
   }
   const characterResult = await generateFaithfulTest5ReactCssCharacter(prompt, designBrief);
   let reactCssCharacter = characterResult.reactCssCharacter;
-  const visualRetryPlan = buildHeldObjectRetryPlan(prompt, designBrief, reactCssCharacter, options.heldObjectFallback || options.objectFallback || {});
+  const visualRetryPlan = buildHeldObjectRetryPlan(prompt, designBrief, reactCssCharacter, effectiveFallback);
   reactCssCharacter = dropHeldObjectsFromReactCssCharacter(reactCssCharacter, visualRetryPlan);
   let first = await generateTest5SceneSpec(prompt, designBrief);
   let rawSceneSpec = coerceTest5RawScene(parseJsonObject(first.content), prompt);
   let validation = validateTest5Scene(rawSceneSpec);
   let sceneSpec = null;
   let repairs = 0;
-  let provider = `${expanded.provider} + ${characterResult.provider} + ${first.provider}`;
+  let provider = `${expanded.provider}${replacementRecommendation ? ` + ${replacementRecommendation.provider}` : ''} + ${characterResult.provider} + ${first.provider}`;
   let rawContent = first.content;
   const enrichmentEnabled = options.enrichmentEnabled !== false;
   const coverageMode = options.coverageMode || (enrichmentEnabled ? 'enforced' : 'report-only');
@@ -1224,7 +1300,7 @@ async function generateTest5Avatar(prompt, options = {}) {
   if (!validation.ok) {
     repairs = 1;
     const repaired = await generateTest5SceneSpec(prompt, designBrief, validation.errors.join('; '));
-    provider = `${expanded.provider} + ${characterResult.provider} + ${repaired.provider}`;
+    provider = `${expanded.provider}${replacementRecommendation ? ` + ${replacementRecommendation.provider}` : ''} + ${characterResult.provider} + ${repaired.provider}`;
     rawContent = repaired.content;
     rawSceneSpec = coerceTest5RawScene(parseJsonObject(repaired.content), prompt);
     validation = validateTest5Scene(rawSceneSpec);
@@ -1246,7 +1322,7 @@ async function generateTest5Avatar(prompt, options = {}) {
   if (!coverage.ok && coverageMode !== 'report-only') {
     repairs += 1;
     const repaired = await generateTest5SceneSpec(prompt, designBrief, `Structurally valid but missing required visual detail coverage: ${coverage.missingRequiredDetails.join(', ')}. Add actual renderable layers for those details. Return the full corrected SceneSpec.`);
-    provider = `${expanded.provider} + ${characterResult.provider} + ${repaired.provider}`;
+    provider = `${expanded.provider}${replacementRecommendation ? ` + ${replacementRecommendation.provider}` : ''} + ${characterResult.provider} + ${repaired.provider}`;
     rawContent = repaired.content;
     rawSceneSpec = coerceTest5RawScene(parseJsonObject(repaired.content), prompt);
     validation = validateTest5Scene(rawSceneSpec);
