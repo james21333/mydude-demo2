@@ -2101,7 +2101,12 @@ function Test5AvatarLab() {
     if (!text || busy) return;
     setBusy(true);
     setError('');
-    setStatus(requestOverrides.heldObjectFallback ? `visual retry ${requestOverrides.heldObjectFallback.attempt || 1}/3: asking for a different hand-held object…` : 'expanding prompt into a hidden art-direction brief…');
+    const retryMode = requestOverrides.heldObjectFallback?.mode || requestOverrides.heldObjectFallback?.action || '';
+    setStatus(requestOverrides.heldObjectFallback
+      ? retryMode === 'drop'
+        ? 'final fallback: rendering without the failed held object…'
+        : `visual retry ${requestOverrides.heldObjectFallback.attempt || 1}/3: trying the same hand-held object again, clearer…`
+      : 'expanding prompt into a hidden art-direction brief…');
     try {
       const requestBody = { prompt: text, commit: true, enrichment: useEnrichment, coverageMode: useEnrichment ? 'enforced' : 'report-only', ...requestOverrides };
       const res = await fetch(`${test5BridgeOrigin()}/test5/avatar`, {
@@ -2126,21 +2131,22 @@ function Test5AvatarLab() {
 
   async function retryHeldObjectFallback() {
     if (busy || !prompt.trim()) return;
-    const badObject = result?.visualRetryPlan?.currentObject || result?.visualRetryPlan?.badObject || 'unclear held object';
-    let lastError = null;
-    for (let attempt = 1; attempt <= 3; attempt += 1) {
-      setObjectRetryCount(attempt);
-      try {
-        await generate({ throwOnError: true, heldObjectFallback: { enabled: true, badObject, attempt, maxAttempts: 3 } });
-        setStatus(`visual retry ${attempt}/3 rendered an alternate held object; inspect the screenshot`);
+    const badObject = result?.visualRetryPlan?.badObject || result?.visualRetryPlan?.currentObject || 'unclear held object';
+    const nextAttempt = Math.min(3, objectRetryCount + 1);
+    try {
+      if (objectRetryCount >= 3) {
+        const dropped = await generate({ throwOnError: true, heldObjectFallback: { enabled: true, mode: 'drop', action: 'drop-held-object', dropObject: true, badObject, attempt: 3, maxAttempts: 3 } });
+        if (dropped) setStatus('rendered without the failed held object; inspect final avatar');
         return;
-      } catch (err) {
-        lastError = err;
       }
+      setObjectRetryCount(nextAttempt);
+      const retried = await generate({ throwOnError: true, heldObjectFallback: { enabled: true, mode: 'retry-same', action: 'retry-same-object', badObject, attempt: nextAttempt, maxAttempts: 3 } });
+      if (retried) setStatus(`visual retry ${nextAttempt}/3 rendered the same object again; inspect it honestly`);
+    } catch (err) {
+      setError(String(err?.message || err));
+      setStatus('held-object visual retry failed');
+      setBusy(false);
     }
-    setError(String(lastError?.message || lastError || 'alternate held-object retries failed'));
-    setStatus('alternate held-object retries failed');
-    setBusy(false);
   }
 
   const scene = result?.sceneSpec;
@@ -2173,7 +2179,7 @@ function Test5AvatarLab() {
         <div className="debug-pill" style={{ marginTop: 8 }}>comparison mode: {useEnrichment ? 'LLM + enrichment, coverage enforced' : 'LLM only, enrichment off, coverage report-only'}</div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginTop: 12 }}>
           <button className="primary" onClick={() => generate()} disabled={busy || !prompt.trim()}>{busy ? 'Generating…' : 'Generate Avatar'}</button>
-          {result ? <button className="secondary" onClick={retryHeldObjectFallback} disabled={busy || !prompt.trim()} title="If the hand-held object still looks wrong after the normal generation tries, run up to three more attempts with a different prompt-fitting object.">Object looks wrong: try alternate ×3</button> : null}
+          {result ? <button className="secondary" onClick={retryHeldObjectFallback} disabled={busy || !prompt.trim()} title="If the hand-held object looks wrong, retry that same object up to three times. After the third bad try, render without the object.">{objectRetryCount >= 3 ? 'Third try still bad: render without object' : `Object still wrong: retry same object ${objectRetryCount + 1}/3`}</button> : null}
           <span className="debug-pill">status: {status}</span>
         </div>
         {error ? <div className="error-box" style={{ marginTop: 12 }}>Error: {error}</div> : null}
@@ -2183,7 +2189,7 @@ function Test5AvatarLab() {
           <div><strong>Commit:</strong> {result.commit?.ok ? result.commit.hash : result.commit?.error || 'not committed'}</div>
           <div><strong>Push:</strong> {result.commit?.push?.ok ? 'pushed to GitHub' : result.commit?.push?.attempted ? result.commit.push.error || 'push failed' : 'not pushed'}</div>
           <div><strong>Repairs:</strong> {result.repairs}</div>
-          <div><strong>Visual retry plan:</strong> {result.visualRetryPlan?.currentObject || 'no held object detected'}{result.visualRetryPlan?.alternateObject ? ` → alternate available: ${result.visualRetryPlan.alternateObject}` : ''}{objectRetryCount ? ` (retry ${objectRetryCount}/3)` : ''}</div>
+          <div><strong>Visual retry plan:</strong> {result.visualRetryPlan?.currentObject || result.visualRetryPlan?.badObject || 'no held object detected'}{result.visualRetryPlan?.action ? ` → ${result.visualRetryPlan.action}` : ''}{result.visualRetryPlan?.targetObject ? `: ${result.visualRetryPlan.targetObject}` : ''}{objectRetryCount ? ` (same-object retry ${objectRetryCount}/3)` : ''}</div>
           <div><strong>Mode:</strong> {result.options?.enrichmentEnabled ? 'LLM + fallback reusable shape primitives' : 'LLM only; fallback shape primitives off'} / coverage {result.options?.coverageMode || 'enforced'}</div>
           <div><strong>Coverage:</strong> {result.coverage?.ok ? 'passed' : 'failed'}{result.coverage?.missingRequiredDetails?.length ? ` — missing ${result.coverage.missingRequiredDetails.join(', ')}` : ''}</div>
           <div><strong>React/CSS component:</strong> {result.reactCssCharacter?.componentName || 'not returned'} ({result.reactCssCharacter?.styleSystem || 'unknown'})</div>

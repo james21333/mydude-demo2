@@ -282,50 +282,87 @@ function inferHeldObjectSemanticFromCharacter(character = {}) {
   return normalizeHeldObjectSemantic(heldText);
 }
 
-function alternateHeldObjectForPrompt(prompt = '', badObject = '') {
-  const text = String(prompt || '').toLowerCase();
-  const bad = normalizeHeldObjectSemantic(badObject);
-  if (/baseball|slugger|batter|pitcher|catcher/.test(text) || ['baseball-bat','baseball-glove'].includes(bad)) {
-    return bad === 'baseball-glove' ? 'baseball-bat' : 'baseball-glove';
-  }
-  if (bad === 'gavel') return 'documents';
-  if (bad === 'briefcase') return 'documents';
-  if (bad === 'documents') return 'briefcase';
-  if (bad === 'racket') return 'briefcase';
-  return '';
+function heldObjectLabel(value = '') {
+  return String(value || 'unclear held object').replace(/-/g, ' ');
+}
+
+function isHeldObjectRequirement(value = '', badObject = '') {
+  const text = String(value || '').toLowerCase();
+  const bad = heldObjectLabel(badObject).toLowerCase();
+  return /held|hand-held|prop|tool|bat|glove|mitt|gavel|briefcase|document|paper|folder|racket|racquet|wand|staff|mallet|stick|sword/.test(text) || (bad && text.includes(bad));
 }
 
 function buildHeldObjectRetryPlan(prompt = '', designBrief = {}, character = {}, options = {}) {
   const currentObject = inferHeldObjectSemanticFromCharacter(character) || normalizeHeldObjectSemantic(`${prompt} ${designBrief?.expandedPrompt || ''} ${(designBrief?.visualChecklist || []).join(' ')}`);
-  const userBadObject = normalizeHeldObjectSemantic(options?.badObject || options?.badHeldObject || currentObject);
-  const requested = Boolean(options?.enabled || options?.heldObjectFallback || options?.objectFallback || options?.badObject || options?.badHeldObject);
-  const badObject = userBadObject || currentObject;
-  const alternateObject = requested ? alternateHeldObjectForPrompt(prompt, badObject) : '';
+  const requested = Boolean(options?.enabled || options?.heldObjectFallback || options?.objectFallback || options?.badObject || options?.badHeldObject || options?.dropObject || options?.dropHeldObject);
+  const badObject = normalizeHeldObjectSemantic(options?.badObject || options?.badHeldObject || currentObject) || currentObject;
+  const mode = String(options?.mode || options?.action || '').toLowerCase();
+  const dropObject = Boolean(options?.dropObject || options?.dropHeldObject || mode === 'drop' || mode === 'drop-object' || mode === 'without-object');
+  const attempt = Math.max(1, Math.min(3, Number(options?.attempt || 1) || 1));
+  const maxAttempts = Math.max(1, Math.min(3, Number(options?.maxAttempts || 3) || 3));
+  const targetObject = dropObject ? '' : (badObject || currentObject);
   return {
     requested,
     currentObject,
     badObject,
-    alternateObject,
-    maxAlternateAttempts: 3,
-    instruction: alternateObject ? `Visual retry: avoid ${badObject || 'the previous unclear held object'} and use a clearly readable ${alternateObject} instead, still attached to the character hand and fitting the original prompt.` : '',
+    targetObject,
+    action: dropObject ? 'drop-held-object' : 'retry-same-object',
+    attempt,
+    maxAttempts,
+    finalDropAfterAttempts: 3,
+    instruction: !requested ? '' : dropObject
+      ? `Visual fallback: the held ${heldObjectLabel(badObject)} failed the final visual inspection after three same-object tries. Render the avatar without any hand-held object; preserve the prompt identity through headwear, clothing, colors, expression, and body-attached details.`
+      : `Visual retry ${attempt}/${maxAttempts}: the held ${heldObjectLabel(targetObject)} did not read clearly in the screenshot. Try the same object again, not an alternate object. Make it oversized, simple, connected to one hand, and recognizable from silhouette alone. If it still fails after three tries, the next step is to render without the object.`,
   };
 }
 
 function applyHeldObjectRetryToBrief(designBrief = {}, retryPlan = {}) {
-  if (!retryPlan?.requested || !retryPlan?.alternateObject) return designBrief;
-  const label = retryPlan.alternateObject.replace(/-/g, ' ');
-  const badLabel = (retryPlan.badObject || 'unclear held object').replace(/-/g, ' ');
+  if (!retryPlan?.requested) return designBrief;
+  const badLabel = heldObjectLabel(retryPlan.badObject || retryPlan.currentObject);
+  const checklist = Array.isArray(designBrief.visualChecklist) ? designBrief.visualChecklist : [];
+  const details = Array.isArray(designBrief.requiredDetails) ? designBrief.requiredDetails : [];
+  const renderable = Array.isArray(designBrief.requiredRenderableDetails) ? designBrief.requiredRenderableDetails : [];
+  if (retryPlan.action === 'drop-held-object') {
+    return {
+      ...designBrief,
+      expandedPrompt: `${designBrief.expandedPrompt || ''} Final visual fallback: the hand-held ${badLabel} failed after three honest screenshot inspections. Render the character WITHOUT any hand-held object or tool. Keep the avatar prompt-faithful through non-held visible cues such as headwear, clothing, colors, expression, body shape, markings, and shoes.`,
+      visualChecklist: [
+        `Final visual fallback: no hand-held object; preserve prompt identity without the failed ${badLabel}`,
+        ...checklist.filter(item => !isHeldObjectRequirement(item, retryPlan.badObject)),
+      ].slice(0, 14),
+      requiredDetails: details.filter(item => !isHeldObjectRequirement(item, retryPlan.badObject)).slice(0, 8),
+      requiredRenderableDetails: renderable.filter(item => !isHeldObjectRequirement(`${item?.id || ''} ${item?.label || ''}`, retryPlan.badObject)),
+    };
+  }
+  const label = heldObjectLabel(retryPlan.targetObject || retryPlan.badObject || retryPlan.currentObject);
   return {
     ...designBrief,
-    expandedPrompt: `${designBrief.expandedPrompt || ''} Visual retry override: the previous ${badLabel} did not read clearly in the screenshot, so render a clearly recognizable hand-held ${label} instead. Do not render the previous ${badLabel}.`,
+    expandedPrompt: `${designBrief.expandedPrompt || ''} Visual retry ${retryPlan.attempt || 1}/${retryPlan.maxAttempts || 3}: the previous hand-held ${label} did not read clearly in the screenshot. Render the SAME ${label} again, not an alternate object. Make the object large, uncluttered, attached to one hand, with a clear silhouette and distinctive subparts. Baseball bat example: one continuous long tapered barrel, narrow handle, knob, and wood cues.`,
     visualChecklist: [
-      `Visual retry fallback: avoid ${badLabel}; use a clear hand-held ${label} that still fits the character prompt`,
-      ...(Array.isArray(designBrief.visualChecklist) ? designBrief.visualChecklist : []),
+      `Visual retry ${retryPlan.attempt || 1}/${retryPlan.maxAttempts || 3}: same object, clearer hand-held ${label}; if third try still fails, drop the object`,
+      ...checklist,
     ].slice(0, 14),
     requiredDetails: [
       `clear hand-held ${label}`,
-      ...(Array.isArray(designBrief.requiredDetails) ? designBrief.requiredDetails : []),
+      ...details,
     ].slice(0, 8),
+  };
+}
+
+function dropHeldObjectsFromReactCssCharacter(character = {}, retryPlan = {}) {
+  if (retryPlan?.action !== 'drop-held-object') return character;
+  const bad = retryPlan.badObject || retryPlan.currentObject || '';
+  const filteredPrimitives = (Array.isArray(character.customPrimitives) ? character.customPrimitives : []).filter(item => {
+    const text = `${item?.groupId || ''} ${item?.id || ''} ${item?.label || ''}`;
+    if (item?.held === true && ['leftHand','rightHand'].includes(item?.anchor)) return false;
+    return !isHeldObjectRequirement(text, bad);
+  });
+  const filteredParts = (Array.isArray(character.parts) ? character.parts : []).filter(part => !['wand','staff','tool','prop'].includes(String(part?.type || '').toLowerCase()) && !isHeldObjectRequirement(`${part?.type || ''} ${part?.label || ''}`, bad));
+  return {
+    ...character,
+    parts: filteredParts,
+    customPrimitives: filteredPrimitives,
+    notes: [...(Array.isArray(character.notes) ? character.notes : []), `Final visual fallback removed failed hand-held ${heldObjectLabel(bad)} after three same-object tries.`].slice(0, 12),
   };
 }
 
@@ -1142,8 +1179,9 @@ async function generateTest5Avatar(prompt, options = {}) {
     designBrief.requiredRenderableDetails = normalizeRenderableDetails(designBrief.requiredRenderableDetails, prompt, designBrief);
   }
   const characterResult = await generateFaithfulTest5ReactCssCharacter(prompt, designBrief);
-  const reactCssCharacter = characterResult.reactCssCharacter;
+  let reactCssCharacter = characterResult.reactCssCharacter;
   const visualRetryPlan = buildHeldObjectRetryPlan(prompt, designBrief, reactCssCharacter, options.heldObjectFallback || options.objectFallback || {});
+  reactCssCharacter = dropHeldObjectsFromReactCssCharacter(reactCssCharacter, visualRetryPlan);
   let first = await generateTest5SceneSpec(prompt, designBrief);
   let rawSceneSpec = coerceTest5RawScene(parseJsonObject(first.content), prompt);
   let validation = validateTest5Scene(rawSceneSpec);
