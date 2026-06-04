@@ -2093,6 +2093,7 @@ function Test5AvatarLab() {
   const [result, setResult] = useState(null);
   const [busy, setBusy] = useState(false);
   const [objectRetryCount, setObjectRetryCount] = useState(0);
+  const [visualInspectionDone, setVisualInspectionDone] = useState(false);
   const [useEnrichment, setUseEnrichment] = useState(() => !/enrichment=0|fallback=0/.test(window.location.search));
 
   async function generate(overrides = {}) {
@@ -2117,7 +2118,8 @@ function Test5AvatarLab() {
       const json = await res.json().catch(() => ({}));
       if (!res.ok || !json.ok) throw new Error(json.error || `HTTP ${res.status}`);
       setResult(json);
-      setStatus(`rendered + saved${json.commit?.ok ? ` + committed ${json.commit.hash}${json.commit?.push?.ok ? ' + pushed' : json.commit?.push?.attempted ? ' (push failed)' : ''}` : json.commit?.attempted ? ' (commit failed; artifact saved)' : ''}`);
+      setVisualInspectionDone(false);
+      setStatus(`rendered + saved${json.commit?.ok ? ` + committed ${json.commit.hash}${json.commit?.push?.ok ? ' + pushed' : json.commit?.push?.attempted ? ' (push failed)' : ''}` : json.commit?.attempted ? ' (commit failed; artifact saved)' : ''}; next step: screenshot inspection`);
       return json;
     } catch (err) {
       setError(String(err?.message || err));
@@ -2131,6 +2133,11 @@ function Test5AvatarLab() {
 
   async function retryHeldObjectFallback() {
     if (busy || !prompt.trim()) return;
+    if (!visualInspectionDone) {
+      setError('Screenshot inspection required before retry/drop decisions. Look at the final avatar first and truthfully mark whether anything looks bad.');
+      setStatus('waiting for screenshot inspection');
+      return;
+    }
     const badObject = result?.visualRetryPlan?.badObject || result?.visualRetryPlan?.currentObject || 'unclear held object';
     const nextAttempt = Math.min(3, objectRetryCount + 1);
     try {
@@ -2167,7 +2174,7 @@ function Test5AvatarLab() {
         <textarea
           id="test5-prompt"
           value={prompt}
-          onChange={(e) => { setPrompt(e.target.value.slice(0, 1200)); setObjectRetryCount(0); }}
+          onChange={(e) => { setPrompt(e.target.value.slice(0, 1200)); setObjectRetryCount(0); setVisualInspectionDone(false); }}
           rows={5}
           style={{ width: '100%', borderRadius: 16, border: '1px solid rgba(148,163,184,.28)', background: 'rgba(15,23,42,.74)', color: 'white', padding: 14, resize: 'vertical', fontSize: 15, lineHeight: 1.4 }}
           placeholder="Example: blue mushroom wizard with sleepy eyes and a tiny glowing staff"
@@ -2179,7 +2186,8 @@ function Test5AvatarLab() {
         <div className="debug-pill" style={{ marginTop: 8 }}>comparison mode: {useEnrichment ? 'LLM + enrichment, coverage enforced' : 'LLM only, enrichment off, coverage report-only'}</div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginTop: 12 }}>
           <button className="primary" onClick={() => generate()} disabled={busy || !prompt.trim()}>{busy ? 'Generating…' : 'Generate Avatar'}</button>
-          {result ? <button className="secondary" onClick={retryHeldObjectFallback} disabled={busy || !prompt.trim()} title="If the hand-held object looks wrong, retry that same object up to three times. After the third bad try, render without the object.">{objectRetryCount >= 3 ? 'Third try still bad: render without object' : `Object still wrong: retry same object ${objectRetryCount + 1}/3`}</button> : null}
+          {result ? <button className="secondary" onClick={() => { setVisualInspectionDone(true); setError(''); setStatus('screenshot inspected; visual problem confirmed'); }} disabled={busy} title="Step 2: inspect the final screenshot/avatar honestly before any retry, replacement, or drop decision.">Step 2: screenshot inspected — something looks bad</button> : null}
+          {result ? <button className="secondary" onClick={retryHeldObjectFallback} disabled={busy || !prompt.trim() || !visualInspectionDone} title="Only after screenshot inspection: retry that same object up to three times. After the third bad try, render without the object.">{!visualInspectionDone ? 'Inspect screenshot first' : objectRetryCount >= 3 ? 'Third try still bad: render without object' : `Object still wrong: retry same object ${objectRetryCount + 1}/3`}</button> : null}
           <span className="debug-pill">status: {status}</span>
         </div>
         {error ? <div className="error-box" style={{ marginTop: 12 }}>Error: {error}</div> : null}
@@ -2189,6 +2197,7 @@ function Test5AvatarLab() {
           <div><strong>Commit:</strong> {result.commit?.ok ? result.commit.hash : result.commit?.error || 'not committed'}</div>
           <div><strong>Push:</strong> {result.commit?.push?.ok ? 'pushed to GitHub' : result.commit?.push?.attempted ? result.commit.push.error || 'push failed' : 'not pushed'}</div>
           <div><strong>Repairs:</strong> {result.repairs}</div>
+          <div><strong>Screenshot inspection:</strong> {visualInspectionDone ? 'completed — visual problem confirmed' : 'required before retry/drop'}</div>
           <div><strong>Visual retry plan:</strong> {result.visualRetryPlan?.currentObject || result.visualRetryPlan?.badObject || 'no held object detected'}{result.visualRetryPlan?.action ? ` → ${result.visualRetryPlan.action}` : ''}{result.visualRetryPlan?.targetObject ? `: ${result.visualRetryPlan.targetObject}` : ''}{objectRetryCount ? ` (same-object retry ${objectRetryCount}/3)` : ''}</div>
           <div><strong>Mode:</strong> {result.options?.enrichmentEnabled ? 'LLM + fallback reusable shape primitives' : 'LLM only; fallback shape primitives off'} / coverage {result.options?.coverageMode || 'enforced'}</div>
           <div><strong>Coverage:</strong> {result.coverage?.ok ? 'passed' : 'failed'}{result.coverage?.missingRequiredDetails?.length ? ` — missing ${result.coverage.missingRequiredDetails.join(', ')}` : ''}</div>
