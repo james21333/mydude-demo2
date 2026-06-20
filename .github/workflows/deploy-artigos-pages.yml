@@ -1,0 +1,32 @@
+name: Deploy artigos.mimiepipo.com.br
+
+on:
+  repository_dispatch:
+    types: [deploy-artigos-pages]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-artigos-pages
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout artigos-mimiepipo
+        uses: actions/checkout@v4
+        with:
+          repository: james21333/artigos-mimiepipo
+          ref: main
+          path: artigos
+
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy artigos/public --project-name=mimi-pipo
