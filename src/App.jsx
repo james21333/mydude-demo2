@@ -406,14 +406,16 @@ const VALID_ACCESSORIES = new Set(['crown','topHat','cap','cone','leaf','spark',
 
 function materialForPrompt(prompt = '') {
   const lower = prompt.toLowerCase();
-  if (/pink|dudette/.test(lower)) return 'glossyPink';
-  if (/green|cow|farm|tree|leaf/.test(lower)) return 'glossyGreen';
-  if (/gold|yellow|idea|lightbulb|sun/.test(lower)) return 'glossyGold';
-  if (/purple|alien|space/.test(lower)) return 'glossyPurple';
-  if (/red|car|fire/.test(lower)) return 'glossyRed';
-  if (/orange|cat|kitten/.test(lower)) return 'glossyOrange';
-  if (/computer|monitor|robot|metal/.test(lower)) return 'chrome';
-  if (/boat|sail/.test(lower)) return 'canvas';
+  if (/pink|dudette|flamingo|pig/.test(lower)) return 'glossyPink';
+  if (/green|frog|turtle|lizard|croc|alligator|dinosaur|dino|tree|leaf|plant|cactus/.test(lower)) return 'glossyGreen';
+  if (/gold|yellow|idea|lightbulb|sun|banana|bee|chick/.test(lower)) return 'glossyGold';
+  if (/purple|alien|space|grape/.test(lower)) return 'glossyPurple';
+  if (/\bred\b|fire|lava|devil|lobster|crab/.test(lower)) return 'glossyRed';
+  if (/orange|fox|tiger|pumpkin/.test(lower)) return 'glossyOrange';
+  if (/robot|computer|monitor|metal|silver|steel/.test(lower)) return 'chrome';
+  if (/boat|sail|ship/.test(lower)) return 'canvas';
+  if (/cow|dairy|milk/.test(lower)) return 'softWhite';
+  if (/bear|brown|coffee|chocolate/.test(lower)) return 'warmCream';
   return 'glossyBlue';
 }
 
@@ -433,7 +435,7 @@ function presetSceneSpec(prompt = '') {
   return {
     kind: 'scene',
     prompt,
-    chassis: classifyChassis(prompt),
+    chassis: 'creature',
     title: preset.title,
     summary: preset.summary,
     palette: preset.palette || colorHint(prompt) || 'blue',
@@ -443,13 +445,11 @@ function presetSceneSpec(prompt = '') {
     eyes: inferEyes(prompt),
     mouth: inferMouth(prompt),
     primitives: [],
-    layers: sanitizeDrawingLayers(preset.layers, prompt),
+    layers: sanitizeDrawingLayers(null, prompt),
   };
 }
 
 function fallbackDrawingLayers(prompt = '', spec = {}, options = {}) {
-  const preset = !options.skipPreset ? matchQualityPreset(prompt) : null;
-  if (preset?.layers?.length) return preset.layers;
   const l = prompt.toLowerCase();
   const bodyMaterial = VALID_MATERIALS.has(spec.bodyColor) ? spec.bodyColor : (/idea|funny|abstract|joke/.test(l) ? 'glossyGold' : materialForPrompt(prompt));
   const headMaterial = VALID_MATERIALS.has(spec.headColor) ? spec.headColor : bodyMaterial;
@@ -505,10 +505,10 @@ function fallbackDrawingLayers(prompt = '', spec = {}, options = {}) {
     if (/crown|king|queen|royal|prince|princess/.test(l)) layers.push(layer('crown', 'free', 0, 0, 0.32, 0.2, 'glossyGold', { z: 10, attach: { socket: 'head.leftHorn' } }));
     if (/hat|cowboy|wizard|witch/.test(l)) layers.push(layer('topHat', 'free', 0, -4, 0.3, 0.28, 'charcoalRubber', { z: 10, attach: { socket: 'head.leftHorn' } }));
     if (/cap|baseball|sport/.test(l)) layers.push(layer('cap', 'free', 0, -2, 0.34, 0.18, bodyMaterial, { z: 10, attach: { socket: 'head.leftHorn' } }));
-    if (/cat|dog|bear|rabbit|bunny|animal|mouse|fox|tiger|lion|elephant/.test(l)) layers.push(layer('softEar', 'free', -3, 6, 0.34, 0.42, bodyMaterial, { rotate: -24, z: 9, attach: { socket: 'head.leftEar' } }), layer('softEar', 'free', 3, 6, 0.34, 0.42, bodyMaterial, { rotate: 24, z: 9, attach: { socket: 'head.rightEar' } }));
+    if (/cat|dog|bear|rabbit|bunny|animal|mouse|fox|tiger|lion|elephant|panda|koala|hamster|squirrel|monkey|ape/.test(l)) layers.push(layer('softEar', 'free', -3, 6, 0.34, 0.42, bodyMaterial, { rotate: -24, z: 9, attach: { socket: 'head.leftEar' } }), layer('softEar', 'free', 3, 6, 0.34, 0.42, bodyMaterial, { rotate: 24, z: 9, attach: { socket: 'head.rightEar' } }));
     if (/dragon|unicorn|goat|horn|devil|monster/.test(l)) layers.push(layer('softHorn', 'free', 0, 0, 0.18, 0.34, 'canvas', { rotate: -8, z: 10, attach: { socket: 'head.leftHorn' } }), layer('softHorn', 'free', 0, 0, 0.18, 0.34, 'canvas', { rotate: 8, z: 10, attach: { socket: 'head.rightHorn' } }));
     if (/alien|robot|bug|insect/.test(l)) layers.push(layer('antenna', 'free', 0, 0, 0.22, 0.36, 'neon', { rotate: -18, z: 10, attach: { socket: 'head.leftHorn' } }), layer('antenna', 'free', 0, 0, 0.22, 0.36, 'neon', { rotate: 18, z: 10, attach: { socket: 'head.rightHorn' } }));
-    if (/cow|dog|pig|bear|mouse|fox|cat|animal/.test(l)) layers.push(layer('snout', 'free', 0, -2, 0.42, 0.24, 'warmCream', { z: 24, attach: { socket: 'head.mouth' } }));
+    if (/cow|dog|pig|bear|mouse|fox|cat|animal|panda|koala|hamster|squirrel|monkey|ape/.test(l)) layers.push(layer('snout', 'free', 0, -2, 0.42, 0.24, 'warmCream', { z: 24, attach: { socket: 'head.mouth' } }));
     if (/spot|cow|dog|dalmatian|pattern/.test(l)) layers.push(layer('bodyPatch', 'free', 0, 0, 0.3, 0.22, 'charcoalRubber', { rotate: -10, z: 11, attach: { socket: 'body.patchLeft' } }), layer('bodyPatch', 'free', 0, 0, 0.23, 0.16, 'charcoalRubber', { rotate: 8, z: 11, attach: { socket: 'body.patchRight' } }));
     if (/idea|funny|abstract|joke/.test(l)) layers.push(layer('question', 'orbit', -158, -120, 0.36, 0.36, 'neon', { z: 12 }), layer('spark', 'orbit', 156, -150, 0.42, 0.42, 'glossyGold', { z: 12 }));
     if (/zebra|stripe|striped/.test(l)) layers.push(layer('stripe', 'free', -10, -12, 0.42, 0.24, 'charcoalRubber', { rotate: -18, z: 12, attach: { socket: 'body.front' } }), layer('stripe', 'free', 10, 14, 0.34, 0.2, 'charcoalRubber', { rotate: -18, z: 12, attach: { socket: 'body.patchRight' } }));

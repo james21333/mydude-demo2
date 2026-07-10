@@ -100,14 +100,16 @@ function clampSceneNumber(value, min, max, fallback = 0) {
 }
 function materialForText(text = '') {
   const lower = text.toLowerCase();
-  if (/pink|dudette/.test(lower)) return 'glossyPink';
-  if (/green|cow|farm|tree|leaf/.test(lower)) return 'glossyGreen';
-  if (/gold|yellow|idea|lightbulb|sun/.test(lower)) return 'glossyGold';
-  if (/purple|alien|space/.test(lower)) return 'glossyPurple';
-  if (/red|car|fire/.test(lower)) return 'glossyRed';
-  if (/orange|cat|kitten/.test(lower)) return 'glossyOrange';
-  if (/computer|monitor|robot|metal/.test(lower)) return 'chrome';
-  if (/boat|sail/.test(lower)) return 'canvas';
+  if (/pink|dudette|flamingo|pig/.test(lower)) return 'glossyPink';
+  if (/green|frog|turtle|lizard|croc|alligator|dinosaur|dino|tree|leaf|plant|cactus/.test(lower)) return 'glossyGreen';
+  if (/gold|yellow|idea|lightbulb|sun|banana|bee|chick/.test(lower)) return 'glossyGold';
+  if (/purple|alien|space|grape/.test(lower)) return 'glossyPurple';
+  if (/\bred\b|fire|lava|devil|lobster|crab/.test(lower)) return 'glossyRed';
+  if (/orange|fox|tiger|pumpkin/.test(lower)) return 'glossyOrange';
+  if (/robot|computer|monitor|metal|silver|steel/.test(lower)) return 'chrome';
+  if (/boat|sail|ship/.test(lower)) return 'canvas';
+  if (/cow|dairy|milk/.test(lower)) return 'softWhite';
+  if (/bear|brown|coffee|chocolate/.test(lower)) return 'warmCream';
   return 'glossyBlue';
 }
 function sceneLayer(shape, anchor, x, y, sx, sy, material, options = {}) { return { shape, anchor, x, y, scale: [sx, sy], material, ...options }; }
@@ -151,12 +153,10 @@ function presetSceneSpec(text = '') {
   const preset = matchQualityPreset(text);
   if (!preset) return null;
   const base = fallbackSceneSpec(text, { skipPreset: true });
-  return { ...base, chassis: classifyChassis(text), title: preset.title, summary: preset.summary, palette: preset.palette || base.palette, layers: sanitizeDrawingLayers(preset.layers, text) };
+  return { ...base, chassis: 'creature', title: preset.title, summary: preset.summary, palette: preset.palette || base.palette, layers: sanitizeDrawingLayers(null, text) };
 }
 
 function fallbackDrawingLayers(text = '', spec = {}, options = {}) {
-  const preset = !options.skipPreset ? matchQualityPreset(text) : null;
-  if (preset?.layers?.length) return preset.layers;
   const l = text.toLowerCase();
   const bodyMaterial = VALID_MATERIALS.has(spec.bodyColor) ? spec.bodyColor : (/idea|funny|abstract|joke/.test(l) ? 'glossyGold' : materialForText(text));
   const headMaterial = VALID_MATERIALS.has(spec.headColor) ? spec.headColor : bodyMaterial;
@@ -213,10 +213,10 @@ function fallbackDrawingLayers(text = '', spec = {}, options = {}) {
     if (/crown|king|queen|royal|prince|princess/.test(l)) layers.push(sceneLayer('crown','free',0,0,.32,.2,'glossyGold',{z:10,attach:{socket:'head.leftHorn'}}));
     if (/hat|cowboy|wizard|witch/.test(l)) layers.push(sceneLayer('topHat','free',0,-4,.3,.28,'charcoalRubber',{z:10,attach:{socket:'head.leftHorn'}}));
     if (/cap|baseball|sport/.test(l)) layers.push(sceneLayer('cap','free',0,-2,.34,.18,bodyMaterial,{z:10,attach:{socket:'head.leftHorn'}}));
-    if (/cat|dog|bear|rabbit|bunny|animal|mouse|fox|tiger|lion|elephant/.test(l)) layers.push(sceneLayer('softEar','free',-3,6,.34,.42,bodyMaterial,{rotate:-24,z:9,attach:{socket:'head.leftEar'}}), sceneLayer('softEar','free',3,6,.34,.42,bodyMaterial,{rotate:24,z:9,attach:{socket:'head.rightEar'}}));
+    if (/cat|dog|bear|rabbit|bunny|animal|mouse|fox|tiger|lion|elephant|panda|koala|hamster|squirrel|monkey|ape/.test(l)) layers.push(sceneLayer('softEar','free',-3,6,.34,.42,bodyMaterial,{rotate:-24,z:9,attach:{socket:'head.leftEar'}}), sceneLayer('softEar','free',3,6,.34,.42,bodyMaterial,{rotate:24,z:9,attach:{socket:'head.rightEar'}}));
     if (/dragon|unicorn|goat|horn|devil|monster/.test(l)) layers.push(sceneLayer('softHorn','free',0,0,.18,.34,'canvas',{rotate:-8,z:10,attach:{socket:'head.leftHorn'}}), sceneLayer('softHorn','free',0,0,.18,.34,'canvas',{rotate:8,z:10,attach:{socket:'head.rightHorn'}}));
     if (/alien|robot|bug|insect/.test(l)) layers.push(sceneLayer('antenna','free',0,0,.22,.36,'neon',{rotate:-18,z:10,attach:{socket:'head.leftHorn'}}), sceneLayer('antenna','free',0,0,.22,.36,'neon',{rotate:18,z:10,attach:{socket:'head.rightHorn'}}));
-    if (/cow|dog|pig|bear|mouse|fox|cat|animal/.test(l)) layers.push(sceneLayer('snout','free',0,-2,.42,.24,'warmCream',{z:24,attach:{socket:'head.mouth'}}));
+    if (/cow|dog|pig|bear|mouse|fox|cat|animal|panda|koala|hamster|squirrel|monkey|ape/.test(l)) layers.push(sceneLayer('snout','free',0,-2,.42,.24,'warmCream',{z:24,attach:{socket:'head.mouth'}}));
     if (/spot|cow|dog|dalmatian|pattern/.test(l)) layers.push(sceneLayer('bodyPatch','free',0,0,.3,.22,'charcoalRubber',{rotate:-10,z:11,attach:{socket:'body.patchLeft'}}), sceneLayer('bodyPatch','free',0,0,.23,.16,'charcoalRubber',{rotate:8,z:11,attach:{socket:'body.patchRight'}}));
     if (/idea|funny|abstract|joke/.test(l)) layers.push(sceneLayer('question','orbit',-158,-120,.36,.36,'neon',{z:12}), sceneLayer('spark','orbit',156,-150,.42,.42,'glossyGold',{z:12}));
     if (/zebra|stripe|striped/.test(l)) layers.push(sceneLayer('stripe','free',-10,-12,.42,.24,'charcoalRubber',{rotate:-18,z:12,attach:{socket:'body.front'}}), sceneLayer('stripe','free',10,14,.34,.2,'charcoalRubber',{rotate:-18,z:12,attach:{socket:'body.patchRight'}}));
@@ -262,7 +262,9 @@ const SCENE_PRIMITIVES = Object.freeze([
 const SCENE_SCHEMA = DRAWING_PROMPT;
 
 function wantsSceneSpec(text = '') {
-  return /\b(look like|make (you|him|it)|avatar|turn into|become|transform|change into|be a|be an|computer|sailboat|boat|car|truck|cow|animal|monster|dragon|funny idea|abstract|appearance)\b/i.test(text);
+  const t = text.trim();
+  if (t.split(/\s+/).length <= 5) return true;
+  return /\b(look like|make (you|him|it)|avatar|turn into|become|transform|change into|be a|be an)\b/i.test(t);
 }
 
 function fallbackSceneSpec(text = '', options = {}) {
