@@ -498,7 +498,7 @@ function fallbackDrawingLayers(prompt = '', spec = {}, options = {}) {
     if (/rocket|missile|spaceship/.test(l)) layers.push(layer('cone', 'free', 0, -6, 0.28, 0.22, bodyMaterial, { z: 9, attach: { socket: 'head.leftHorn' } }), layer('flame', 'free', 0, 6, 0.24, 0.3, 'flame', { z: 1, attach: { socket: 'body.leftFoot' } }), layer('flame', 'free', 0, 6, 0.24, 0.3, 'flame', { z: 1, attach: { socket: 'body.rightFoot' } }));
     if (/car|truck|taxi|bus|vehicle/.test(l)) layers.push(layer('windshield', 'free', 0, 4, 0.32, 0.18, 'blackGlass', { z: 9, attach: { socket: 'head.center' } }));
     if (/computer|monitor|tv|television|screen/.test(l)) layers.push(layer('screen', 'free', 0, 2, 0.46, 0.28, 'screenGlow', { z: 9, attach: { socket: 'head.center' } }));
-    if (/boat|sail|ship/.test(l)) layers.push(layer('curvedSail', 'free', 4, -8, 0.32, 0.44, 'canvas', { z: 9, attach: { socket: 'head.rightHorn' } }));
+    if (/boat|sail|ship/.test(l)) layers.push(layer('curvedSail', 'free', 0, -12, 0.5, 0.6, 'softWhite', { z: 9, attach: { socket: 'head.leftHorn' } }));
     if (/sun|star/.test(l)) layers.push(layer('spark', 'free', 0, 0, 0.22, 0.26, 'glossyGold', { z: 7, attach: { socket: 'head.leftHorn' } }), layer('spark', 'free', 0, 0, 0.22, 0.26, 'glossyGold', { z: 7, attach: { socket: 'head.rightHorn' } }));
     if (/mushroom|toadstool/.test(l)) layers.push(layer('mushroomCap', 'free', 0, -6, 0.64, 0.3, bodyMaterial, { z: 9, attach: { socket: 'head.center' } }));
     if (/tree|cactus|plant/.test(l)) layers.push(layer('leaf', 'free', -4, 0, 0.26, 0.2, 'glossyGreen', { rotate: -20, z: 9, attach: { socket: 'head.leftHorn' } }), layer('leaf', 'free', 4, 0, 0.26, 0.2, 'glossyGreen', { rotate: 20, z: 9, attach: { socket: 'head.rightHorn' } }));

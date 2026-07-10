@@ -58,41 +58,45 @@ glossyBlue, glossyPink, glossyGreen, glossyGold, glossyPurple, glossyRed, glossy
 
 AVAILABLE ACCESSORY SHAPES:
 Head-top accessories (hats, horns, headgear):
-- "crown": a royal crown (suggested color: glossyGold)
-- "topHat": a tall hat (suggested color: charcoalRubber)
-- "cap": a baseball cap (suggested color: match body)
-- "cone": a rocket nose cone (suggested color: match body)
-- "mushroomCap": a big mushroom cap (suggested color: glossyRed)
-- "leaf": leaves sprouting from head — use for trees/plants (suggested color: glossyGreen). Adds a pair.
-- "spark": glowing rays on head — use for sun/star (suggested color: glossyGold). Adds a pair.
-- "softHorn": animal horns — use for dragons/unicorns/devils (suggested color: canvas). Adds a pair.
-- "antenna": alien/robot antennae (suggested color: neon). Adds a pair.
+- "crown": a royal crown → use for kings/queens/royalty. Color: glossyGold
+- "topHat": a tall top hat → use for wizards/magicians/formal. Color: charcoalRubber
+- "cap": a baseball cap → use for sports/casual. Color: match body
+- "cone": a rocket nose cone → use for rockets/missiles. Color: match body
+- "mushroomCap": a big mushroom cap → use for mushrooms. Color: glossyRed
+- "leaf": green leaves sprouting from top of head → use for trees/plants/nature. Color: glossyGreen. Adds a pair left+right.
+- "spark": golden rays on head → use for sun/star/light. Color: glossyGold. Adds a pair.
+- "softHorn": pointed animal horn(s) → use ONLY for animals: dragons, unicorns, rhinos, bulls, devils. Color: softWhite or warmCream. DO NOT use for boats or sailing. Adds a pair.
+- "antenna": alien/robot antennae → use for aliens/robots/bugs. Color: neon. Adds a pair.
 
-Head-center overlays (put the concept ON the head):
-- "windshield": car windshield — makes dude look like a car (suggested color: blackGlass)
-- "screen": monitor/TV screen — makes dude look like a computer (suggested color: screenGlow)
-- "curvedSail": a boat sail on head (suggested color: canvas)
+Head-center overlays (the concept becomes the face of the mascot):
+- "windshield": car windshield over the face → use for cars/trucks/vehicles. Color: blackGlass
+- "screen": glowing monitor screen over the face → use for computers/TVs/phones/screens. Color: screenGlow
+- "curvedSail": a curved sail billow on top of the head → use for BOATS and SAILING (sailboat, sailboat dude, etc.). Color: softWhite. This is the ONLY correct accessory for anything boat/sail/nautical — never use softHorn for a boat.
 
 Animal face features:
-- "softEar": round floppy animal ears (suggested color: match body). Adds a pair.
-- "snout": animal nose/muzzle (suggested color: warmCream)
+- "softEar": round floppy animal ears on the sides of the head → use for mammals: cats, dogs, bears, rabbits, etc. Color: match body. Adds a pair.
+- "snout": animal muzzle/nose → use for mammals with prominent noses: dogs, pigs, bears, cows. Color: warmCream
 
 Body features:
-- "wing": wings on shoulders — for dragons/birds/bats (suggested color: match body). Adds a pair.
-- "bodyPatch": spots/patches on body — for cows/dalmatians (suggested color: charcoalRubber). Adds a pair.
-- "stripe": stripes on body — for zebras/tigers (suggested color: charcoalRubber). Adds a pair.
+- "wing": wings on the shoulders → use for dragons/birds/bats/angels. Color: match body. Adds a pair.
+- "bodyPatch": dark spots/patches on the body → use for cows/dalmatians/spotted animals. Color: charcoalRubber. Adds a pair.
+- "stripe": stripes across the body → use for zebras/tigers/striped animals. Color: charcoalRubber. Adds a pair.
 
 Special:
-- "flame": fire jets on feet — for rockets/fire themes (color: flame). Adds a pair.
-- "question": floating question mark — for abstract/idea concepts (color: neon). Orbits around avatar.
+- "flame": fire jets shooting from the feet → use for rockets/fire themes. Color: flame. Adds a pair.
+- "question": floating question mark orbiting the avatar → use for abstract/ideas/philosophy. Color: neon.
 
 DESIGN RULES:
-- For things that aren't creatures (car, boat, computer, TV), keep the mascot body but put the concept ON the head as an accessory (windshield for car, screen for computer, sail for boat).
-- For vehicles, also set footType to "wheel".
-- Combine accessories to build identity: a dragon = softEar + softHorn + wing with glossyGreen body. A cow = softEar + snout + bodyPatch with softWhite body.
+- For non-creature concepts (car, boat, computer, TV), keep the mascot body but put the concept ON the head: windshield for cars, screen for computers, curvedSail for boats.
+- SAILBOAT = curvedSail (softWhite) + canvas body. Never use softHorn for a boat. Never use wheel feet for a boat.
+- CAR/TRUCK = windshield (blackGlass) + wheel feet + glossyRed or glossyBlue body.
+- COMPUTER/ROBOT = screen (screenGlow) + pixelEye + mouthScreen + chrome body.
+- ROCKET = cone + flame feet + match-body color.
+- DRAGON = softHorn + wing + softEar + glossyGreen body.
+- COW = softEar + snout + bodyPatch + softWhite body.
 - Pick 1-4 accessories max. More is not better — keep it clean and readable.
-- For real people, use symbolic safe caricature/vibe only, never exact likeness. Pick colors and accessories that capture the vibe.
-- For abstract ideas (funny, joke, philosophy), use glossyGold body + googlyEye + mouthGrin + question accessory.`;
+- For real people, use symbolic safe caricature only, never exact likeness.
+- For funny/abstract/joke ideas: glossyGold body + googlyEye + mouthGrin + question accessory.`;
 
 function clampSceneNumber(value, min, max, fallback = 0) {
   const parsed = Number(value);
@@ -206,7 +210,7 @@ function fallbackDrawingLayers(text = '', spec = {}, options = {}) {
     if (/rocket|missile|spaceship/.test(l)) layers.push(sceneLayer('cone','free',0,-6,.28,.22,bodyMaterial,{z:9,attach:{socket:'head.leftHorn'}}), sceneLayer('flame','free',0,6,.24,.3,'flame',{z:1,attach:{socket:'body.leftFoot'}}), sceneLayer('flame','free',0,6,.24,.3,'flame',{z:1,attach:{socket:'body.rightFoot'}}));
     if (/car|truck|taxi|bus|vehicle/.test(l)) layers.push(sceneLayer('windshield','free',0,4,.32,.18,'blackGlass',{z:9,attach:{socket:'head.center'}}));
     if (/computer|monitor|tv|television|screen/.test(l)) layers.push(sceneLayer('screen','free',0,2,.46,.28,'screenGlow',{z:9,attach:{socket:'head.center'}}));
-    if (/boat|sail|ship/.test(l)) layers.push(sceneLayer('curvedSail','free',4,-8,.32,.44,'canvas',{z:9,attach:{socket:'head.rightHorn'}}));
+    if (/boat|sail|ship/.test(l)) layers.push(sceneLayer('curvedSail','free',0,-12,.5,.6,'softWhite',{z:9,attach:{socket:'head.leftHorn'}}));
     if (/sun|star/.test(l)) layers.push(sceneLayer('spark','free',0,0,.22,.26,'glossyGold',{z:7,attach:{socket:'head.leftHorn'}}), sceneLayer('spark','free',0,0,.22,.26,'glossyGold',{z:7,attach:{socket:'head.rightHorn'}}));
     if (/mushroom|toadstool/.test(l)) layers.push(sceneLayer('mushroomCap','free',0,-6,.64,.3,bodyMaterial,{z:9,attach:{socket:'head.center'}}));
     if (/tree|cactus|plant/.test(l)) layers.push(sceneLayer('leaf','free',-4,0,.26,.2,'glossyGreen',{rotate:-20,z:9,attach:{socket:'head.leftHorn'}}), sceneLayer('leaf','free',4,0,.26,.2,'glossyGreen',{rotate:20,z:9,attach:{socket:'head.rightHorn'}}));
