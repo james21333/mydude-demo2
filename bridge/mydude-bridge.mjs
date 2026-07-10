@@ -7,6 +7,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
 import { generatePhase1SceneSpec } from '../shared/phase1/phase1-avatar-engine.mjs';
+import { CHASSIS_TYPES, classifyChassis } from '../shared/chassis.mjs';
 
 const PORT = Number(process.env.PORT || 8788);
 const execFileAsync = promisify(execFile);
@@ -34,7 +35,7 @@ const DRAWING_SHAPES = new Set(DRAWING_GRAMMAR.shapes || []);
 const DRAWING_MATERIALS = new Set(DRAWING_GRAMMAR.materials || []);
 const DRAWING_ANCHORS = new Set(DRAWING_GRAMMAR.anchors || []);
 const ATTACHMENT_SOCKET_NAMES = new Set(DRAWING_GRAMMAR.rules?.attachmentMath?.sockets || []);
-const DRAWING_PROMPT = `Use these polished house-style presets when relevant: ${QUALITY_PRESET_HINTS}. 3D cartoon drawing grammar ${DRAWING_GRAMMAR.version}. Return JSON with title, summary, palette, scene, body, head, eyes, mouth, primitives, and layers. layers is an array of up to 32 objects: {shape, anchor, x, y, scale:[sx,sy], rotate, material, role, z, attach:{socket}}. For mascot pieces prefer attach.socket and use x/y as small local offsets. Use only shapes: ${DRAWING_GRAMMAR.shapes.join(', ')}. Use only anchors: ${DRAWING_GRAMMAR.anchors.join(', ')}. Use only materials: ${DRAWING_GRAMMAR.materials.join(', ')}. Coordinates are -280..280. Required: visible face and one mouth layer with role:"mouth" attached to head.mouth when using mascot parts. Follow the house-style process: build one connected mascot silhouette first (body, overlapping head, attached limbs), then face, then details; never leave core limbs/hooves/ears/spots/patches floating like stickers; details should be embedded into or overlapping their parent surfaces. If a detail cannot be convincingly attached, omit it instead of rendering a floating artifact. Make it look like dimensional glossy 3D cartoon pieces, not flat icon art. Ignore backgrounds. For real people, do symbolic safe caricature/vibe only, not exact likeness.`;
+const DRAWING_PROMPT = `Use these polished house-style presets when relevant: ${QUALITY_PRESET_HINTS}. 3D cartoon drawing grammar ${DRAWING_GRAMMAR.version}. Return JSON with title, summary, palette, chassis, scene, body, head, eyes, mouth, primitives, and layers. chassis must be one of: horizontal, vertical, circular, square, creature. Choose chassis based on the prompt shape: horizontal for cars/boats/snakes/animals-on-all-fours, vertical for rockets/trees/bottles/standing-tall-things, circular for suns/balls/coins/round-things, square for computers/books/screens/boxy-things, creature for people/characters/mascots/bipeds. The first layer must be the chassis body shape: chassisHorizontal, chassisVertical, chassisCircular, chassisSquare, or mascotBody (for creature). For creature chassis, also include mascotHead attached to head.center. For non-creature chassis, put the face directly on the body (no separate head). layers is an array of up to 32 objects: {shape, anchor, x, y, scale:[sx,sy], rotate, material, role, z, attach:{socket}}. Prefer attach.socket and use x/y as small local offsets. Use only shapes: ${DRAWING_GRAMMAR.shapes.join(', ')}. Use only anchors: ${DRAWING_GRAMMAR.anchors.join(', ')}. Use only materials: ${DRAWING_GRAMMAR.materials.join(', ')}. Coordinates are -280..280. Required: visible face and one mouth layer with role:"mouth" attached to head.mouth. Follow the house-style process: build one connected silhouette first (chassis body, then face, then details); never leave core parts floating like stickers. Make it look like dimensional glossy 3D cartoon pieces, not flat icon art. Ignore backgrounds. For real people, do symbolic safe caricature/vibe only, not exact likeness.`;
 
 function clampSceneNumber(value, min, max, fallback = 0) {
   const parsed = Number(value);
@@ -56,6 +57,7 @@ function sceneLayer(shape, anchor, x, y, sx, sy, material, options = {}) { retur
 
 const SOCKET_COMPATIBILITY = Object.freeze({
   mascotBody: ['body.center'], mascotHead: ['head.center'],
+  chassisHorizontal: ['body.center'], chassisVertical: ['body.center'], chassisCircular: ['body.center'], chassisSquare: ['body.center'],
   stubbyArm: ['body.leftShoulder', 'body.rightShoulder', 'body.leftHand', 'body.rightHand'], wing: ['body.leftShoulder', 'body.rightShoulder'], finLimb: ['body.leftShoulder', 'body.rightShoulder'], noodleArm: ['body.leftShoulder', 'body.rightShoulder'], tentacle: ['body.leftShoulder', 'body.rightShoulder', 'body.leftHand', 'body.rightHand'],
   stubbyLeg: ['body.leftHip', 'body.rightHip'], leg: ['body.leftHip', 'body.rightHip'], boot: ['body.leftFoot', 'body.rightFoot'], hoof: ['body.leftHand', 'body.rightHand', 'body.leftFoot', 'body.rightFoot'],
   paw: ['body.leftHand', 'body.rightHand', 'body.leftFoot', 'body.rightFoot'], mitten: ['body.leftHand', 'body.rightHand'], claw: ['body.leftHand', 'body.rightHand'],
@@ -92,46 +94,57 @@ function presetSceneSpec(text = '') {
   const preset = matchQualityPreset(text);
   if (!preset) return null;
   const base = fallbackSceneSpec(text, { skipPreset: true });
-  return { ...base, title: preset.title, summary: preset.summary, palette: preset.palette || base.palette, layers: sanitizeDrawingLayers(preset.layers, text) };
+  return { ...base, chassis: classifyChassis(text), title: preset.title, summary: preset.summary, palette: preset.palette || base.palette, layers: sanitizeDrawingLayers(preset.layers, text) };
 }
 
 function fallbackDrawingLayers(text = '', options = {}) {
   const preset = !options.skipPreset ? matchQualityPreset(text) : null;
   if (preset?.layers?.length) return preset.layers;
   const l = text.toLowerCase(); const mat = materialForText(text);
+  const chassis = classifyChassis(text);
   const eyeShape = /funny|idea|abstract|silly/.test(l) ? 'googlyEye' : /computer|robot|screen/.test(l) ? 'pixelEye' : 'cuteEye';
   const mouthShape = /computer|robot|screen/.test(l) ? 'mouthScreen' : /funny|idea|abstract|joke/.test(l) ? 'mouthGrin' : /bird|duck|chicken/.test(l) ? 'beak' : 'mouthSmile';
   const bodyMaterial = /idea|funny|abstract|joke/.test(l) ? 'glossyGold' : mat;
+  const chassisDef = CHASSIS_TYPES[chassis];
+  const bodyShape = chassisDef.bodyShape;
   const layers = [
     sceneLayer('shadow','ground',0,6,.98,.18,'shadow',{opacity:.24,z:-10}),
-    sceneLayer('mascotBody','free',0,0,.62,.6,bodyMaterial,{z:2,attach:{socket:'body.center'}}),
-    sceneLayer('stubbyLeg','free',0,-4,.21,.25,bodyMaterial,{z:4,attach:{socket:'body.leftHip'}}),
-    sceneLayer('stubbyLeg','free',0,-4,.21,.25,bodyMaterial,{z:4,attach:{socket:'body.rightHip'}}),
-    sceneLayer('hoof','free',0,-4,.2,.13,'charcoalRubber',{z:6,attach:{socket:'body.leftFoot'}}),
-    sceneLayer('hoof','free',0,-4,.2,.13,'charcoalRubber',{z:6,attach:{socket:'body.rightFoot'}}),
-    sceneLayer('mascotHead','free',0,0,.94,.84,bodyMaterial,{z:8,attach:{socket:'head.center'}}),
+    sceneLayer(bodyShape,'free',0,0,chassis === 'creature' ? .62 : 1,chassis === 'creature' ? .6 : 1,bodyMaterial,{z:2,attach:{socket:'body.center'}}),
   ];
-  if (!/computer|monitor|screen|car|boat|sail|rocket/.test(l)) layers.push(sceneLayer('stubbyArm','free',-2,0,.22,.26,bodyMaterial,{rotate:-10,z:5,attach:{socket:'body.leftHand'}}), sceneLayer('stubbyArm','free',2,0,.22,.26,bodyMaterial,{rotate:10,z:5,attach:{socket:'body.rightHand'}}));
+  if (chassis === 'creature') {
+    layers.push(
+      sceneLayer('stubbyLeg','free',0,-4,.21,.25,bodyMaterial,{z:4,attach:{socket:'body.leftHip'}}),
+      sceneLayer('stubbyLeg','free',0,-4,.21,.25,bodyMaterial,{z:4,attach:{socket:'body.rightHip'}}),
+      sceneLayer('hoof','free',0,-4,.2,.13,'charcoalRubber',{z:6,attach:{socket:'body.leftFoot'}}),
+      sceneLayer('hoof','free',0,-4,.2,.13,'charcoalRubber',{z:6,attach:{socket:'body.rightFoot'}}),
+      sceneLayer('mascotHead','free',0,0,.94,.84,bodyMaterial,{z:8,attach:{socket:'head.center'}}),
+    );
+    if (!/computer|monitor|screen|car|boat|sail|rocket/.test(l)) {
+      layers.push(
+        sceneLayer('stubbyArm','free',-2,0,.22,.26,bodyMaterial,{rotate:-10,z:5,attach:{socket:'body.leftHand'}}),
+        sceneLayer('stubbyArm','free',2,0,.22,.26,bodyMaterial,{rotate:10,z:5,attach:{socket:'body.rightHand'}}),
+      );
+    }
+  }
+  if (chassis === 'horizontal') {
+    layers.push(
+      sceneLayer('wheel','free',0,0,.22,.22,'charcoalRubber',{z:4,attach:{socket:'body.leftFoot'}}),
+      sceneLayer('wheel','free',0,0,.22,.22,'charcoalRubber',{z:4,attach:{socket:'body.rightFoot'}}),
+    );
+  }
   if (/cat|dog|bear|rabbit|bunny|animal|mouse|fox|tiger|lion|elephant/.test(l)) layers.push(sceneLayer('softEar','free',-3,6,.34,.42,bodyMaterial,{rotate:-24,z:9,attach:{socket:'head.leftEar'}}), sceneLayer('softEar','free',3,6,.34,.42,bodyMaterial,{rotate:24,z:9,attach:{socket:'head.rightEar'}}));
   if (/dragon|unicorn|goat|horn|devil|monster/.test(l)) layers.push(sceneLayer('softHorn','free',0,0,.18,.34,'canvas',{rotate:-8,z:10,attach:{socket:'head.leftHorn'}}), sceneLayer('softHorn','free',0,0,.18,.34,'canvas',{rotate:8,z:10,attach:{socket:'head.rightHorn'}}));
   if (/alien|robot|bug|insect/.test(l)) layers.push(sceneLayer('antenna','free',0,0,.22,.36,'neon',{rotate:-18,z:10,attach:{socket:'head.leftHorn'}}), sceneLayer('antenna','free',0,0,.22,.36,'neon',{rotate:18,z:10,attach:{socket:'head.rightHorn'}}));
   if (/cow|dog|pig|bear|mouse|fox|cat|animal/.test(l)) layers.push(sceneLayer('snout','free',0,-2,.42,.24,'warmCream',{z:24,attach:{socket:'head.mouth'}}));
   if (/spot|cow|dog|dalmatian|pattern/.test(l)) layers.push(sceneLayer('bodyPatch','free',0,0,.3,.22,'charcoalRubber',{rotate:-10,z:11,attach:{socket:'body.patchLeft'}}), sceneLayer('bodyPatch','free',0,0,.23,.16,'charcoalRubber',{rotate:8,z:11,attach:{socket:'body.patchRight'}}));
-  if (/computer|monitor|screen/.test(l)) layers.push(sceneLayer('screen','free',0,2,.5,.28,'screenGlow',{z:13,attach:{socket:'body.front'}}), sceneLayer('button','free',-20,28,.14,.14,'glossyRed',{z:14,attach:{socket:'body.front'}}));
-  if (/car|truck|vehicle/.test(l)) layers.push(sceneLayer('carBody','ground',0,-34,.7,.3,'glossyRed',{z:13}), sceneLayer('wheel','ground',-50,-20,.25,.25,'charcoalRubber',{z:15}), sceneLayer('wheel','ground',50,-20,.25,.25,'charcoalRubber',{z:15}));
-  if (/sail|boat|ship/.test(l)) layers.push(sceneLayer('hull','ground',0,-34,.72,.26,'wood',{z:13}), sceneLayer('curvedSail','free',8,-20,.45,.62,'canvas',{z:12,attach:{socket:'head.rightHorn'}}));
-  if (/rocket|spaceship|space ship/.test(l)) layers.push(sceneLayer('rocket','free',0,-12,.38,.54,'glossyPurple',{z:13,attach:{socket:'body.front'}}));
   if (/idea|funny|abstract|joke/.test(l)) layers.push(sceneLayer('question','orbit',-158,-120,.36,.36,'neon',{z:12}), sceneLayer('spark','orbit',156,-150,.42,.42,'glossyGold',{z:12}));
   if (/zebra|stripe|striped/.test(l)) layers.push(sceneLayer('stripe','free',-10,-12,.42,.24,'charcoalRubber',{rotate:-18,z:12,attach:{socket:'body.front'}}), sceneLayer('stripe','free',10,14,.34,.2,'charcoalRubber',{rotate:-18,z:12,attach:{socket:'body.patchRight'}}));
-  if (/skateboard|skate board/.test(l)) layers.push(sceneLayer('roundedBox','ground',0,-28,.78,.16,'wood',{z:14}), sceneLayer('wheel','ground',-58,-14,.24,.24,'charcoalRubber',{z:15}), sceneLayer('wheel','ground',58,-14,.24,.24,'charcoalRubber',{z:15}));
   if (/\b(dragon|bird|bat|wing|wings)\b/.test(l)) layers.push(sceneLayer('wing','free',-8,4,.42,.34,bodyMaterial,{rotate:-22,z:3,attach:{socket:'body.leftShoulder'}}), sceneLayer('wing','free',8,4,.42,.34,bodyMaterial,{rotate:22,z:3,attach:{socket:'body.rightShoulder'}}));
   layers.push(sceneLayer(eyeShape,'free',0,0,.24,.24,'softWhite',{role:'eye',z:20,attach:{socket:'head.leftEye'}}), sceneLayer(eyeShape,'free',0,0,.24,.24,'softWhite',{role:'eye',z:20,attach:{socket:'head.rightEye'}}), sceneLayer(mouthShape,'free',0,mouthShape === 'mouthGrin' ? 12 : 18,mouthShape === 'beak' ? .38 : .38,mouthShape === 'beak' ? .22 : .2,'charcoalRubber',{role:'mouth',z:31,attach:{socket:'head.mouth'}}));
   return layers;
 }
 function sanitizeDrawingLayers(rawLayers, text = '') {
-  const initialSource = Array.isArray(rawLayers) && rawLayers.length ? rawLayers : fallbackDrawingLayers(text);
-  const hasCore = initialSource.some(raw => raw?.shape === 'mascotBody' || raw?.shape === 'mascotHead');
-  const source = !hasCore ? fallbackDrawingLayers(text, { skipPreset: true }) : initialSource;
+  const source = Array.isArray(rawLayers) && rawLayers.length ? rawLayers : fallbackDrawingLayers(text);
   const cleaned = source.slice(0, DRAWING_GRAMMAR.rules?.maxLayers || 42).map((raw, index) => {
     const shape = DRAWING_SHAPES.has(raw?.shape) ? raw.shape : 'blob';
     if (shape === 'shadow') return null;
@@ -139,8 +152,7 @@ function sanitizeDrawingLayers(rawLayers, text = '') {
     const attach = normalizeAttach(raw, shape, role);
     if (!attach && FLOATING_ARTIFACT_SHAPES.has(shape) && (!raw?.anchor || raw.anchor === 'free' || raw.anchor === 'orbit')) return null;
     const rawScale = Array.isArray(raw?.scale) ? raw.scale : [raw?.sx, raw?.sy];
-    const baseScale = [clampSceneNumber(rawScale?.[0], .05, 3.2, 1), clampSceneNumber(rawScale?.[1], .05, 3.2, 1)];
-    const scale = shape === 'mascotHead' ? [Math.max(baseScale[0], .9), Math.max(baseScale[1], .78)] : shape === 'mascotBody' ? [Math.min(baseScale[0], .68), Math.min(baseScale[1], .66)] : baseScale;
+    const scale = [clampSceneNumber(rawScale?.[0], .05, 3.2, 1), clampSceneNumber(rawScale?.[1], .05, 3.2, 1)];
     return {
       id: String(raw?.id || `${shape}-${index}`).slice(0, 32),
       shape,
@@ -165,7 +177,7 @@ const SCENE_PRIMITIVES = Object.freeze([
   'body_blob','body_capsule','body_box','body_sphere','body_triangle','body_star','body_cloud','body_flame','body_crystal','body_monitor','body_car','body_boat','body_plane','body_rocket','body_house','body_tree','body_mushroom','body_book','body_phone','body_lightbulb','head_round','head_square','head_screen','head_animal','head_bird','head_fish','head_reptile','head_flower','head_planet','head_helmet','head_crown','head_hat','head_hair','head_mask','head_skull','eyes_dot','eyes_googly','eyes_sleepy','eyes_star','eyes_heart','eyes_pixel','eyes_windshield','eyes_porthole','eyes_cyclops','eyes_glasses','eyes_sunglasses','eyes_binocular','eyes_robot','eyes_cat','eyes_cartoon','mouth_smile','mouth_grin','mouth_screen','mouth_grille','mouth_beak','mouth_snout','mouth_tusk','mouth_fang','mouth_wave','mouth_speaker','mouth_mustache','mouth_tongue','limb_arm','limb_wing','limb_fin','limb_tentacle','limb_branch','limb_wheel','limb_track','limb_leg','limb_boot','limb_claw','limb_paw','limb_flipper','limb_propeller','limb_rope','accessory_hat','accessory_cap','accessory_crown','accessory_tie','accessory_bowtie','accessory_cape','accessory_backpack','accessory_toolbelt','accessory_badge','accessory_flag','accessory_microphone','accessory_sword','accessory_wand','accessory_umbrella','accessory_balloon','accessory_book','accessory_headphones','accessory_antenna','accessory_halo','accessory_lightning','texture_stripes','texture_spots','texture_stars','texture_grid','texture_circuit','texture_wood','texture_metal','texture_glass','texture_fur','texture_scales','texture_feathers','texture_cloud','texture_flame','texture_water','texture_leaf','scene_sky','scene_space','scene_ocean','scene_farm','scene_city','scene_desert','scene_forest','scene_jungle','scene_castle','scene_lab','scene_office','scene_stage','scene_road','scene_mountain','scene_beach','scene_underwater','scene_volcano','scene_snow','scene_candy','scene_dream','object_sun','object_moon','object_star','object_cloud','object_rainbow','object_tree','object_flower','object_rock','object_wave','object_anchor','object_podium','object_flag','object_keyboard','object_mouse','object_orbit','object_satellite','object_comet','object_gear','object_wire','object_spark','symbol_question','symbol_exclamation','symbol_idea','symbol_joke','symbol_music','symbol_heart','symbol_laugh','symbol_magic','symbol_money','symbol_time','symbol_map','symbol_compass','symbol_code'
 ]);
 
-const SCENE_SCHEMA = `Return only compact JSON with keys: title, summary, palette, scene, body, head, eyes, mouth, primitives, layers. palette one of blue,pink,green,gold,purple,red,gray,orange. scene/body/head/eyes/mouth/primitives must use only these primitive ids: ${SCENE_PRIMITIVES.join(', ')}. ${DRAWING_PROMPT} Use symbolic approximation for real people: never exact likeness; for George H W Bush use presidential elder-statesman cartoon cues like gray hair, suit, tie, podium, flag, elder-statesman vibe. For abstract requests, map the idea to visual metaphors.`;
+const SCENE_SCHEMA = `Return only compact JSON with keys: title, summary, palette, chassis, scene, body, head, eyes, mouth, primitives, layers. palette one of blue,pink,green,gold,purple,red,gray,orange. chassis one of horizontal,vertical,circular,square,creature. scene/body/head/eyes/mouth/primitives must use only these primitive ids: ${SCENE_PRIMITIVES.join(', ')}. ${DRAWING_PROMPT} Use symbolic approximation for real people: never exact likeness; for George H W Bush use presidential elder-statesman cartoon cues like gray hair, suit, tie, podium, flag, elder-statesman vibe. For abstract requests, map the idea to visual metaphors.`;
 
 function wantsSceneSpec(text = '') {
   return /\b(look like|make (you|him|it)|avatar|turn into|become|transform|change into|be a|be an|computer|sailboat|boat|car|truck|cow|animal|monster|dragon|funny idea|abstract|appearance)\b/i.test(text);
@@ -181,7 +193,7 @@ function fallbackSceneSpec(text = '', options = {}) {
   const eyes = pick([/computer|robot/, 'eyes_pixel'], [/car/, 'eyes_windshield'], [/funny|idea|abstract/, 'eyes_googly']) || 'eyes_cartoon';
   const mouth = pick([/car/, 'mouth_grille'], [/computer|robot/, 'mouth_screen'], [/funny|idea|abstract/, 'mouth_grin'], [/cow|animal/, 'mouth_snout']) || 'mouth_smile';
   const palette = pick([/pink/, 'pink'], [/green|cow|farm/, 'green'], [/gold|yellow|idea/, 'gold'], [/purple|space|alien/, 'purple'], [/red|car/, 'red'], [/gray|computer|bush|president/, 'gray']) || 'blue';
-  return { title: lower.replace(/[^a-z0-9\s-]/g, '').split(/\s+/).slice(-5).join(' ') || 'wild idea', summary: 'Fast 3D cartoon transformation', palette, scene, body, head, eyes, mouth, primitives: [scene, body, head, eyes, mouth, 'object_spark'], layers: fallbackDrawingLayers(text) };
+  return { title: lower.replace(/[^a-z0-9\s-]/g, '').split(/\s+/).slice(-5).join(' ') || 'wild idea', summary: 'Fast 3D cartoon transformation', palette, chassis: classifyChassis(text), scene, body, head, eyes, mouth, primitives: [scene, body, head, eyes, mouth, 'object_spark'], layers: fallbackDrawingLayers(text) };
 }
 
 function sanitizeSceneSpec(raw, text = '', options = {}) {
@@ -191,10 +203,12 @@ function sanitizeSceneSpec(raw, text = '', options = {}) {
   const fallback = fallbackSceneSpec(text, { skipPreset: Boolean(options.skipPreset) });
   const clean = raw && typeof raw === 'object' ? raw : {};
   const use = (value, fb) => allowed.has(value) ? value : fb;
+  const chassisIds = ['horizontal','vertical','circular','square','creature'];
   return {
     title: String(clean.title || fallback.title).slice(0, 48),
     summary: String(clean.summary || fallback.summary).slice(0, 140),
     palette: ['blue','pink','green','gold','purple','red','gray','orange'].includes(clean.palette) ? clean.palette : fallback.palette,
+    chassis: chassisIds.includes(clean.chassis) ? clean.chassis : classifyChassis(text),
     scene: use(clean.scene, fallback.scene),
     body: use(clean.body, fallback.body),
     head: use(clean.head, fallback.head),
@@ -499,12 +513,15 @@ Extra /test5 rules:
 - Keep the My Dude quality bar: oversized expressive head, compact body, connected limbs, glossy dimensional materials, readable silhouette.
 - Create a detailed avatar, not a sparse placeholder: minimum 10 layers when possible, maximum 28 layers.
 - Include every prompt-specific requiredRenderableDetails item using valid renderer parts; the backend rejects recipes whose layers do not cover required details.
-- Required layers must use exact shape names, not roles: {"shape":"mascotBody","role":"part","attach":{"socket":"body.center"}}, {"shape":"mascotHead","role":"part","attach":{"socket":"head.center"}}, two eye layers with role:"eye", and exactly one mouth layer with role:"mouth" attached to head.mouth.
-- Use exact renderer shape names only. For dragon use mascotBody+mascotHead+softHorn+wing+claw; for scientist goggles use glasses; for robot use screen/panel/pixelEye/mouthScreen. Never invent names like dragon, goggles, smile, arm, leftEye, body.
+- Choose the right chassis for the prompt. The first layer must be the chassis body: chassisHorizontal (cars/boats/snakes/animals-on-all-fours), chassisVertical (rockets/trees/bottles), chassisCircular (suns/balls/coins), chassisSquare (computers/books/screens), or mascotBody (creature chassis for people/characters/bipeds). Include "chassis" key in the top-level JSON.
+- For creature chassis: also include mascotHead attached to head.center, plus stubby arms/legs. For non-creature chassis: put eyes and mouth directly on the body (no separate head shape).
+- Required: two eye layers with role:"eye", and exactly one mouth layer with role:"mouth" attached to head.mouth.
+- Use exact renderer shape names only. For dragon use mascotBody+mascotHead+softHorn+wing+claw; for scientist goggles use glasses; for robot use chassisSquare+pixelEye+mouthScreen. Never invent names like dragon, goggles, smile, arm, leftEye, body.
 - Accessories/details must attach to valid sockets. Prefer head.leftHorn/rightHorn for antenna/horns, head.leftEar/rightEar for ears, body.front/body.patchLeft/body.patchRight for body details.
 - If a detail such as headphones is not a single renderer part, compose it from valid shapes such as arc/ring/circle/panel/spark when available, or use glasses/antenna/spark/patch as a safe visual proxy.
 - Max 28 layers. Use x/y only as small local offsets from sockets.
-Example minimal valid layer list: [{"shape":"mascotBody","anchor":"free","x":0,"y":0,"scale":[0.62,0.6],"rotate":0,"material":"glossyPurple","role":"part","z":2,"attach":{"socket":"body.center"}},{"shape":"mascotHead","anchor":"free","x":0,"y":0,"scale":[0.94,0.84],"rotate":0,"material":"glossyPurple","role":"part","z":8,"attach":{"socket":"head.center"}},{"shape":"stubbyArm","anchor":"free","x":0,"y":0,"scale":[0.22,0.46],"rotate":-10,"material":"glossyPurple","role":"part","z":5,"attach":{"socket":"body.leftHand"}},{"shape":"stubbyArm","anchor":"free","x":0,"y":0,"scale":[0.22,0.46],"rotate":10,"material":"glossyPurple","role":"part","z":5,"attach":{"socket":"body.rightHand"}},{"shape":"cuteEye","anchor":"free","x":0,"y":0,"scale":[0.24,0.24],"rotate":0,"material":"softWhite","role":"eye","z":20,"attach":{"socket":"head.leftEye"}},{"shape":"cuteEye","anchor":"free","x":0,"y":0,"scale":[0.24,0.24],"rotate":0,"material":"softWhite","role":"eye","z":20,"attach":{"socket":"head.rightEye"}},{"shape":"mouthSmile","anchor":"free","x":0,"y":18,"scale":[0.38,0.2],"rotate":0,"material":"charcoalRubber","role":"mouth","z":31,"attach":{"socket":"head.mouth"}}]`;
+Example minimal valid creature layer list: [{"shape":"mascotBody","anchor":"free","x":0,"y":0,"scale":[0.62,0.6],"rotate":0,"material":"glossyPurple","role":"part","z":2,"attach":{"socket":"body.center"}},{"shape":"mascotHead","anchor":"free","x":0,"y":0,"scale":[0.94,0.84],"rotate":0,"material":"glossyPurple","role":"part","z":8,"attach":{"socket":"head.center"}},{"shape":"stubbyArm","anchor":"free","x":0,"y":0,"scale":[0.22,0.46],"rotate":-10,"material":"glossyPurple","role":"part","z":5,"attach":{"socket":"body.leftHand"}},{"shape":"stubbyArm","anchor":"free","x":0,"y":0,"scale":[0.22,0.46],"rotate":10,"material":"glossyPurple","role":"part","z":5,"attach":{"socket":"body.rightHand"}},{"shape":"cuteEye","anchor":"free","x":0,"y":0,"scale":[0.24,0.24],"rotate":0,"material":"softWhite","role":"eye","z":20,"attach":{"socket":"head.leftEye"}},{"shape":"cuteEye","anchor":"free","x":0,"y":0,"scale":[0.24,0.24],"rotate":0,"material":"softWhite","role":"eye","z":20,"attach":{"socket":"head.rightEye"}},{"shape":"mouthSmile","anchor":"free","x":0,"y":18,"scale":[0.38,0.2],"rotate":0,"material":"charcoalRubber","role":"mouth","z":31,"attach":{"socket":"head.mouth"}}]
+Example horizontal chassis (car): [{"shape":"chassisHorizontal","anchor":"free","x":0,"y":0,"scale":[1,1],"rotate":0,"material":"glossyRed","role":"part","z":2,"attach":{"socket":"body.center"}},{"shape":"wheel","anchor":"free","x":0,"y":0,"scale":[0.22,0.22],"rotate":0,"material":"charcoalRubber","role":"part","z":4,"attach":{"socket":"body.leftFoot"}},{"shape":"wheel","anchor":"free","x":0,"y":0,"scale":[0.22,0.22],"rotate":0,"material":"charcoalRubber","role":"part","z":4,"attach":{"socket":"body.rightFoot"}},{"shape":"cuteEye","anchor":"free","x":0,"y":0,"scale":[0.24,0.24],"rotate":0,"material":"softWhite","role":"eye","z":20,"attach":{"socket":"head.leftEye"}},{"shape":"cuteEye","anchor":"free","x":0,"y":0,"scale":[0.24,0.24],"rotate":0,"material":"softWhite","role":"eye","z":20,"attach":{"socket":"head.rightEye"}},{"shape":"mouthSmile","anchor":"free","x":0,"y":18,"scale":[0.38,0.2],"rotate":0,"material":"charcoalRubber","role":"mouth","z":31,"attach":{"socket":"head.mouth"}}]`;
 }
 
 async function callTest5Chat({ system, userContent, temperature = 0.38, maxTokens = 1800, stage = 'avatar' }) {
