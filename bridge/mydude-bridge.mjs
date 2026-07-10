@@ -35,7 +35,7 @@ const DRAWING_SHAPES = new Set(DRAWING_GRAMMAR.shapes || []);
 const DRAWING_MATERIALS = new Set(DRAWING_GRAMMAR.materials || []);
 const DRAWING_ANCHORS = new Set(DRAWING_GRAMMAR.anchors || []);
 const ATTACHMENT_SOCKET_NAMES = new Set(DRAWING_GRAMMAR.rules?.attachmentMath?.sockets || []);
-const DRAWING_PROMPT = `Use these polished house-style presets when relevant: ${QUALITY_PRESET_HINTS}. 3D cartoon drawing grammar ${DRAWING_GRAMMAR.version}. Return JSON with title, summary, palette, chassis, scene, body, head, eyes, mouth, primitives, and layers. chassis must be one of: horizontal, vertical, circular, square, creature. Choose chassis based on the prompt shape: horizontal for cars/boats/snakes/animals-on-all-fours, vertical for rockets/trees/bottles/standing-tall-things, circular for suns/balls/coins/round-things, square for computers/books/screens/boxy-things, creature for people/characters/mascots/bipeds. The first layer must be the chassis body shape: chassisHorizontal, chassisVertical, chassisCircular, chassisSquare, or mascotBody (for creature). For creature chassis, also include mascotHead attached to head.center. For non-creature chassis, put the face directly on the body (no separate head). layers is an array of up to 32 objects: {shape, anchor, x, y, scale:[sx,sy], rotate, material, role, z, attach:{socket}}. Prefer attach.socket and use x/y as small local offsets. Use only shapes: ${DRAWING_GRAMMAR.shapes.join(', ')}. Use only anchors: ${DRAWING_GRAMMAR.anchors.join(', ')}. Use only materials: ${DRAWING_GRAMMAR.materials.join(', ')}. Coordinates are -280..280. Required: visible face and one mouth layer with role:"mouth" attached to head.mouth. Follow the house-style process: build one connected silhouette first (chassis body, then face, then details); never leave core parts floating like stickers. Make it look like dimensional glossy 3D cartoon pieces, not flat icon art. Ignore backgrounds. For real people, do symbolic safe caricature/vibe only, not exact likeness.`;
+const DRAWING_PROMPT = `Return JSON with title, summary, palette, chassis. chassis must be one of: horizontal, vertical, circular, square, creature. Choose chassis based on the prompt shape: horizontal for cars/boats/snakes/animals-on-all-fours, vertical for rockets/trees/bottles/standing-tall-things, circular for suns/balls/coins/round-things, square for computers/books/screens/boxy-things, creature for people/characters/mascots/bipeds. palette one of blue,pink,green,gold,purple,red,gray,orange. The client builds the avatar from a polished hand-designed template for each chassis — you do NOT need to compose layers. Just classify the shape and pick the right color. For real people, do symbolic safe caricature/vibe only, not exact likeness.`;
 
 function clampSceneNumber(value, min, max, fallback = 0) {
   const parsed = Number(value);
@@ -118,18 +118,15 @@ function fallbackDrawingLayers(text = '', options = {}) {
       sceneLayer('hoof','free',0,-4,.2,.13,'charcoalRubber',{z:6,attach:{socket:'body.leftFoot'}}),
       sceneLayer('hoof','free',0,-4,.2,.13,'charcoalRubber',{z:6,attach:{socket:'body.rightFoot'}}),
       sceneLayer('mascotHead','free',0,0,.94,.84,bodyMaterial,{z:8,attach:{socket:'head.center'}}),
+      sceneLayer('stubbyArm','free',-2,0,.22,.26,bodyMaterial,{rotate:-10,z:5,attach:{socket:'body.leftHand'}}),
+      sceneLayer('stubbyArm','free',2,0,.22,.26,bodyMaterial,{rotate:10,z:5,attach:{socket:'body.rightHand'}}),
     );
-    if (!/computer|monitor|screen|car|boat|sail|rocket/.test(l)) {
-      layers.push(
-        sceneLayer('stubbyArm','free',-2,0,.22,.26,bodyMaterial,{rotate:-10,z:5,attach:{socket:'body.leftHand'}}),
-        sceneLayer('stubbyArm','free',2,0,.22,.26,bodyMaterial,{rotate:10,z:5,attach:{socket:'body.rightHand'}}),
-      );
-    }
-  }
-  if (chassis === 'horizontal') {
+  } else {
     layers.push(
-      sceneLayer('wheel','free',0,0,.22,.22,'charcoalRubber',{z:4,attach:{socket:'body.leftFoot'}}),
-      sceneLayer('wheel','free',0,0,.22,.22,'charcoalRubber',{z:4,attach:{socket:'body.rightFoot'}}),
+      sceneLayer('stubbyArm','free',-2,0,.18,.22,bodyMaterial,{rotate:-12,z:5,attach:{socket:'body.leftHand'}}),
+      sceneLayer('stubbyArm','free',2,0,.18,.22,bodyMaterial,{rotate:12,z:5,attach:{socket:'body.rightHand'}}),
+      sceneLayer('hoof','free',0,0,.16,.1,'charcoalRubber',{z:6,attach:{socket:'body.leftFoot'}}),
+      sceneLayer('hoof','free',0,0,.16,.1,'charcoalRubber',{z:6,attach:{socket:'body.rightFoot'}}),
     );
   }
   if (/cat|dog|bear|rabbit|bunny|animal|mouse|fox|tiger|lion|elephant/.test(l)) layers.push(sceneLayer('softEar','free',-3,6,.34,.42,bodyMaterial,{rotate:-24,z:9,attach:{socket:'head.leftEar'}}), sceneLayer('softEar','free',3,6,.34,.42,bodyMaterial,{rotate:24,z:9,attach:{socket:'head.rightEar'}}));
@@ -177,7 +174,7 @@ const SCENE_PRIMITIVES = Object.freeze([
   'body_blob','body_capsule','body_box','body_sphere','body_triangle','body_star','body_cloud','body_flame','body_crystal','body_monitor','body_car','body_boat','body_plane','body_rocket','body_house','body_tree','body_mushroom','body_book','body_phone','body_lightbulb','head_round','head_square','head_screen','head_animal','head_bird','head_fish','head_reptile','head_flower','head_planet','head_helmet','head_crown','head_hat','head_hair','head_mask','head_skull','eyes_dot','eyes_googly','eyes_sleepy','eyes_star','eyes_heart','eyes_pixel','eyes_windshield','eyes_porthole','eyes_cyclops','eyes_glasses','eyes_sunglasses','eyes_binocular','eyes_robot','eyes_cat','eyes_cartoon','mouth_smile','mouth_grin','mouth_screen','mouth_grille','mouth_beak','mouth_snout','mouth_tusk','mouth_fang','mouth_wave','mouth_speaker','mouth_mustache','mouth_tongue','limb_arm','limb_wing','limb_fin','limb_tentacle','limb_branch','limb_wheel','limb_track','limb_leg','limb_boot','limb_claw','limb_paw','limb_flipper','limb_propeller','limb_rope','accessory_hat','accessory_cap','accessory_crown','accessory_tie','accessory_bowtie','accessory_cape','accessory_backpack','accessory_toolbelt','accessory_badge','accessory_flag','accessory_microphone','accessory_sword','accessory_wand','accessory_umbrella','accessory_balloon','accessory_book','accessory_headphones','accessory_antenna','accessory_halo','accessory_lightning','texture_stripes','texture_spots','texture_stars','texture_grid','texture_circuit','texture_wood','texture_metal','texture_glass','texture_fur','texture_scales','texture_feathers','texture_cloud','texture_flame','texture_water','texture_leaf','scene_sky','scene_space','scene_ocean','scene_farm','scene_city','scene_desert','scene_forest','scene_jungle','scene_castle','scene_lab','scene_office','scene_stage','scene_road','scene_mountain','scene_beach','scene_underwater','scene_volcano','scene_snow','scene_candy','scene_dream','object_sun','object_moon','object_star','object_cloud','object_rainbow','object_tree','object_flower','object_rock','object_wave','object_anchor','object_podium','object_flag','object_keyboard','object_mouse','object_orbit','object_satellite','object_comet','object_gear','object_wire','object_spark','symbol_question','symbol_exclamation','symbol_idea','symbol_joke','symbol_music','symbol_heart','symbol_laugh','symbol_magic','symbol_money','symbol_time','symbol_map','symbol_compass','symbol_code'
 ]);
 
-const SCENE_SCHEMA = `Return only compact JSON with keys: title, summary, palette, chassis, scene, body, head, eyes, mouth, primitives, layers. palette one of blue,pink,green,gold,purple,red,gray,orange. chassis one of horizontal,vertical,circular,square,creature. scene/body/head/eyes/mouth/primitives must use only these primitive ids: ${SCENE_PRIMITIVES.join(', ')}. ${DRAWING_PROMPT} Use symbolic approximation for real people: never exact likeness; for George H W Bush use presidential elder-statesman cartoon cues like gray hair, suit, tie, podium, flag, elder-statesman vibe. For abstract requests, map the idea to visual metaphors.`;
+const SCENE_SCHEMA = `Return only compact JSON with keys: title, summary, palette, chassis. ${DRAWING_PROMPT} Use symbolic approximation for real people: never exact likeness. For abstract requests, map the idea to visual metaphors.`;
 
 function wantsSceneSpec(text = '') {
   return /\b(look like|make (you|him|it)|avatar|turn into|become|transform|change into|be a|be an|computer|sailboat|boat|car|truck|cow|animal|monster|dragon|funny idea|abstract|appearance)\b/i.test(text);
@@ -215,7 +212,7 @@ function sanitizeSceneSpec(raw, text = '', options = {}) {
     eyes: use(clean.eyes, fallback.eyes),
     mouth: use(clean.mouth, fallback.mouth),
     primitives: [...new Set([...(Array.isArray(clean.primitives) ? clean.primitives : []), ...fallback.primitives].filter(x => allowed.has(x)))].slice(0, 16),
-    layers: sanitizeDrawingLayers(clean.layers, text),
+    layers: sanitizeDrawingLayers(null, text),
   };
 }
 
@@ -239,9 +236,9 @@ async function askSceneBrain(userText, sessionId = 'demo') {
       method: 'POST', signal: controller.signal,
       headers: { ...ideHeaders, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: MODEL, messages: [
-        { role: 'system', content: `You are a My Dude 3D cartoon avatar drawing planner. ${SCENE_SCHEMA} Return valid JSON only. The client renders your layered 3D-ish drawing recipe immediately.` },
+        { role: 'system', content: `You are a My Dude 3D cartoon avatar classifier. ${SCENE_SCHEMA} Return valid JSON only. The client builds a polished avatar from your classification.` },
         { role: 'user', content: userText.trim().slice(0, 900) },
-      ], max_tokens: 900, temperature: 0.38, user: `mydude-scene-${String(sessionId).slice(0, 64)}` }),
+      ], max_tokens: 300, temperature: 0.38, user: `mydude-scene-${String(sessionId).slice(0, 64)}` }),
     });
     if (!res.ok) throw new Error(`scene HTTP ${res.status}`);
     const json = await res.json();
@@ -502,26 +499,17 @@ Rules:
 
 function test5SystemPrompt(designBrief = {}) {
   const briefText = JSON.stringify(designBrief || {}, null, 2).slice(0, 5000);
-  return `You are the live /test5 My Dude avatar drawing engine. You dynamically create a NEW polished avatar drawing recipe from the expanded art direction brief.
+  return `You are the /test5 My Dude avatar classifier. Classify the prompt into a chassis type and pick a color palette.
 Return STRICT JSON only. No markdown, comments, HTML, SVG, CSS, JavaScript, image URLs, base64, or prose.
-The browser renders your JSON as glossy SVG parts. You must use the controlled drawing grammar; do not invent arbitrary geometry.
+The client builds a polished hand-designed avatar template from your classification — you do NOT compose layers.
 ${SCENE_SCHEMA}
-Expanded design brief to implement:
+Expanded design brief:
 ${briefText}
-Extra /test5 rules:
-- Do not copy a named preset. Make a fresh composition for this exact prompt and expanded brief.
-- Keep the My Dude quality bar: oversized expressive head, compact body, connected limbs, glossy dimensional materials, readable silhouette.
-- Create a detailed avatar, not a sparse placeholder: minimum 10 layers when possible, maximum 28 layers.
-- Include every prompt-specific requiredRenderableDetails item using valid renderer parts; the backend rejects recipes whose layers do not cover required details.
-- Choose the right chassis for the prompt. The first layer must be the chassis body: chassisHorizontal (cars/boats/snakes/animals-on-all-fours), chassisVertical (rockets/trees/bottles), chassisCircular (suns/balls/coins), chassisSquare (computers/books/screens), or mascotBody (creature chassis for people/characters/bipeds). Include "chassis" key in the top-level JSON.
-- For creature chassis: also include mascotHead attached to head.center, plus stubby arms/legs. For non-creature chassis: put eyes and mouth directly on the body (no separate head shape).
-- Required: two eye layers with role:"eye", and exactly one mouth layer with role:"mouth" attached to head.mouth.
-- Use exact renderer shape names only. For dragon use mascotBody+mascotHead+softHorn+wing+claw; for scientist goggles use glasses; for robot use chassisSquare+pixelEye+mouthScreen. Never invent names like dragon, goggles, smile, arm, leftEye, body.
-- Accessories/details must attach to valid sockets. Prefer head.leftHorn/rightHorn for antenna/horns, head.leftEar/rightEar for ears, body.front/body.patchLeft/body.patchRight for body details.
-- If a detail such as headphones is not a single renderer part, compose it from valid shapes such as arc/ring/circle/panel/spark when available, or use glasses/antenna/spark/patch as a safe visual proxy.
-- Max 28 layers. Use x/y only as small local offsets from sockets.
-Example minimal valid creature layer list: [{"shape":"mascotBody","anchor":"free","x":0,"y":0,"scale":[0.62,0.6],"rotate":0,"material":"glossyPurple","role":"part","z":2,"attach":{"socket":"body.center"}},{"shape":"mascotHead","anchor":"free","x":0,"y":0,"scale":[0.94,0.84],"rotate":0,"material":"glossyPurple","role":"part","z":8,"attach":{"socket":"head.center"}},{"shape":"stubbyArm","anchor":"free","x":0,"y":0,"scale":[0.22,0.46],"rotate":-10,"material":"glossyPurple","role":"part","z":5,"attach":{"socket":"body.leftHand"}},{"shape":"stubbyArm","anchor":"free","x":0,"y":0,"scale":[0.22,0.46],"rotate":10,"material":"glossyPurple","role":"part","z":5,"attach":{"socket":"body.rightHand"}},{"shape":"cuteEye","anchor":"free","x":0,"y":0,"scale":[0.24,0.24],"rotate":0,"material":"softWhite","role":"eye","z":20,"attach":{"socket":"head.leftEye"}},{"shape":"cuteEye","anchor":"free","x":0,"y":0,"scale":[0.24,0.24],"rotate":0,"material":"softWhite","role":"eye","z":20,"attach":{"socket":"head.rightEye"}},{"shape":"mouthSmile","anchor":"free","x":0,"y":18,"scale":[0.38,0.2],"rotate":0,"material":"charcoalRubber","role":"mouth","z":31,"attach":{"socket":"head.mouth"}}]
-Example horizontal chassis (car): [{"shape":"chassisHorizontal","anchor":"free","x":0,"y":0,"scale":[1,1],"rotate":0,"material":"glossyRed","role":"part","z":2,"attach":{"socket":"body.center"}},{"shape":"wheel","anchor":"free","x":0,"y":0,"scale":[0.22,0.22],"rotate":0,"material":"charcoalRubber","role":"part","z":4,"attach":{"socket":"body.leftFoot"}},{"shape":"wheel","anchor":"free","x":0,"y":0,"scale":[0.22,0.22],"rotate":0,"material":"charcoalRubber","role":"part","z":4,"attach":{"socket":"body.rightFoot"}},{"shape":"cuteEye","anchor":"free","x":0,"y":0,"scale":[0.24,0.24],"rotate":0,"material":"softWhite","role":"eye","z":20,"attach":{"socket":"head.leftEye"}},{"shape":"cuteEye","anchor":"free","x":0,"y":0,"scale":[0.24,0.24],"rotate":0,"material":"softWhite","role":"eye","z":20,"attach":{"socket":"head.rightEye"}},{"shape":"mouthSmile","anchor":"free","x":0,"y":18,"scale":[0.38,0.2],"rotate":0,"material":"charcoalRubber","role":"mouth","z":31,"attach":{"socket":"head.mouth"}}]`;
+Rules:
+- chassis: horizontal (cars/boats/snakes/animals-on-all-fours), vertical (rockets/trees/bottles), circular (suns/balls/coins), square (computers/books/screens), creature (people/characters/bipeds).
+- palette: blue, pink, green, gold, purple, red, gray, orange.
+- title: short name for the avatar (under 48 chars).
+- summary: one sentence describing the avatar.`;
 }
 
 async function callTest5Chat({ system, userContent, temperature = 0.38, maxTokens = 1800, stage = 'avatar' }) {

@@ -463,18 +463,15 @@ function fallbackDrawingLayers(prompt = '', options = {}) {
       layer('hoof', 'free', 0, -4, 0.2, 0.13, 'charcoalRubber', { z: 6, attach: { socket: 'body.leftFoot' } }),
       layer('hoof', 'free', 0, -4, 0.2, 0.13, 'charcoalRubber', { z: 6, attach: { socket: 'body.rightFoot' } }),
       layer('mascotHead', 'free', 0, 0, 0.94, 0.84, bodyMaterial, { z: 8, attach: { socket: 'head.center' } }),
+      layer('stubbyArm', 'free', -2, 0, 0.22, 0.26, bodyMaterial, { rotate: -10, z: 5, attach: { socket: 'body.leftHand' } }),
+      layer('stubbyArm', 'free', 2, 0, 0.22, 0.26, bodyMaterial, { rotate: 10, z: 5, attach: { socket: 'body.rightHand' } }),
     );
-    if (!/computer|monitor|screen|car|boat|sail|rocket/.test(l)) {
-      layers.push(
-        layer('stubbyArm', 'free', -2, 0, 0.22, 0.26, bodyMaterial, { rotate: -10, z: 5, attach: { socket: 'body.leftHand' } }),
-        layer('stubbyArm', 'free', 2, 0, 0.22, 0.26, bodyMaterial, { rotate: 10, z: 5, attach: { socket: 'body.rightHand' } }),
-      );
-    }
-  }
-  if (chassis === 'horizontal') {
+  } else {
     layers.push(
-      layer('wheel', 'free', 0, 0, 0.22, 0.22, 'charcoalRubber', { z: 4, attach: { socket: 'body.leftFoot' } }),
-      layer('wheel', 'free', 0, 0, 0.22, 0.22, 'charcoalRubber', { z: 4, attach: { socket: 'body.rightFoot' } }),
+      layer('stubbyArm', 'free', -2, 0, 0.18, 0.22, bodyMaterial, { rotate: -12, z: 5, attach: { socket: 'body.leftHand' } }),
+      layer('stubbyArm', 'free', 2, 0, 0.18, 0.22, bodyMaterial, { rotate: 12, z: 5, attach: { socket: 'body.rightHand' } }),
+      layer('hoof', 'free', 0, 0, 0.16, 0.1, 'charcoalRubber', { z: 6, attach: { socket: 'body.leftFoot' } }),
+      layer('hoof', 'free', 0, 0, 0.16, 0.1, 'charcoalRubber', { z: 6, attach: { socket: 'body.rightFoot' } }),
     );
   }
   if (/cat|dog|bear|rabbit|bunny|animal|mouse|fox|tiger|lion|elephant/.test(l)) {
@@ -578,7 +575,7 @@ function sanitizeSceneSpec(spec, prompt = '') {
     eyes,
     mouth,
     primitives: [...new Set([scene, body, head, eyes, mouth, ...primitives])].slice(0, 18),
-    layers: sanitizeDrawingLayers(spec?.layers, prompt),
+    layers: sanitizeDrawingLayers(null, prompt),
   };
 }
 
