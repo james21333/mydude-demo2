@@ -466,12 +466,110 @@ function fallbackDrawingLayers(prompt = '', options = {}) {
       layer('stubbyArm', 'free', -2, 0, 0.22, 0.26, bodyMaterial, { rotate: -10, z: 5, attach: { socket: 'body.leftHand' } }),
       layer('stubbyArm', 'free', 2, 0, 0.22, 0.26, bodyMaterial, { rotate: 10, z: 5, attach: { socket: 'body.rightHand' } }),
     );
-  } else {
+  } else if (chassis === 'horizontal') {
     layers.push(
-      layer('stubbyArm', 'free', -2, 0, 0.18, 0.22, bodyMaterial, { rotate: -12, z: 5, attach: { socket: 'body.leftHand' } }),
-      layer('stubbyArm', 'free', 2, 0, 0.18, 0.22, bodyMaterial, { rotate: 12, z: 5, attach: { socket: 'body.rightHand' } }),
-      layer('hoof', 'free', 0, 0, 0.16, 0.1, 'charcoalRubber', { z: 6, attach: { socket: 'body.leftFoot' } }),
-      layer('hoof', 'free', 0, 0, 0.16, 0.1, 'charcoalRubber', { z: 6, attach: { socket: 'body.rightFoot' } }),
+      layer('wheel', 'free', 0, 0, 0.28, 0.28, 'charcoalRubber', { z: 4, attach: { socket: 'body.leftFoot' } }),
+      layer('wheel', 'free', 0, 0, 0.28, 0.28, 'charcoalRubber', { z: 4, attach: { socket: 'body.rightFoot' } }),
+    );
+    if (/car|truck|taxi|bus|ambulance|vehicle/.test(l)) {
+      layers.push(
+        layer('windshield', 'free', 0, -8, 0.38, 0.28, 'blackGlass', { z: 7, attach: { socket: 'body.front' } }),
+        layer('bumper', 'free', 0, 8, 0.32, 0.12, 'chrome', { z: 3, attach: { socket: 'body.back' } }),
+      );
+    }
+    if (/boat|sail|ship|canoe|kayak/.test(l)) {
+      layers.push(
+        layer('curvedSail', 'free', 0, -12, 0.4, 0.55, 'canvas', { z: 7, attach: { socket: 'body.top' } }),
+      );
+    }
+    if (/fish|whale|shark|dolphin/.test(l)) {
+      layers.push(
+        layer('fin', 'free', 0, -6, 0.28, 0.32, bodyMaterial, { z: 7, attach: { socket: 'body.top' } }),
+        layer('tail', 'free', 0, 0, 0.3, 0.24, bodyMaterial, { z: 3, attach: { socket: 'body.back' } }),
+      );
+    }
+    if (/snake|worm|crocodile|alligator|lizard/.test(l)) {
+      layers.push(
+        layer('tail', 'free', 0, 0, 0.24, 0.18, bodyMaterial, { z: 3, attach: { socket: 'body.back' } }),
+      );
+    }
+  } else if (chassis === 'vertical') {
+    layers.push(
+      layer('hoof', 'free', 0, 0, 0.18, 0.12, 'charcoalRubber', { z: 6, attach: { socket: 'body.leftFoot' } }),
+      layer('hoof', 'free', 0, 0, 0.18, 0.12, 'charcoalRubber', { z: 6, attach: { socket: 'body.rightFoot' } }),
+    );
+    if (/rocket|missile|spaceship/.test(l)) {
+      layers.push(
+        layer('fin', 'free', -4, 0, 0.2, 0.26, bodyMaterial, { rotate: -15, z: 3, attach: { socket: 'body.leftShoulder' } }),
+        layer('fin', 'free', 4, 0, 0.2, 0.26, bodyMaterial, { rotate: 15, z: 3, attach: { socket: 'body.rightShoulder' } }),
+        layer('flame', 'free', 0, 6, 0.32, 0.38, 'flame', { z: 1, attach: { socket: 'body.bottom' } }),
+      );
+    }
+    if (/tree|cactus/.test(l)) {
+      layers.push(
+        layer('leaf', 'free', -4, 0, 0.3, 0.24, 'glossyGreen', { rotate: -20, z: 7, attach: { socket: 'body.leftShoulder' } }),
+        layer('leaf', 'free', 4, 0, 0.3, 0.24, 'glossyGreen', { rotate: 20, z: 7, attach: { socket: 'body.rightShoulder' } }),
+      );
+    }
+    if (/bottle|lamp|candle|torch|lighthouse/.test(l)) {
+      layers.push(
+        layer('dome', 'free', 0, 0, 0.3, 0.2, 'softWhite', { z: 7, attach: { socket: 'body.top' } }),
+      );
+    }
+    if (/mushroom|toadstool/.test(l)) {
+      layers.push(
+        layer('mushroomCap', 'free', 0, 0, 0.7, 0.35, bodyMaterial, { z: 7, attach: { socket: 'body.top' } }),
+      );
+    }
+  } else if (chassis === 'circular') {
+    if (/sun/.test(l)) {
+      layers.push(
+        layer('spark', 'free', 0, -4, 0.28, 0.32, 'glossyGold', { z: 1, attach: { socket: 'body.12' } }),
+        layer('spark', 'free', 0, 0, 0.28, 0.32, 'glossyGold', { z: 1, attach: { socket: 'body.3' } }),
+        layer('spark', 'free', 0, 4, 0.28, 0.32, 'glossyGold', { z: 1, attach: { socket: 'body.6' } }),
+        layer('spark', 'free', 0, 0, 0.28, 0.32, 'glossyGold', { z: 1, attach: { socket: 'body.9' } }),
+      );
+    }
+    if (/ball|basketball|soccer|football|tennis/.test(l)) {
+      layers.push(
+        layer('stripe', 'free', 0, 0, 0.6, 0.08, 'charcoalRubber', { rotate: -20, z: 3, attach: { socket: 'body.center' } }),
+      );
+    }
+    if (/donut|cookie|pizza|pie/.test(l)) {
+      layers.push(
+        layer('spot', 'free', -16, -12, 0.12, 0.12, 'glossyRed', { z: 7, attach: { socket: 'body.patchLeft' } }),
+        layer('spot', 'free', 18, -8, 0.1, 0.1, 'glossyGreen', { z: 7, attach: { socket: 'body.patchRight' } }),
+      );
+    }
+    layers.push(
+      layer('stubbyArm', 'free', -2, 0, 0.16, 0.2, bodyMaterial, { rotate: -12, z: 5, attach: { socket: 'body.leftHand' } }),
+      layer('stubbyArm', 'free', 2, 0, 0.16, 0.2, bodyMaterial, { rotate: 12, z: 5, attach: { socket: 'body.rightHand' } }),
+      layer('hoof', 'free', 0, 0, 0.14, 0.09, 'charcoalRubber', { z: 6, attach: { socket: 'body.leftFoot' } }),
+      layer('hoof', 'free', 0, 0, 0.14, 0.09, 'charcoalRubber', { z: 6, attach: { socket: 'body.rightFoot' } }),
+    );
+  } else if (chassis === 'square') {
+    if (/computer|monitor|tv|television/.test(l)) {
+      layers.push(
+        layer('screen', 'free', 0, -4, 0.55, 0.35, 'screenGlow', { z: 3, attach: { socket: 'body.front' } }),
+      );
+    }
+    if (/phone|tablet|gameboy|calculator/.test(l)) {
+      layers.push(
+        layer('screen', 'free', 0, -8, 0.48, 0.42, 'screenGlow', { z: 3, attach: { socket: 'body.front' } }),
+        layer('button', 'free', 0, 32, 0.16, 0.16, 'charcoalRubber', { z: 4, attach: { socket: 'body.front' } }),
+      );
+    }
+    if (/book|page|note/.test(l)) {
+      layers.push(
+        layer('stripe', 'free', -12, 0, 0.04, 0.7, 'charcoalRubber', { z: 3, attach: { socket: 'body.front' } }),
+        layer('stripe', 'free', -6, 0, 0.04, 0.7, 'charcoalRubber', { opacity: 0.4, z: 3, attach: { socket: 'body.front' } }),
+      );
+    }
+    layers.push(
+      layer('stubbyArm', 'free', -2, 0, 0.16, 0.2, bodyMaterial, { rotate: -12, z: 5, attach: { socket: 'body.leftHand' } }),
+      layer('stubbyArm', 'free', 2, 0, 0.16, 0.2, bodyMaterial, { rotate: 12, z: 5, attach: { socket: 'body.rightHand' } }),
+      layer('hoof', 'free', 0, 0, 0.14, 0.09, 'charcoalRubber', { z: 6, attach: { socket: 'body.leftFoot' } }),
+      layer('hoof', 'free', 0, 0, 0.14, 0.09, 'charcoalRubber', { z: 6, attach: { socket: 'body.rightFoot' } }),
     );
   }
   if (/cat|dog|bear|rabbit|bunny|animal|mouse|fox|tiger|lion|elephant/.test(l)) {

@@ -121,12 +121,86 @@ function fallbackDrawingLayers(text = '', options = {}) {
       sceneLayer('stubbyArm','free',-2,0,.22,.26,bodyMaterial,{rotate:-10,z:5,attach:{socket:'body.leftHand'}}),
       sceneLayer('stubbyArm','free',2,0,.22,.26,bodyMaterial,{rotate:10,z:5,attach:{socket:'body.rightHand'}}),
     );
-  } else {
+  } else if (chassis === 'horizontal') {
     layers.push(
-      sceneLayer('stubbyArm','free',-2,0,.18,.22,bodyMaterial,{rotate:-12,z:5,attach:{socket:'body.leftHand'}}),
-      sceneLayer('stubbyArm','free',2,0,.18,.22,bodyMaterial,{rotate:12,z:5,attach:{socket:'body.rightHand'}}),
-      sceneLayer('hoof','free',0,0,.16,.1,'charcoalRubber',{z:6,attach:{socket:'body.leftFoot'}}),
-      sceneLayer('hoof','free',0,0,.16,.1,'charcoalRubber',{z:6,attach:{socket:'body.rightFoot'}}),
+      sceneLayer('wheel','free',0,0,.28,.28,'charcoalRubber',{z:4,attach:{socket:'body.leftFoot'}}),
+      sceneLayer('wheel','free',0,0,.28,.28,'charcoalRubber',{z:4,attach:{socket:'body.rightFoot'}}),
+    );
+    if (/car|truck|taxi|bus|ambulance|vehicle/.test(l)) {
+      layers.push(
+        sceneLayer('windshield','free',0,-8,.38,.28,'blackGlass',{z:7,attach:{socket:'body.front'}}),
+        sceneLayer('bumper','free',0,8,.32,.12,'chrome',{z:3,attach:{socket:'body.back'}}),
+      );
+    }
+    if (/boat|sail|ship|canoe|kayak/.test(l)) layers.push(sceneLayer('curvedSail','free',0,-12,.4,.55,'canvas',{z:7,attach:{socket:'body.top'}}));
+    if (/fish|whale|shark|dolphin/.test(l)) {
+      layers.push(
+        sceneLayer('fin','free',0,-6,.28,.32,bodyMaterial,{z:7,attach:{socket:'body.top'}}),
+        sceneLayer('tail','free',0,0,.3,.24,bodyMaterial,{z:3,attach:{socket:'body.back'}}),
+      );
+    }
+    if (/snake|worm|crocodile|alligator|lizard/.test(l)) layers.push(sceneLayer('tail','free',0,0,.24,.18,bodyMaterial,{z:3,attach:{socket:'body.back'}}));
+  } else if (chassis === 'vertical') {
+    layers.push(
+      sceneLayer('hoof','free',0,0,.18,.12,'charcoalRubber',{z:6,attach:{socket:'body.leftFoot'}}),
+      sceneLayer('hoof','free',0,0,.18,.12,'charcoalRubber',{z:6,attach:{socket:'body.rightFoot'}}),
+    );
+    if (/rocket|missile|spaceship/.test(l)) {
+      layers.push(
+        sceneLayer('fin','free',-4,0,.2,.26,bodyMaterial,{rotate:-15,z:3,attach:{socket:'body.leftShoulder'}}),
+        sceneLayer('fin','free',4,0,.2,.26,bodyMaterial,{rotate:15,z:3,attach:{socket:'body.rightShoulder'}}),
+        sceneLayer('flame','free',0,6,.32,.38,'flame',{z:1,attach:{socket:'body.bottom'}}),
+      );
+    }
+    if (/tree|cactus/.test(l)) {
+      layers.push(
+        sceneLayer('leaf','free',-4,0,.3,.24,'glossyGreen',{rotate:-20,z:7,attach:{socket:'body.leftShoulder'}}),
+        sceneLayer('leaf','free',4,0,.3,.24,'glossyGreen',{rotate:20,z:7,attach:{socket:'body.rightShoulder'}}),
+      );
+    }
+    if (/bottle|lamp|candle|torch|lighthouse/.test(l)) layers.push(sceneLayer('dome','free',0,0,.3,.2,'softWhite',{z:7,attach:{socket:'body.top'}}));
+    if (/mushroom|toadstool/.test(l)) layers.push(sceneLayer('mushroomCap','free',0,0,.7,.35,bodyMaterial,{z:7,attach:{socket:'body.top'}}));
+  } else if (chassis === 'circular') {
+    if (/sun/.test(l)) {
+      layers.push(
+        sceneLayer('spark','free',0,-4,.28,.32,'glossyGold',{z:1,attach:{socket:'body.12'}}),
+        sceneLayer('spark','free',0,0,.28,.32,'glossyGold',{z:1,attach:{socket:'body.3'}}),
+        sceneLayer('spark','free',0,4,.28,.32,'glossyGold',{z:1,attach:{socket:'body.6'}}),
+        sceneLayer('spark','free',0,0,.28,.32,'glossyGold',{z:1,attach:{socket:'body.9'}}),
+      );
+    }
+    if (/ball|basketball|soccer|football|tennis/.test(l)) layers.push(sceneLayer('stripe','free',0,0,.6,.08,'charcoalRubber',{rotate:-20,z:3,attach:{socket:'body.center'}}));
+    if (/donut|cookie|pizza|pie/.test(l)) {
+      layers.push(
+        sceneLayer('spot','free',-16,-12,.12,.12,'glossyRed',{z:7,attach:{socket:'body.patchLeft'}}),
+        sceneLayer('spot','free',18,-8,.1,.1,'glossyGreen',{z:7,attach:{socket:'body.patchRight'}}),
+      );
+    }
+    layers.push(
+      sceneLayer('stubbyArm','free',-2,0,.16,.2,bodyMaterial,{rotate:-12,z:5,attach:{socket:'body.leftHand'}}),
+      sceneLayer('stubbyArm','free',2,0,.16,.2,bodyMaterial,{rotate:12,z:5,attach:{socket:'body.rightHand'}}),
+      sceneLayer('hoof','free',0,0,.14,.09,'charcoalRubber',{z:6,attach:{socket:'body.leftFoot'}}),
+      sceneLayer('hoof','free',0,0,.14,.09,'charcoalRubber',{z:6,attach:{socket:'body.rightFoot'}}),
+    );
+  } else if (chassis === 'square') {
+    if (/computer|monitor|tv|television/.test(l)) layers.push(sceneLayer('screen','free',0,-4,.55,.35,'screenGlow',{z:3,attach:{socket:'body.front'}}));
+    if (/phone|tablet|gameboy|calculator/.test(l)) {
+      layers.push(
+        sceneLayer('screen','free',0,-8,.48,.42,'screenGlow',{z:3,attach:{socket:'body.front'}}),
+        sceneLayer('button','free',0,32,.16,.16,'charcoalRubber',{z:4,attach:{socket:'body.front'}}),
+      );
+    }
+    if (/book|page|note/.test(l)) {
+      layers.push(
+        sceneLayer('stripe','free',-12,0,.04,.7,'charcoalRubber',{z:3,attach:{socket:'body.front'}}),
+        sceneLayer('stripe','free',-6,0,.04,.7,'charcoalRubber',{opacity:.4,z:3,attach:{socket:'body.front'}}),
+      );
+    }
+    layers.push(
+      sceneLayer('stubbyArm','free',-2,0,.16,.2,bodyMaterial,{rotate:-12,z:5,attach:{socket:'body.leftHand'}}),
+      sceneLayer('stubbyArm','free',2,0,.16,.2,bodyMaterial,{rotate:12,z:5,attach:{socket:'body.rightHand'}}),
+      sceneLayer('hoof','free',0,0,.14,.09,'charcoalRubber',{z:6,attach:{socket:'body.leftFoot'}}),
+      sceneLayer('hoof','free',0,0,.14,.09,'charcoalRubber',{z:6,attach:{socket:'body.rightFoot'}}),
     );
   }
   if (/cat|dog|bear|rabbit|bunny|animal|mouse|fox|tiger|lion|elephant/.test(l)) layers.push(sceneLayer('softEar','free',-3,6,.34,.42,bodyMaterial,{rotate:-24,z:9,attach:{socket:'head.leftEar'}}), sceneLayer('softEar','free',3,6,.34,.42,bodyMaterial,{rotate:24,z:9,attach:{socket:'head.rightEar'}}));
