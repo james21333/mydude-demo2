@@ -1980,6 +1980,177 @@ function Test5HandCodedAvatar({ character, status = 'listening' }) {
   </div>;
 }
 
+// Option A: Hardcoded mascot layout — positions never change, only colors and accessories vary.
+// This guarantees the character always looks like the original blue dude regardless of socket math.
+function MascotSVG({ layers = [], mouthPhase = 0, status = 'idle' }) {
+  const BASE = new Set(['mascotBody','mascotHead','stubbyArm','stubbyLeg','hoof','wheel','shadow']);
+  const byShape = {};
+  for (const l of layers) if (!byShape[l.shape]) byShape[l.shape] = l;
+  const byRole = {};
+  for (const l of layers) if (!byRole[l.role]) byRole[l.role] = l;
+
+  const bodyMat  = byShape.mascotBody?.material || 'glossyBlue';
+  const headMat  = byShape.mascotHead?.material || bodyMat;
+  const armMat   = byShape.stubbyArm?.material  || bodyMat;
+  const legMat   = byShape.stubbyLeg?.material  || bodyMat;
+  const allFeet  = layers.filter(l => l.shape === 'hoof' || l.shape === 'wheel');
+  const footShape = allFeet[0]?.shape || 'hoof';
+  const footMat  = allFeet[0]?.material || 'charcoalRubber';
+  const eyeShape  = byRole.eye?.shape   || 'cuteEye';
+  const mouthShape = byRole.mouth?.shape || 'mouthSmile';
+  const mouthMat  = byRole.mouth?.material || 'charcoalRubber';
+  const accs = layers.filter(l => !BASE.has(l.shape) && l.role !== 'eye' && l.role !== 'mouth');
+
+  const mouthYS = mouthPhase === 2 ? 3 : mouthPhase === 1 ? 1.8 : 1;
+  const listening = status === 'listening';
+  const speaking  = status === 'speaking';
+
+  // HARDCODED POSITIONS — never recalculate, never socket-math these
+  // All values in avatar coordinate space (inside scale(2) in the outer SVG)
+  const H  = 'translate(0 5) scale(0.84 0.80)';    // head
+  const B  = 'translate(0 100) scale(0.68 0.65)';   // body
+  const LA = 'translate(-88 95) rotate(-14) scale(0.46 0.46)'; // left arm
+  const RA = 'translate(88 95) rotate(14) scale(0.46 0.46)';   // right arm
+  const LL = 'translate(-35 185) scale(0.44 0.44)'; // left leg
+  const RL = 'translate(35 185) scale(0.44 0.44)';  // right leg
+  const isWheel = footShape === 'wheel';
+  const LF = isWheel ? 'translate(-46 212) scale(0.50 0.50)' : 'translate(-35 218) scale(0.50 0.40)'; // left foot
+  const RF = isWheel ? 'translate(46 212) scale(0.50 0.50)' : 'translate(35 218) scale(0.50 0.40)';   // right foot
+  const LE = 'translate(-22 0) scale(0.32 0.32)';   // left eye
+  const RE = 'translate(22 0) scale(0.32 0.32)';    // right eye
+  const MO = `translate(0 38) scale(0.44 ${0.42 * mouthYS})`; // mouth
+
+  // Accessory anchor positions (absolute avatar space)
+  const TOP    = [-2, -68]; // crown of head
+  const L_EAR  = [-78, 3];  // left ear
+  const R_EAR  = [78, 3];   // right ear
+  const L_HORN = [-30, -54];// left horn/antenna
+  const R_HORN = [30, -54]; // right horn/antenna
+  const HEAD_C = [0, 6];    // head face center
+  const BODY_F = [0, 100];  // body front
+  const BODY_L = [-28, 95]; // body left patch
+  const BODY_R = [28, 112]; // body right patch
+  const L_SHL  = [-80, 68]; // left shoulder (for wings)
+  const R_SHL  = [80, 68];  // right shoulder
+  const L_FT   = [-38, 222];// left foot (for flames)
+  const R_FT   = [38, 222]; // right foot
+
+  function gt(x, y, sx, sy, r = 0) {
+    return `translate(${x} ${y})${r ? ` rotate(${r})` : ''} scale(${sx} ${sy})`;
+  }
+
+  function renderAcc(acc, i) {
+    const s = acc.shape, m = acc.material || bodyMat;
+    if (s === 'softEar') return [
+      <g key={`ear-l-${i}`} transform={gt(...L_EAR, 0.36, 0.46, -24)}><Shape3D shape="softEar" material={m}/></g>,
+      <g key={`ear-r-${i}`} transform={gt(...R_EAR, 0.36, 0.46, 24)}><Shape3D shape="softEar" material={m}/></g>,
+    ];
+    if (s === 'softHorn') return [
+      <g key={`horn-l-${i}`} transform={gt(...L_HORN, 0.20, 0.42, -8)}><Shape3D shape="softHorn" material={m}/></g>,
+      <g key={`horn-r-${i}`} transform={gt(...R_HORN, 0.20, 0.42, 8)}><Shape3D shape="softHorn" material={m}/></g>,
+    ];
+    if (s === 'antenna') return [
+      <g key={`ant-l-${i}`} transform={gt(...L_HORN, 0.24, 0.44, -18)}><Shape3D shape="antenna" material={m}/></g>,
+      <g key={`ant-r-${i}`} transform={gt(...R_HORN, 0.24, 0.44, 18)}><Shape3D shape="antenna" material={m}/></g>,
+    ];
+    if (s === 'leaf') return [
+      <g key={`leaf-l-${i}`} transform={gt(...L_HORN, 0.28, 0.22, -20)}><Shape3D shape="leaf" material={m}/></g>,
+      <g key={`leaf-r-${i}`} transform={gt(...R_HORN, 0.28, 0.22, 20)}><Shape3D shape="leaf" material={m}/></g>,
+    ];
+    if (s === 'spark') return [
+      <g key={`sp-l-${i}`} transform={gt(...L_HORN, 0.26, 0.30)}><Shape3D shape="spark" material={m}/></g>,
+      <g key={`sp-r-${i}`} transform={gt(...R_HORN, 0.26, 0.30)}><Shape3D shape="spark" material={m}/></g>,
+    ];
+    if (s === 'curvedSail') return [<g key={`sail-${i}`} transform={gt(R_HORN[0]+24, R_HORN[1]-20, 0.40, 0.60)}><Shape3D shape="curvedSail" material={m}/></g>];
+    if (s === 'windshield') return [<g key={`wind-${i}`} transform={gt(...HEAD_C, 0.40, 0.26)}><Shape3D shape="windshield" material={m}/></g>];
+    if (s === 'screen') return [<g key={`scr-${i}`} transform={gt(HEAD_C[0], HEAD_C[1]+4, 0.54, 0.36)}><Shape3D shape="screen" material={m}/></g>];
+    if (s === 'snout') return [<g key={`snt-${i}`} transform={gt(HEAD_C[0], HEAD_C[1]+32, 0.46, 0.28)}><Shape3D shape="snout" material={m}/></g>];
+    if (s === 'wing') return [
+      <g key={`wng-l-${i}`} transform={gt(...L_SHL, 0.48, 0.38, -22)}><Shape3D shape="wing" material={m}/></g>,
+      <g key={`wng-r-${i}`} transform={gt(...R_SHL, 0.48, 0.38, 22)}><Shape3D shape="wing" material={m}/></g>,
+    ];
+    if (s === 'bodyPatch') return [
+      <g key={`ptch-l-${i}`} transform={gt(...BODY_L, 0.32, 0.24, -10)}><Shape3D shape="bodyPatch" material={m}/></g>,
+      <g key={`ptch-r-${i}`} transform={gt(...BODY_R, 0.26, 0.18, 8)}><Shape3D shape="bodyPatch" material={m}/></g>,
+    ];
+    if (s === 'stripe') return [
+      <g key={`str1-${i}`} transform={gt(BODY_F[0]-10, BODY_F[1]-10, 0.46, 0.26, -18)}><Shape3D shape="stripe" material={m}/></g>,
+      <g key={`str2-${i}`} transform={gt(BODY_R[0], BODY_R[1]+14, 0.38, 0.22, -18)}><Shape3D shape="stripe" material={m}/></g>,
+    ];
+    if (s === 'flame') return [
+      <g key={`fl-l-${i}`} transform={gt(...L_FT, 0.28, 0.34)}><Shape3D shape="flame" material={m || 'flame'}/></g>,
+      <g key={`fl-r-${i}`} transform={gt(...R_FT, 0.28, 0.34)}><Shape3D shape="flame" material={m || 'flame'}/></g>,
+    ];
+    if (s === 'question') return [
+      <g key={`q-${i}`} transform="translate(-158 -120) scale(0.36 0.36)"><Shape3D shape="question" material={m || 'neon'}/></g>,
+      <g key={`qs-${i}`} transform="translate(156 -150) scale(0.42 0.42)"><Shape3D shape="spark" material="glossyGold"/></g>,
+    ];
+    // Hats and top-of-head accessories (crown, topHat, cap, cone, mushroomCap)
+    if (s === 'mushroomCap') return [<g key={`mush-${i}`} transform={gt(HEAD_C[0], HEAD_C[1]-54, 0.70, 0.38)}><Shape3D shape="mushroomCap" material={m}/></g>];
+    if (['crown','topHat','cap','cone'].includes(s)) return [<g key={`hat-${i}`} transform={gt(TOP[0], TOP[1]-6, 0.36, 0.30)}><Shape3D shape={s} material={m}/></g>];
+    return null;
+  }
+
+  const earAccs  = accs.filter(a => a.shape === 'softEar');
+  const wingAccs = accs.filter(a => a.shape === 'wing');
+  const bodyAccs = accs.filter(a => ['bodyPatch','stripe'].includes(a.shape));
+  const faceAccs = accs.filter(a => !['softEar','wing','bodyPatch','stripe'].includes(a.shape));
+
+  return <>
+    {/* Ground shadow */}
+    <ellipse cx="0" cy="236" rx="118" ry="18" fill="#020617" opacity="0.26"/>
+
+    {/* Wings — behind everything */}
+    {wingAccs.flatMap(renderAcc).filter(Boolean)}
+
+    {/* Legs */}
+    <g transform={LL}>
+      {listening && <animateTransform attributeName="transform" type="rotate" values="-2;2;-2" dur="3.8s" repeatCount="indefinite" additive="sum"/>}
+      <Shape3D shape="stubbyLeg" material={legMat}/>
+    </g>
+    <g transform={RL}>
+      {listening && <animateTransform attributeName="transform" type="rotate" values="2;-2;2" dur="3.8s" repeatCount="indefinite" additive="sum"/>}
+      <Shape3D shape="stubbyLeg" material={legMat}/>
+    </g>
+
+    {/* Feet */}
+    <g transform={LF}><Shape3D shape={footShape} material={footMat}/></g>
+    <g transform={RF}><Shape3D shape={footShape} material={footMat}/></g>
+
+    {/* Arms — behind body */}
+    <g transform={LA}>
+      {speaking && <animateTransform attributeName="transform" type="rotate" values="0;0;-5;2;0;0" dur="2.8s" repeatCount="indefinite" additive="sum"/>}
+      <Shape3D shape="stubbyArm" material={armMat}/>
+    </g>
+    <g transform={RA}>
+      {speaking && <animateTransform attributeName="transform" type="rotate" values="0;0;5;-2;0;0" dur="2.8s" repeatCount="indefinite" additive="sum"/>}
+      <Shape3D shape="stubbyArm" material={armMat}/>
+    </g>
+
+    {/* Body */}
+    <g transform={B}><Shape3D shape="mascotBody" material={bodyMat}/></g>
+
+    {/* Body overlays */}
+    {bodyAccs.flatMap(renderAcc).filter(Boolean)}
+
+    {/* Soft ears — behind head */}
+    {earAccs.flatMap(renderAcc).filter(Boolean)}
+
+    {/* Head */}
+    <g transform={H}><Shape3D shape="mascotHead" material={headMat}/></g>
+
+    {/* Eyes */}
+    <g transform={LE}><Shape3D shape={eyeShape} material="softWhite"/></g>
+    <g transform={RE}><Shape3D shape={eyeShape} material="softWhite"/></g>
+
+    {/* Mouth */}
+    <g transform={MO}><Shape3D shape={mouthShape} material={mouthMat} mouthPhase={mouthPhase}/></g>
+
+    {/* Face / head accessories (horns, hats, screen, snout, etc.) */}
+    {faceAccs.flatMap(renderAcc).filter(Boolean)}
+  </>;
+}
+
 function SceneAvatar({ scene, mouthPhase, status, voiceTheme = {} }) {
   const palette = SCENE_PALETTES[scene.palette] || SCENE_PALETTES.blue;
   const [primary, dark, light] = palette;
@@ -2000,7 +2171,10 @@ function SceneAvatar({ scene, mouthPhase, status, voiceTheme = {} }) {
         <g transform="scale(2)">
           <g className="drawing-character">
             {status === 'listening' && <animateTransform attributeName="transform" type="translate" values="-2 0; 2 0; -2 0" dur="5.2s" repeatCount="indefinite" additive="sum" />}
-            {layers.map(item => <DrawingLayer key={item.id} item={item} mouthPhase={mouthPhase} status={status} chassisId={chassisId} />)}
+            {chassisId === 'creature'
+              ? <MascotSVG layers={layers} mouthPhase={mouthPhase} status={status}/>
+              : layers.map(item => <DrawingLayer key={item.id} item={item} mouthPhase={mouthPhase} status={status} chassisId={chassisId}/>)
+            }
           </g>
         </g>
       </g>
