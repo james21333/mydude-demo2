@@ -3,6 +3,7 @@ import { Mic, RotateCcw, Sparkles } from 'lucide-react';
 import { createRoot } from 'react-dom/client';
 import drawingGrammar from '../shared/avatar-drawing-grammar.json';
 import qualityPresets from '../shared/avatar-quality-presets.json';
+import { CHASSIS_TYPES, classifyChassis } from '../shared/chassis.mjs';
 import { generatePhase1SceneSpec } from '../shared/phase1/phase1-avatar-engine.mjs';
 import TestMatrixApp from './testmatrix/TestMatrixApp.jsx';
 import './styles.css';
@@ -298,8 +299,15 @@ const ATTACHMENT_SOCKETS = Object.freeze({
   'head.patchLeft': () => [MASCOT_RIG.head.cx - MASCOT_RIG.head.rx * 0.42, MASCOT_RIG.head.cy + MASCOT_RIG.head.ry * 0.18],
 });
 
-function rigPoint(item) {
+function rigPoint(item, chassisId) {
   const socket = item?.attach?.socket;
+  if (chassisId && chassisId !== 'creature' && socket) {
+    const chassis = CHASSIS_TYPES[chassisId];
+    if (chassis) {
+      const socketFn = chassis.sockets[socket];
+      if (socketFn) return socketFn(chassis.rig);
+    }
+  }
   if (socket && ATTACHMENT_SOCKETS[socket]) return ATTACHMENT_SOCKETS[socket]();
   return ANCHOR_POINTS[item.anchor] || ANCHOR_POINTS.free;
 }
@@ -419,6 +427,7 @@ function presetSceneSpec(prompt = '') {
   return {
     kind: 'scene',
     prompt,
+    chassis: classifyChassis(prompt),
     title: preset.title,
     summary: preset.summary,
     palette: preset.palette || colorHint(prompt) || 'blue',
@@ -437,22 +446,35 @@ function fallbackDrawingLayers(prompt = '', options = {}) {
   if (preset?.layers?.length) return preset.layers;
   const l = prompt.toLowerCase();
   const mat = materialForPrompt(prompt);
+  const chassis = classifyChassis(prompt);
   const eyeShape = /funny|idea|abstract|silly/.test(l) ? 'googlyEye' : /computer|robot|screen/.test(l) ? 'pixelEye' : 'cuteEye';
   const mouthShape = /computer|robot|screen/.test(l) ? 'mouthScreen' : /funny|idea|abstract|joke/.test(l) ? 'mouthGrin' : /bird|duck|chicken/.test(l) ? 'beak' : 'mouthSmile';
   const bodyMaterial = /idea|funny|abstract|joke/.test(l) ? 'glossyGold' : mat;
+  const chassisDef = CHASSIS_TYPES[chassis];
+  const bodyShape = chassisDef.bodyShape;
   const layers = [
     layer('shadow', 'ground', 0, 6, 0.98, 0.18, 'shadow', { opacity: 0.24, z: -10 }),
-    layer('mascotBody', 'free', 0, 0, 0.62, 0.6, bodyMaterial, { z: 2, attach: { socket: 'body.center' } }),
-    layer('stubbyLeg', 'free', 0, -4, 0.21, 0.25, bodyMaterial, { z: 4, attach: { socket: 'body.leftHip' } }),
-    layer('stubbyLeg', 'free', 0, -4, 0.21, 0.25, bodyMaterial, { z: 4, attach: { socket: 'body.rightHip' } }),
-    layer('hoof', 'free', 0, -4, 0.2, 0.13, 'charcoalRubber', { z: 6, attach: { socket: 'body.leftFoot' } }),
-    layer('hoof', 'free', 0, -4, 0.2, 0.13, 'charcoalRubber', { z: 6, attach: { socket: 'body.rightFoot' } }),
-    layer('mascotHead', 'free', 0, 0, 0.94, 0.84, bodyMaterial, { z: 8, attach: { socket: 'head.center' } }),
+    layer(bodyShape, 'free', 0, 0, chassis === 'creature' ? 0.62 : 1, chassis === 'creature' ? 0.6 : 1, bodyMaterial, { z: 2, attach: { socket: 'body.center' } }),
   ];
-  if (!/computer|monitor|screen|car|boat|sail|rocket/.test(l)) {
+  if (chassis === 'creature') {
     layers.push(
-      layer('stubbyArm', 'free', -2, 0, 0.22, 0.26, bodyMaterial, { rotate: -10, z: 5, attach: { socket: 'body.leftHand' } }),
-      layer('stubbyArm', 'free', 2, 0, 0.22, 0.26, bodyMaterial, { rotate: 10, z: 5, attach: { socket: 'body.rightHand' } }),
+      layer('stubbyLeg', 'free', 0, -4, 0.21, 0.25, bodyMaterial, { z: 4, attach: { socket: 'body.leftHip' } }),
+      layer('stubbyLeg', 'free', 0, -4, 0.21, 0.25, bodyMaterial, { z: 4, attach: { socket: 'body.rightHip' } }),
+      layer('hoof', 'free', 0, -4, 0.2, 0.13, 'charcoalRubber', { z: 6, attach: { socket: 'body.leftFoot' } }),
+      layer('hoof', 'free', 0, -4, 0.2, 0.13, 'charcoalRubber', { z: 6, attach: { socket: 'body.rightFoot' } }),
+      layer('mascotHead', 'free', 0, 0, 0.94, 0.84, bodyMaterial, { z: 8, attach: { socket: 'head.center' } }),
+    );
+    if (!/computer|monitor|screen|car|boat|sail|rocket/.test(l)) {
+      layers.push(
+        layer('stubbyArm', 'free', -2, 0, 0.22, 0.26, bodyMaterial, { rotate: -10, z: 5, attach: { socket: 'body.leftHand' } }),
+        layer('stubbyArm', 'free', 2, 0, 0.22, 0.26, bodyMaterial, { rotate: 10, z: 5, attach: { socket: 'body.rightHand' } }),
+      );
+    }
+  }
+  if (chassis === 'horizontal') {
+    layers.push(
+      layer('wheel', 'free', 0, 0, 0.22, 0.22, 'charcoalRubber', { z: 4, attach: { socket: 'body.leftFoot' } }),
+      layer('wheel', 'free', 0, 0, 0.22, 0.22, 'charcoalRubber', { z: 4, attach: { socket: 'body.rightFoot' } }),
     );
   }
   if (/cat|dog|bear|rabbit|bunny|animal|mouse|fox|tiger|lion|elephant/.test(l)) {
@@ -466,13 +488,8 @@ function fallbackDrawingLayers(prompt = '', options = {}) {
   }
   if (/cow|dog|pig|bear|mouse|fox|cat|animal/.test(l)) layers.push(layer('snout', 'free', 0, -2, 0.42, 0.24, 'warmCream', { z: 24, attach: { socket: 'head.mouth' } }));
   if (/spot|cow|dog|dalmatian|pattern/.test(l)) layers.push(layer('bodyPatch', 'free', 0, 0, 0.3, 0.22, 'charcoalRubber', { rotate: -10, z: 11, attach: { socket: 'body.patchLeft' } }), layer('bodyPatch', 'free', 0, 0, 0.23, 0.16, 'charcoalRubber', { rotate: 8, z: 11, attach: { socket: 'body.patchRight' } }));
-  if (/computer|monitor|screen/.test(l)) layers.push(layer('screen', 'free', 0, 2, 0.5, 0.28, 'screenGlow', { z: 13, attach: { socket: 'body.front' } }), layer('button', 'free', -20, 28, 0.14, 0.14, 'glossyRed', { z: 14, attach: { socket: 'body.front' } }));
-  if (/car|truck|vehicle/.test(l)) layers.push(layer('carBody', 'ground', 0, -34, 0.7, 0.3, 'glossyRed', { z: 13 }), layer('wheel', 'ground', -50, -20, 0.25, 0.25, 'charcoalRubber', { z: 15 }), layer('wheel', 'ground', 50, -20, 0.25, 0.25, 'charcoalRubber', { z: 15 }));
-  if (/sail|boat|ship/.test(l)) layers.push(layer('hull', 'ground', 0, -34, 0.72, 0.26, 'wood', { z: 13 }), layer('curvedSail', 'free', 8, -20, 0.45, 0.62, 'canvas', { z: 12, attach: { socket: 'head.rightHorn' } }));
-  if (/rocket|spaceship|space ship/.test(l)) layers.push(layer('rocket', 'free', 0, -12, 0.38, 0.54, 'glossyPurple', { z: 13, attach: { socket: 'body.front' } }));
   if (/idea|funny|abstract|joke/.test(l)) layers.push(layer('question', 'orbit', -158, -120, 0.36, 0.36, 'neon', { z: 12 }), layer('spark', 'orbit', 156, -150, 0.42, 0.42, 'glossyGold', { z: 12 }));
   if (/zebra|stripe|striped/.test(l)) layers.push(layer('stripe', 'free', -10, -12, 0.42, 0.24, 'charcoalRubber', { rotate: -18, z: 12, attach: { socket: 'body.front' } }), layer('stripe', 'free', 10, 14, 0.34, 0.2, 'charcoalRubber', { rotate: -18, z: 12, attach: { socket: 'body.patchRight' } }));
-  if (/skateboard|skate board/.test(l)) layers.push(layer('roundedBox', 'ground', 0, -28, 0.78, 0.16, 'wood', { z: 14 }), layer('wheel', 'ground', -58, -14, 0.24, 0.24, 'charcoalRubber', { z: 15 }), layer('wheel', 'ground', 58, -14, 0.24, 0.24, 'charcoalRubber', { z: 15 }));
   if (/dragon|bird|bat|wing/.test(l)) layers.push(layer('wing', 'free', -8, 4, 0.42, 0.34, bodyMaterial, { rotate: -22, z: 3, attach: { socket: 'body.leftShoulder' } }), layer('wing', 'free', 8, 4, 0.42, 0.34, bodyMaterial, { rotate: 22, z: 3, attach: { socket: 'body.rightShoulder' } }));
   layers.push(
     layer(eyeShape, 'free', 0, 0, 0.24, 0.24, 'softWhite', { role: 'eye', z: 20, attach: { socket: 'head.leftEye' } }),
@@ -483,9 +500,7 @@ function fallbackDrawingLayers(prompt = '', options = {}) {
 }
 
 function sanitizeDrawingLayers(rawLayers, prompt = '') {
-  const initialSource = Array.isArray(rawLayers) && rawLayers.length ? rawLayers : fallbackDrawingLayers(prompt);
-  const hasCore = initialSource.some(raw => raw?.shape === 'mascotBody' || raw?.shape === 'mascotHead');
-  const source = !hasCore ? fallbackDrawingLayers(prompt, { skipPreset: true }) : initialSource;
+  const source = Array.isArray(rawLayers) && rawLayers.length ? rawLayers : fallbackDrawingLayers(prompt);
   const cleaned = source.slice(0, drawingGrammar.rules?.maxLayers || 42).map((raw, index) => {
     const shape = DRAWING_SHAPES.has(raw?.shape) ? raw.shape : 'blob';
     if (shape === 'shadow') return null;
@@ -499,11 +514,7 @@ function sanitizeDrawingLayers(rawLayers, prompt = '') {
       : shape === 'snout'
         ? [Math.min(Number(rawScale?.[0]) || 0.28, 0.32), Math.min(Number(rawScale?.[1]) || 0.15, 0.17)]
         : rawScale;
-    const scale = shape === 'mascotHead'
-      ? [Math.max(Number(baseScale?.[0]) || 0, 0.9), Math.max(Number(baseScale?.[1]) || 0, 0.78)]
-      : shape === 'mascotBody'
-        ? [Math.min(Number(baseScale?.[0]) || 1, 0.68), Math.min(Number(baseScale?.[1]) || 1, 0.66)]
-        : baseScale;
+    const scale = baseScale;
     const material = DRAWING_MATERIALS.has(raw?.material) ? raw.material : materialForPrompt(prompt);
     return {
       id: String(raw?.id || `${shape}-${index}`).slice(0, 32),
@@ -557,6 +568,7 @@ function sanitizeSceneSpec(spec, prompt = '') {
   return {
     kind: 'scene',
     prompt,
+    chassis: spec?.chassis || classifyChassis(prompt),
     title: String(spec?.title || titleFromPrompt(prompt)).slice(0, 48),
     summary: String(spec?.summary || `Transformed into ${titleFromPrompt(prompt)}`).slice(0, 120),
     palette: SCENE_PALETTES[paletteName] ? paletteName : 'blue',
@@ -1939,6 +1951,7 @@ function Test5HandCodedAvatar({ character, status = 'listening' }) {
 function SceneAvatar({ scene, mouthPhase, status, voiceTheme = {} }) {
   const palette = SCENE_PALETTES[scene.palette] || SCENE_PALETTES.blue;
   const [primary, dark, light] = palette;
+  const chassisId = scene.chassis || 'creature';
   const layers = sanitizeDrawingLayers(scene.layers, scene.prompt || scene.title || '');
   return <div className={`avatar-card scene-card drawing-card ${status} built`} style={{ '--scene-primary': voiceTheme.bot || primary, '--scene-dark': dark, '--scene-light': light }}>
     <svg className="scene-svg drawing-svg" viewBox="0 0 720 620" role="img" aria-label={scene.summary || scene.title}>
@@ -1955,7 +1968,7 @@ function SceneAvatar({ scene, mouthPhase, status, voiceTheme = {} }) {
         <g transform="scale(2)">
           <g className="drawing-character">
             {status === 'listening' && <animateTransform attributeName="transform" type="translate" values="-2 0; 2 0; -2 0" dur="5.2s" repeatCount="indefinite" additive="sum" />}
-            {layers.map(item => <DrawingLayer key={item.id} item={item} mouthPhase={mouthPhase} status={status} />)}
+            {layers.map(item => <DrawingLayer key={item.id} item={item} mouthPhase={mouthPhase} status={status} chassisId={chassisId} />)}
           </g>
         </g>
       </g>
@@ -1963,8 +1976,8 @@ function SceneAvatar({ scene, mouthPhase, status, voiceTheme = {} }) {
   </div>;
 }
 
-function DrawingLayer({ item, mouthPhase = 0, status = 'idle' }) {
-  const [ax, ay] = rigPoint(item);
+function DrawingLayer({ item, mouthPhase = 0, status = 'idle', chassisId }) {
+  const [ax, ay] = rigPoint(item, chassisId);
   const [sx, sy] = item.scale || [1, 1];
   const mouthScale = item.role === 'mouth' ? (mouthPhase === 2 ? 3 : mouthPhase === 1 ? 1.8 : 1) : 1;
   const transform = `translate(${ax + item.x} ${ay + item.y}) rotate(${item.rotate || 0}) scale(${sx} ${sy * mouthScale})`;
@@ -1995,6 +2008,10 @@ function Shape3D({ shape, material = 'glossyBlue', mouthPhase = 0 }) {
   if (['capsule','bean','blob','egg','body_blob'].includes(shape)) return <g><path d="M-78 -74 C-18 -116 82 -82 96 5 C110 95 30 132 -48 104 C-126 76 -138 -34 -78 -74 Z" {...common}/><ellipse cx="-34" cy="-45" rx="38" ry="16" fill="#fff" opacity=".22" stroke="none"/></g>;
   if (shape === 'mascotBody') return <g><path d="M-72 -70 C-38 -114 46 -112 76 -62 C112 -4 106 76 58 116 C18 150 -46 144 -78 106 C-112 64 -110 -22 -72 -70 Z" {...common} strokeWidth="6"/><path d="M-54 -54 C-28 -96 38 -92 66 -42 C88 0 74 70 36 96 C4 118 -42 108 -60 66 C-76 26 -76 -18 -54 -54 Z" fill="#fff" opacity=".14" stroke="none"/><ellipse cx="-34" cy="-30" rx="28" ry="54" fill="#fff" opacity=".22" stroke="none"/><ellipse cx="34" cy="42" rx="20" ry="42" fill="#0f172a" opacity=".035" stroke="none"/></g>;
   if (shape === 'mascotHead') return <g><path d="M-78 -52 C-42 -92 44 -92 78 -50 C110 -10 100 54 52 82 C12 106 -54 92 -82 50 C-104 16 -100 -22 -78 -52 Z" {...common} strokeWidth="6"/><ellipse cx="-28" cy="-38" rx="34" ry="15" fill="#fff" opacity=".34" stroke="none"/><path d="M-62 30 C-28 64 28 66 62 30" fill="none" stroke="#fff" strokeWidth="9" opacity=".1" strokeLinecap="round"/></g>;
+  if (shape === 'chassisHorizontal') return <g><path d="M-160 -30 C-140 -65 -80 -70 0 -68 C80 -70 140 -65 160 -30 C170 0 165 45 145 60 C80 75 -80 75 -145 60 C-165 45 -170 0 -160 -30 Z" {...common} strokeWidth="6"/><ellipse cx="-60" cy="-35" rx="50" ry="16" fill="#fff" opacity=".22" stroke="none"/><ellipse cx="50" cy="30" rx="30" ry="22" fill="#0f172a" opacity=".035" stroke="none"/></g>;
+  if (shape === 'chassisVertical') return <g><path d="M-55 -130 C-25 -155 25 -155 55 -130 C75 -100 70 80 55 130 C25 155 -25 155 -55 130 C-70 80 -75 -100 -55 -130 Z" {...common} strokeWidth="6"/><ellipse cx="-20" cy="-95" rx="25" ry="18" fill="#fff" opacity=".28" stroke="none"/><ellipse cx="15" cy="60" rx="18" ry="40" fill="#0f172a" opacity=".035" stroke="none"/></g>;
+  if (shape === 'chassisCircular') return <g><ellipse cx="0" cy="0" rx="110" ry="110" {...common} strokeWidth="6"/><ellipse cx="-30" cy="-40" rx="38" ry="22" fill="#fff" opacity=".3" stroke="none"/><ellipse cx="25" cy="35" rx="22" ry="30" fill="#0f172a" opacity=".035" stroke="none"/></g>;
+  if (shape === 'chassisSquare') return <g><rect x="-108" y="-98" width="216" height="196" rx="28" {...common} strokeWidth="6"/><ellipse cx="-38" cy="-52" rx="42" ry="18" fill="#fff" opacity=".25" stroke="none"/><ellipse cx="30" cy="40" rx="24" ry="32" fill="#0f172a" opacity=".035" stroke="none"/></g>;
   if (shape === 'stubbyArm') return <g><path d="M-24 -44 C10 -58 34 -30 30 8 C26 38 0 58 -28 44 C-52 30 -56 -28 -24 -44 Z" {...common}/><ellipse cx="-5" cy="-24" rx="14" ry="7" fill="#fff" opacity=".22" stroke="none"/></g>;
   if (shape === 'stubbyLeg') return <g><path d="M-24 -30 C6 -42 30 -16 28 20 C26 48 -10 58 -30 34 C-44 12 -42 -18 -24 -30 Z" {...common}/></g>;
   if (shape === 'hoof') return <g><ellipse rx="42" ry="28" fill="url(#shine-charcoalRubber)" stroke="#020617" strokeWidth="4"/><ellipse cx="-10" cy="-10" rx="13" ry="8" fill="#fff" opacity=".26" stroke="none"/><path d="M0 -20 V16" stroke="#94a3b8" strokeWidth="3" opacity=".45"/></g>;
