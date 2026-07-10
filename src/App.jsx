@@ -398,6 +398,12 @@ function clampDrawingNumber(value, min, max, fallback = 0) {
   return Number.isFinite(parsed) ? Math.max(min, Math.min(max, parsed)) : fallback;
 }
 
+const VALID_MATERIALS = new Set(['glossyBlue','glossyPink','glossyGreen','glossyGold','glossyPurple','glossyRed','glossyOrange','softWhite','warmCream','charcoalRubber','blackGlass','screenGlow','chrome','brushedMetal','mattePlastic','rubber','canvas','wood','fur','feather','scale','water','cloud','flame','leaf','candy','neon','shadow','highlight']);
+const VALID_EYE_TYPES = new Set(['cuteEye','googlyEye','pixelEye']);
+const VALID_MOUTH_TYPES = new Set(['mouthSmile','mouthGrin','mouthScreen','beak']);
+const VALID_FOOT_TYPES = new Set(['hoof','wheel']);
+const VALID_ACCESSORIES = new Set(['crown','topHat','cap','cone','leaf','spark','softHorn','antenna','windshield','screen','mushroomCap','curvedSail','softEar','snout','wing','bodyPatch','stripe','flame','question']);
+
 function materialForPrompt(prompt = '') {
   const lower = prompt.toLowerCase();
   if (/pink|dudette/.test(lower)) return 'glossyPink';
@@ -441,17 +447,16 @@ function presetSceneSpec(prompt = '') {
   };
 }
 
-function fallbackDrawingLayers(prompt = '', options = {}) {
+function fallbackDrawingLayers(prompt = '', spec = {}, options = {}) {
   const preset = !options.skipPreset ? matchQualityPreset(prompt) : null;
   if (preset?.layers?.length) return preset.layers;
   const l = prompt.toLowerCase();
-  const mat = materialForPrompt(prompt);
-  const eyeShape = /funny|idea|abstract|silly/.test(l) ? 'googlyEye' : /computer|robot|screen/.test(l) ? 'pixelEye' : 'cuteEye';
-  const mouthShape = /computer|robot|screen/.test(l) ? 'mouthScreen' : /funny|idea|abstract|joke/.test(l) ? 'mouthGrin' : /bird|duck|chicken/.test(l) ? 'beak' : 'mouthSmile';
-  const bodyMaterial = /idea|funny|abstract|joke/.test(l) ? 'glossyGold' : mat;
-  const headMaterial = bodyMaterial;
-  const footShape = /car|truck|taxi|bus|vehicle|skateboard/.test(l) ? 'wheel' : 'hoof';
-  const footMaterial = /car|truck|taxi|bus|vehicle/.test(l) ? 'charcoalRubber' : 'charcoalRubber';
+  const bodyMaterial = VALID_MATERIALS.has(spec.bodyColor) ? spec.bodyColor : (/idea|funny|abstract|joke/.test(l) ? 'glossyGold' : materialForPrompt(prompt));
+  const headMaterial = VALID_MATERIALS.has(spec.headColor) ? spec.headColor : bodyMaterial;
+  const footShape = VALID_FOOT_TYPES.has(spec.footType) ? spec.footType : (/car|truck|taxi|bus|vehicle|skateboard/.test(l) ? 'wheel' : 'hoof');
+  const footMaterial = VALID_MATERIALS.has(spec.footColor) ? spec.footColor : 'charcoalRubber';
+  const eyeShape = VALID_EYE_TYPES.has(spec.eyeType) ? spec.eyeType : (/funny|idea|abstract|silly/.test(l) ? 'googlyEye' : /computer|robot|screen/.test(l) ? 'pixelEye' : 'cuteEye');
+  const mouthShape = VALID_MOUTH_TYPES.has(spec.mouthType) ? spec.mouthType : (/computer|robot|screen/.test(l) ? 'mouthScreen' : /funny|idea|abstract|joke/.test(l) ? 'mouthGrin' : /bird|duck|chicken/.test(l) ? 'beak' : 'mouthSmile');
   const layers = [
     layer('shadow', 'ground', 0, 6, 0.98, 0.18, 'shadow', { opacity: 0.24, z: -10 }),
     layer('mascotBody', 'free', 0, 0, 0.62, 0.6, bodyMaterial, { z: 2, attach: { socket: 'body.center' } }),
@@ -463,30 +468,52 @@ function fallbackDrawingLayers(prompt = '', options = {}) {
     layer('stubbyArm', 'free', -2, 0, 0.22, 0.26, bodyMaterial, { rotate: -10, z: 5, attach: { socket: 'body.leftHand' } }),
     layer('stubbyArm', 'free', 2, 0, 0.22, 0.26, bodyMaterial, { rotate: 10, z: 5, attach: { socket: 'body.rightHand' } }),
   ];
-  if (/rocket|missile|spaceship/.test(l)) layers.push(layer('cone', 'free', 0, -6, 0.28, 0.22, bodyMaterial, { z: 9, attach: { socket: 'head.leftHorn' } }), layer('flame', 'free', 0, 6, 0.24, 0.3, 'flame', { z: 1, attach: { socket: 'body.leftFoot' } }), layer('flame', 'free', 0, 6, 0.24, 0.3, 'flame', { z: 1, attach: { socket: 'body.rightFoot' } }));
-  if (/car|truck|taxi|bus|vehicle/.test(l)) layers.push(layer('windshield', 'free', 0, 4, 0.32, 0.18, 'blackGlass', { z: 9, attach: { socket: 'head.center' } }));
-  if (/computer|monitor|tv|television|screen/.test(l)) layers.push(layer('screen', 'free', 0, 2, 0.46, 0.28, 'screenGlow', { z: 9, attach: { socket: 'head.center' } }));
-  if (/boat|sail|ship/.test(l)) layers.push(layer('curvedSail', 'free', 4, -8, 0.32, 0.44, 'canvas', { z: 9, attach: { socket: 'head.rightHorn' } }));
-  if (/sun|star/.test(l)) layers.push(layer('spark', 'free', 0, 0, 0.22, 0.26, 'glossyGold', { z: 7, attach: { socket: 'head.leftHorn' } }), layer('spark', 'free', 0, 0, 0.22, 0.26, 'glossyGold', { z: 7, attach: { socket: 'head.rightHorn' } }));
-  if (/mushroom|toadstool/.test(l)) layers.push(layer('mushroomCap', 'free', 0, -6, 0.64, 0.3, bodyMaterial, { z: 9, attach: { socket: 'head.center' } }));
-  if (/tree|cactus|plant/.test(l)) layers.push(layer('leaf', 'free', -4, 0, 0.26, 0.2, 'glossyGreen', { rotate: -20, z: 9, attach: { socket: 'head.leftHorn' } }), layer('leaf', 'free', 4, 0, 0.26, 0.2, 'glossyGreen', { rotate: 20, z: 9, attach: { socket: 'head.rightHorn' } }));
-  if (/crown|king|queen|royal|prince|princess/.test(l)) layers.push(layer('crown', 'free', 0, 0, 0.32, 0.2, 'glossyGold', { z: 10, attach: { socket: 'head.leftHorn' } }));
-  if (/hat|cowboy|wizard|witch/.test(l)) layers.push(layer('topHat', 'free', 0, -4, 0.3, 0.28, 'charcoalRubber', { z: 10, attach: { socket: 'head.leftHorn' } }));
-  if (/cap|baseball|sport/.test(l)) layers.push(layer('cap', 'free', 0, -2, 0.34, 0.18, bodyMaterial, { z: 10, attach: { socket: 'head.leftHorn' } }));
-  if (/cat|dog|bear|rabbit|bunny|animal|mouse|fox|tiger|lion|elephant/.test(l)) {
-    layers.push(layer('softEar', 'free', -3, 6, 0.34, 0.42, bodyMaterial, { rotate: -24, z: 9, attach: { socket: 'head.leftEar' } }), layer('softEar', 'free', 3, 6, 0.34, 0.42, bodyMaterial, { rotate: 24, z: 9, attach: { socket: 'head.rightEar' } }));
+  const accessories = Array.isArray(spec.accessories) ? spec.accessories.filter(a => VALID_ACCESSORIES.has(a?.shape)).slice(0, 6) : [];
+  const accColor = (acc, fallback) => VALID_MATERIALS.has(acc?.color) ? acc.color : fallback;
+  if (accessories.length) {
+    for (const acc of accessories) {
+      const s = acc.shape;
+      const c = accColor(acc, bodyMaterial);
+      if (s === 'crown') layers.push(layer('crown', 'free', 0, 0, 0.32, 0.2, c, { z: 10, attach: { socket: 'head.leftHorn' } }));
+      else if (s === 'topHat') layers.push(layer('topHat', 'free', 0, -4, 0.3, 0.28, c, { z: 10, attach: { socket: 'head.leftHorn' } }));
+      else if (s === 'cap') layers.push(layer('cap', 'free', 0, -2, 0.34, 0.18, c, { z: 10, attach: { socket: 'head.leftHorn' } }));
+      else if (s === 'cone') layers.push(layer('cone', 'free', 0, -6, 0.28, 0.22, c, { z: 9, attach: { socket: 'head.leftHorn' } }));
+      else if (s === 'mushroomCap') layers.push(layer('mushroomCap', 'free', 0, -6, 0.64, 0.3, c, { z: 9, attach: { socket: 'head.center' } }));
+      else if (s === 'windshield') layers.push(layer('windshield', 'free', 0, 4, 0.32, 0.18, c, { z: 9, attach: { socket: 'head.center' } }));
+      else if (s === 'screen') layers.push(layer('screen', 'free', 0, 2, 0.46, 0.28, c, { z: 9, attach: { socket: 'head.center' } }));
+      else if (s === 'curvedSail') layers.push(layer('curvedSail', 'free', 4, -8, 0.32, 0.44, c, { z: 9, attach: { socket: 'head.rightHorn' } }));
+      else if (s === 'leaf') layers.push(layer('leaf', 'free', -4, 0, 0.26, 0.2, c, { rotate: -20, z: 9, attach: { socket: 'head.leftHorn' } }), layer('leaf', 'free', 4, 0, 0.26, 0.2, c, { rotate: 20, z: 9, attach: { socket: 'head.rightHorn' } }));
+      else if (s === 'spark') layers.push(layer('spark', 'free', 0, 0, 0.22, 0.26, c, { z: 7, attach: { socket: 'head.leftHorn' } }), layer('spark', 'free', 0, 0, 0.22, 0.26, c, { z: 7, attach: { socket: 'head.rightHorn' } }));
+      else if (s === 'softHorn') layers.push(layer('softHorn', 'free', 0, 0, 0.18, 0.34, c, { rotate: -8, z: 10, attach: { socket: 'head.leftHorn' } }), layer('softHorn', 'free', 0, 0, 0.18, 0.34, c, { rotate: 8, z: 10, attach: { socket: 'head.rightHorn' } }));
+      else if (s === 'antenna') layers.push(layer('antenna', 'free', 0, 0, 0.22, 0.36, c, { rotate: -18, z: 10, attach: { socket: 'head.leftHorn' } }), layer('antenna', 'free', 0, 0, 0.22, 0.36, c, { rotate: 18, z: 10, attach: { socket: 'head.rightHorn' } }));
+      else if (s === 'softEar') layers.push(layer('softEar', 'free', -3, 6, 0.34, 0.42, c, { rotate: -24, z: 9, attach: { socket: 'head.leftEar' } }), layer('softEar', 'free', 3, 6, 0.34, 0.42, c, { rotate: 24, z: 9, attach: { socket: 'head.rightEar' } }));
+      else if (s === 'snout') layers.push(layer('snout', 'free', 0, -2, 0.42, 0.24, c, { z: 24, attach: { socket: 'head.mouth' } }));
+      else if (s === 'wing') layers.push(layer('wing', 'free', -8, 4, 0.42, 0.34, c, { rotate: -22, z: 3, attach: { socket: 'body.leftShoulder' } }), layer('wing', 'free', 8, 4, 0.42, 0.34, c, { rotate: 22, z: 3, attach: { socket: 'body.rightShoulder' } }));
+      else if (s === 'bodyPatch') layers.push(layer('bodyPatch', 'free', 0, 0, 0.3, 0.22, c, { rotate: -10, z: 11, attach: { socket: 'body.patchLeft' } }), layer('bodyPatch', 'free', 0, 0, 0.23, 0.16, c, { rotate: 8, z: 11, attach: { socket: 'body.patchRight' } }));
+      else if (s === 'stripe') layers.push(layer('stripe', 'free', -10, -12, 0.42, 0.24, c, { rotate: -18, z: 12, attach: { socket: 'body.front' } }), layer('stripe', 'free', 10, 14, 0.34, 0.2, c, { rotate: -18, z: 12, attach: { socket: 'body.patchRight' } }));
+      else if (s === 'flame') layers.push(layer('flame', 'free', 0, 6, 0.24, 0.3, c, { z: 1, attach: { socket: 'body.leftFoot' } }), layer('flame', 'free', 0, 6, 0.24, 0.3, c, { z: 1, attach: { socket: 'body.rightFoot' } }));
+      else if (s === 'question') layers.push(layer('question', 'orbit', -158, -120, 0.36, 0.36, c, { z: 12 }), layer('spark', 'orbit', 156, -150, 0.42, 0.42, 'glossyGold', { z: 12 }));
+    }
+  } else {
+    if (/rocket|missile|spaceship/.test(l)) layers.push(layer('cone', 'free', 0, -6, 0.28, 0.22, bodyMaterial, { z: 9, attach: { socket: 'head.leftHorn' } }), layer('flame', 'free', 0, 6, 0.24, 0.3, 'flame', { z: 1, attach: { socket: 'body.leftFoot' } }), layer('flame', 'free', 0, 6, 0.24, 0.3, 'flame', { z: 1, attach: { socket: 'body.rightFoot' } }));
+    if (/car|truck|taxi|bus|vehicle/.test(l)) layers.push(layer('windshield', 'free', 0, 4, 0.32, 0.18, 'blackGlass', { z: 9, attach: { socket: 'head.center' } }));
+    if (/computer|monitor|tv|television|screen/.test(l)) layers.push(layer('screen', 'free', 0, 2, 0.46, 0.28, 'screenGlow', { z: 9, attach: { socket: 'head.center' } }));
+    if (/boat|sail|ship/.test(l)) layers.push(layer('curvedSail', 'free', 4, -8, 0.32, 0.44, 'canvas', { z: 9, attach: { socket: 'head.rightHorn' } }));
+    if (/sun|star/.test(l)) layers.push(layer('spark', 'free', 0, 0, 0.22, 0.26, 'glossyGold', { z: 7, attach: { socket: 'head.leftHorn' } }), layer('spark', 'free', 0, 0, 0.22, 0.26, 'glossyGold', { z: 7, attach: { socket: 'head.rightHorn' } }));
+    if (/mushroom|toadstool/.test(l)) layers.push(layer('mushroomCap', 'free', 0, -6, 0.64, 0.3, bodyMaterial, { z: 9, attach: { socket: 'head.center' } }));
+    if (/tree|cactus|plant/.test(l)) layers.push(layer('leaf', 'free', -4, 0, 0.26, 0.2, 'glossyGreen', { rotate: -20, z: 9, attach: { socket: 'head.leftHorn' } }), layer('leaf', 'free', 4, 0, 0.26, 0.2, 'glossyGreen', { rotate: 20, z: 9, attach: { socket: 'head.rightHorn' } }));
+    if (/crown|king|queen|royal|prince|princess/.test(l)) layers.push(layer('crown', 'free', 0, 0, 0.32, 0.2, 'glossyGold', { z: 10, attach: { socket: 'head.leftHorn' } }));
+    if (/hat|cowboy|wizard|witch/.test(l)) layers.push(layer('topHat', 'free', 0, -4, 0.3, 0.28, 'charcoalRubber', { z: 10, attach: { socket: 'head.leftHorn' } }));
+    if (/cap|baseball|sport/.test(l)) layers.push(layer('cap', 'free', 0, -2, 0.34, 0.18, bodyMaterial, { z: 10, attach: { socket: 'head.leftHorn' } }));
+    if (/cat|dog|bear|rabbit|bunny|animal|mouse|fox|tiger|lion|elephant/.test(l)) layers.push(layer('softEar', 'free', -3, 6, 0.34, 0.42, bodyMaterial, { rotate: -24, z: 9, attach: { socket: 'head.leftEar' } }), layer('softEar', 'free', 3, 6, 0.34, 0.42, bodyMaterial, { rotate: 24, z: 9, attach: { socket: 'head.rightEar' } }));
+    if (/dragon|unicorn|goat|horn|devil|monster/.test(l)) layers.push(layer('softHorn', 'free', 0, 0, 0.18, 0.34, 'canvas', { rotate: -8, z: 10, attach: { socket: 'head.leftHorn' } }), layer('softHorn', 'free', 0, 0, 0.18, 0.34, 'canvas', { rotate: 8, z: 10, attach: { socket: 'head.rightHorn' } }));
+    if (/alien|robot|bug|insect/.test(l)) layers.push(layer('antenna', 'free', 0, 0, 0.22, 0.36, 'neon', { rotate: -18, z: 10, attach: { socket: 'head.leftHorn' } }), layer('antenna', 'free', 0, 0, 0.22, 0.36, 'neon', { rotate: 18, z: 10, attach: { socket: 'head.rightHorn' } }));
+    if (/cow|dog|pig|bear|mouse|fox|cat|animal/.test(l)) layers.push(layer('snout', 'free', 0, -2, 0.42, 0.24, 'warmCream', { z: 24, attach: { socket: 'head.mouth' } }));
+    if (/spot|cow|dog|dalmatian|pattern/.test(l)) layers.push(layer('bodyPatch', 'free', 0, 0, 0.3, 0.22, 'charcoalRubber', { rotate: -10, z: 11, attach: { socket: 'body.patchLeft' } }), layer('bodyPatch', 'free', 0, 0, 0.23, 0.16, 'charcoalRubber', { rotate: 8, z: 11, attach: { socket: 'body.patchRight' } }));
+    if (/idea|funny|abstract|joke/.test(l)) layers.push(layer('question', 'orbit', -158, -120, 0.36, 0.36, 'neon', { z: 12 }), layer('spark', 'orbit', 156, -150, 0.42, 0.42, 'glossyGold', { z: 12 }));
+    if (/zebra|stripe|striped/.test(l)) layers.push(layer('stripe', 'free', -10, -12, 0.42, 0.24, 'charcoalRubber', { rotate: -18, z: 12, attach: { socket: 'body.front' } }), layer('stripe', 'free', 10, 14, 0.34, 0.2, 'charcoalRubber', { rotate: -18, z: 12, attach: { socket: 'body.patchRight' } }));
+    if (/dragon|bird|bat|wing/.test(l)) layers.push(layer('wing', 'free', -8, 4, 0.42, 0.34, bodyMaterial, { rotate: -22, z: 3, attach: { socket: 'body.leftShoulder' } }), layer('wing', 'free', 8, 4, 0.42, 0.34, bodyMaterial, { rotate: 22, z: 3, attach: { socket: 'body.rightShoulder' } }));
   }
-  if (/dragon|unicorn|goat|horn|devil|monster/.test(l)) {
-    layers.push(layer('softHorn', 'free', 0, 0, 0.18, 0.34, 'canvas', { rotate: -8, z: 10, attach: { socket: 'head.leftHorn' } }), layer('softHorn', 'free', 0, 0, 0.18, 0.34, 'canvas', { rotate: 8, z: 10, attach: { socket: 'head.rightHorn' } }));
-  }
-  if (/alien|robot|bug|insect/.test(l)) {
-    layers.push(layer('antenna', 'free', 0, 0, 0.22, 0.36, 'neon', { rotate: -18, z: 10, attach: { socket: 'head.leftHorn' } }), layer('antenna', 'free', 0, 0, 0.22, 0.36, 'neon', { rotate: 18, z: 10, attach: { socket: 'head.rightHorn' } }));
-  }
-  if (/cow|dog|pig|bear|mouse|fox|cat|animal/.test(l)) layers.push(layer('snout', 'free', 0, -2, 0.42, 0.24, 'warmCream', { z: 24, attach: { socket: 'head.mouth' } }));
-  if (/spot|cow|dog|dalmatian|pattern/.test(l)) layers.push(layer('bodyPatch', 'free', 0, 0, 0.3, 0.22, 'charcoalRubber', { rotate: -10, z: 11, attach: { socket: 'body.patchLeft' } }), layer('bodyPatch', 'free', 0, 0, 0.23, 0.16, 'charcoalRubber', { rotate: 8, z: 11, attach: { socket: 'body.patchRight' } }));
-  if (/idea|funny|abstract|joke/.test(l)) layers.push(layer('question', 'orbit', -158, -120, 0.36, 0.36, 'neon', { z: 12 }), layer('spark', 'orbit', 156, -150, 0.42, 0.42, 'glossyGold', { z: 12 }));
-  if (/zebra|stripe|striped/.test(l)) layers.push(layer('stripe', 'free', -10, -12, 0.42, 0.24, 'charcoalRubber', { rotate: -18, z: 12, attach: { socket: 'body.front' } }), layer('stripe', 'free', 10, 14, 0.34, 0.2, 'charcoalRubber', { rotate: -18, z: 12, attach: { socket: 'body.patchRight' } }));
-  if (/dragon|bird|bat|wing/.test(l)) layers.push(layer('wing', 'free', -8, 4, 0.42, 0.34, bodyMaterial, { rotate: -22, z: 3, attach: { socket: 'body.leftShoulder' } }), layer('wing', 'free', 8, 4, 0.42, 0.34, bodyMaterial, { rotate: 22, z: 3, attach: { socket: 'body.rightShoulder' } }));
   layers.push(
     layer(eyeShape, 'free', 0, 0, 0.24, 0.24, 'softWhite', { role: 'eye', z: 20, attach: { socket: 'head.leftEye' } }),
     layer(eyeShape, 'free', 0, 0, 0.24, 0.24, 'softWhite', { role: 'eye', z: 20, attach: { socket: 'head.rightEye' } }),
@@ -495,8 +522,8 @@ function fallbackDrawingLayers(prompt = '', options = {}) {
   return layers;
 }
 
-function sanitizeDrawingLayers(rawLayers, prompt = '') {
-  const source = Array.isArray(rawLayers) && rawLayers.length ? rawLayers : fallbackDrawingLayers(prompt);
+function sanitizeDrawingLayers(rawLayers, prompt = '', mascotSpec = {}) {
+  const source = Array.isArray(rawLayers) && rawLayers.length ? rawLayers : fallbackDrawingLayers(prompt, mascotSpec);
   const cleaned = source.slice(0, drawingGrammar.rules?.maxLayers || 42).map((raw, index) => {
     const shape = DRAWING_SHAPES.has(raw?.shape) ? raw.shape : 'blob';
     if (shape === 'shadow') return null;
@@ -561,10 +588,19 @@ function sanitizeSceneSpec(spec, prompt = '') {
   const head = SCENE_PRIMITIVES.includes(spec?.head) ? spec.head : inferHead(prompt);
   const eyes = SCENE_PRIMITIVES.includes(spec?.eyes) ? spec.eyes : inferEyes(prompt);
   const mouth = SCENE_PRIMITIVES.includes(spec?.mouth) ? spec.mouth : inferMouth(prompt);
+  const mascotSpec = {
+    bodyColor: spec?.bodyColor,
+    headColor: spec?.headColor,
+    footType: spec?.footType,
+    footColor: spec?.footColor,
+    eyeType: spec?.eyeType,
+    mouthType: spec?.mouthType,
+    accessories: spec?.accessories,
+  };
   return {
     kind: 'scene',
     prompt,
-    chassis: spec?.chassis || classifyChassis(prompt),
+    chassis: 'creature',
     title: String(spec?.title || titleFromPrompt(prompt)).slice(0, 48),
     summary: String(spec?.summary || `Transformed into ${titleFromPrompt(prompt)}`).slice(0, 120),
     palette: SCENE_PALETTES[paletteName] ? paletteName : 'blue',
@@ -574,7 +610,7 @@ function sanitizeSceneSpec(spec, prompt = '') {
     eyes,
     mouth,
     primitives: [...new Set([scene, body, head, eyes, mouth, ...primitives])].slice(0, 18),
-    layers: sanitizeDrawingLayers(null, prompt),
+    layers: sanitizeDrawingLayers(null, prompt, mascotSpec),
   };
 }
 
