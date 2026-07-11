@@ -222,14 +222,16 @@ function createBlueDude() {
   const rightLeg = makeLeg( 0.24);
   g.add(leftLeg); g.add(rightLeg);
 
-  // FEET — dark flattened ellipses
-  function makeFoot(x) {
+  // FEET — parented to legs so they swing with them
+  // Leg center is at y=0.32; capsule bottom = -(0.22/2 + 0.165) = -0.275 in leg-local space
+  function makeFoot() {
     const f = mk(new THREE.SphereGeometry(0.22, 14, 8), darkMat());
     f.scale.set(1.35, 0.52, 1.15);
-    f.position.set(x, 0.06, 0.05);
+    f.position.set(0, -0.27, 0.05);
     return f;
   }
-  g.add(makeFoot(-0.24)); g.add(makeFoot(0.24));
+  leftLeg.add(makeFoot());
+  rightLeg.add(makeFoot());
 
   g.position.set(0, 0, 0);
   scene.add(g);
