@@ -69,17 +69,71 @@ async function fetchKenneyCatalog() {
   }
 }
 
+const KENNEY_SYNONYMS = {
+  // vehicles
+  car: 'car sedan', vehicle: 'car sedan', automobile: 'car sedan',
+  truck: 'car truck', van: 'car van', taxi: 'car taxi',
+  // buildings
+  house: 'suburban building', home: 'suburban building', cottage: 'suburban building',
+  factory: 'factory box', warehouse: 'factory box', industrial: 'factory box',
+  // weapons/tools
+  gun: 'blaster', rifle: 'blaster', pistol: 'blaster', firearm: 'blaster',
+  weapon: 'sword dungeon', knife: 'sword dungeon', dagger: 'sword dungeon',
+  // characters
+  knight: 'character blocky', soldier: 'character blocky', person: 'character blocky',
+  human: 'character blocky', man: 'character blocky', woman: 'character blocky',
+  hero: 'character blocky', npc: 'character blocky',
+  // monsters
+  monster: 'zombie graveyard', creature: 'zombie graveyard', undead: 'zombie graveyard',
+  // nautical
+  ship: 'ship pirate', boat: 'ship pirate', vessel: 'ship pirate',
+  // graveyard
+  skull: 'gravestone graveyard', tomb: 'gravestone graveyard', tombstone: 'gravestone graveyard',
+  spooky: 'graveyard coffin', haunted: 'graveyard coffin',
+  // environment
+  cave: 'cave corridor modular', cavern: 'cave corridor modular',
+  space: 'space corridor modular', spaceship: 'space corridor modular', rocket: 'space corridor modular',
+  dungeon: 'dungeon wall modular', sci: 'space corridor modular',
+  // nature
+  forest: 'tree pine platformer', jungle: 'tree platformer',
+  // animals
+  animal: 'animal cube', pet: 'animal cube',
+  // misc
+  box: 'box dungeon', crate: 'box dungeon',
+};
+
 function searchKenney(query) {
   if (!kenneyCatalog.length) return null;
-  const queryWords = query.toLowerCase().split(/\W+/).filter(w => w.length > 1);
+
+  // Expand synonyms
+  let expanded = query.toLowerCase();
+  for (const [from, to] of Object.entries(KENNEY_SYNONYMS)) {
+    const re = new RegExp(`\\b${from}\\b`);
+    if (re.test(expanded)) expanded = expanded.replace(re, to);
+  }
+
+  const queryWords = [...new Set(expanded.split(/\W+/).filter(w => w.length > 1))];
   let best = null, bestScore = 0;
+
   for (const entry of kenneyCatalog) {
-    const tagSet = new Set(entry.tags.toLowerCase().split(/\s+/));
+    const [packSlug, fileName] = entry.path.split('/');
+    const packWords = new Set(packSlug.replace('.glb', '').split('-').filter(w => w.length > 1));
+    const fileWordList = fileName.replace('.glb', '').split('-').filter(w => w.length > 1);
+    const fileWords = new Set(fileWordList);
+
     let score = 0;
-    for (const w of queryWords) if (tagSet.has(w)) score++;
+    for (const w of queryWords) {
+      if (fileWords.has(w)) {
+        // First word in filename = strongest signal (it's the primary noun)
+        score += fileWordList[0] === w ? 3 : 2;
+      } else if (packWords.has(w)) {
+        score += 1;
+      }
+    }
     if (score > bestScore) { bestScore = score; best = entry; }
   }
-  return best ? `${KENNEY_BASE}/${best.path}` : null;
+
+  return (best && bestScore > 0) ? `${KENNEY_BASE}/${best.path}` : null;
 }
 
 // ── THREE.JS SCENE SETUP ─────────────────────────────────────────────────────
