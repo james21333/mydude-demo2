@@ -1269,8 +1269,7 @@ function DemoApp() {
       resetDemo();
       return;
     }
-    if (shouldUpdateAvatar(text)) buildAvatar(text);
-    else talkWithBrain(text);
+    buildAvatar(text);
   }
 
   function wantsReset(text = '') {
