@@ -78,15 +78,19 @@ function searchKenney(query) {
   let best = null, bestScore = 0;
 
   for (const entry of kenneyCatalog) {
-    const fileName = entry.path.split('/')[1].replace('.glb', '');
+    const [packSlug, fileWithExt] = entry.path.split('/');
+    const fileName = fileWithExt.replace('.glb', '');
     const fileWordList = fileName.split('-').filter(w => w.length > 1);
     const fileWords = new Set(fileWordList);
+    const packWords = new Set(packSlug.split('-').filter(w => w.length > 1));
     const tagWords = new Set(entry.tags.split(/\s+/).filter(w => w.length > 1));
 
     let score = 0;
     for (const w of queryWords) {
       if (fileWords.has(w)) {
         score += fileWordList[0] === w ? 3 : 2;
+      } else if (packWords.has(w)) {
+        score += 1.5; // pack slug match — stronger than generic tag
       } else if (tagWords.has(w)) {
         score += 1;
       }
