@@ -587,20 +587,48 @@ function finishBridgeReply() {
 }
 
 // ── TTS ──────────────────────────────────────────────────────────────────────
+let ttsUnlocked = false;
+function unlockTTS() {
+  if (ttsUnlocked || !window.speechSynthesis) return;
+  ttsUnlocked = true;
+  const u = new SpeechSynthesisUtterance(' ');
+  u.volume = 0;
+  speechSynthesis.speak(u);
+}
+
 function speakText(text) {
   if (!window.speechSynthesis) { setStatus('listening'); if (activated) startListening(); return; }
   speechSynthesis.cancel();
   setStatus('speaking');
   speaking = true;
+
+  // Fallback timer: animate mouth for estimated speech duration even if audio is blocked
+  const wordCount = text.trim().split(/\s+/).length;
+  const estimatedMs = Math.max(2500, wordCount * 380);
+  let speakTimer = setTimeout(doneSpeaking, estimatedMs);
+
+  function doneSpeaking() {
+    clearTimeout(speakTimer);
+    speakTimer = null;
+    speaking = false;
+    setStatus('listening');
+    if (activated) startListening();
+  }
+
   const utter = new SpeechSynthesisUtterance(text);
   utter.rate = 1.06; utter.pitch = 1.06;
-  const voices = speechSynthesis.getVoices();
-  const pick = voices.find(v => /en.*GB|Google.*UK|Daniel|Samantha/i.test(v.name))
-             || voices.find(v => /^en/i.test(v.lang)) || voices[0];
-  if (pick) utter.voice = pick;
-  utter.onend = () => { speaking = false; setStatus('listening'); if (activated) startListening(); };
-  utter.onerror = () => { speaking = false; setStatus('listening'); if (activated) startListening(); };
-  speechSynthesis.speak(utter);
+  // Wait for voices to be ready
+  const trySpeak = () => {
+    const voices = speechSynthesis.getVoices();
+    const pick = voices.find(v => /en.*GB|Google.*UK|Daniel|Samantha/i.test(v.name))
+               || voices.find(v => /^en/i.test(v.lang)) || voices[0];
+    if (pick) utter.voice = pick;
+    utter.onend   = doneSpeaking;
+    utter.onerror = doneSpeaking;
+    speechSynthesis.speak(utter);
+  };
+  if (speechSynthesis.getVoices().length) trySpeak();
+  else speechSynthesis.onvoiceschanged = trySpeak;
 }
 
 // ── SPEECH RECOGNITION ───────────────────────────────────────────────────────
@@ -666,6 +694,7 @@ function showMsg(text, dur = 4500) {
 
 // ── UI EXPORTS ───────────────────────────────────────────────────────────────
 window.toggleMic = function() {
+  unlockTTS();
   if (!activated) {
     activated = true;
     setStatus('listening');
@@ -682,6 +711,7 @@ window.toggleMic = function() {
 };
 
 window.sendTyped = function() {
+  unlockTTS();
   const inp = document.getElementById('typed-input');
   const text = inp.value.trim();
   if (!text) return;
