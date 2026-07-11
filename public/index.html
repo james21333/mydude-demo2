@@ -471,17 +471,21 @@ const ASSET_LIBRARY = [
 const canvas = document.getElementById('three-canvas');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.15;
 
+function vw() { return window.innerWidth  || canvas.clientWidth  || document.documentElement.clientWidth  || 1280; }
+function vh() { return window.innerHeight || canvas.clientHeight || document.documentElement.clientHeight || 720; }
+
+renderer.setSize(vw(), vh());
+
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x060a12);
 scene.fog = new THREE.FogExp2(0x060a12, 0.018);
 
-const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 200);
+const camera = new THREE.PerspectiveCamera(55, vw() / vh(), 0.1, 200);
 camera.position.set(0, 9, 18);
 camera.lookAt(0, 0, 0);
 
@@ -533,9 +537,9 @@ groundMesh.receiveShadow = true;
 scene.add(groundMesh);
 
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.aspect = vw() / vh();
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(vw(), vh());
 });
 
 function animate() {
