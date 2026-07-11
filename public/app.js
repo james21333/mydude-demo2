@@ -71,16 +71,16 @@ scene.background = new THREE.Color(0x060a12);
 scene.fog = new THREE.FogExp2(0x060a12, 0.018);
 
 const camera = new THREE.PerspectiveCamera(55, vw() / vh(), 0.1, 200);
-camera.position.set(0, 9, 18);
-camera.lookAt(0, 0, 0);
+camera.position.set(0, 4, 9);
+camera.lookAt(0, 1.5, 0);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.06;
 controls.maxPolarAngle = Math.PI * 0.48;
-controls.minDistance = 3;
+controls.minDistance = 2;
 controls.maxDistance = 80;
-controls.target.set(0, 0, 0);
+controls.target.set(0, 1.5, 0);
 
 // Lights
 const ambientLight = new THREE.AmbientLight(0x2a3f60, 1.2);
@@ -127,10 +127,88 @@ window.addEventListener('resize', () => {
   renderer.setSize(vw(), vh());
 });
 
+// ── BLUE DUDE ────────────────────────────────────────────────────────────────
+function createBlueDude() {
+  const g = new THREE.Group();
+
+  const bodyMat = new THREE.MeshPhongMaterial({ color: 0x2196F3, emissive: 0x0D47A1, emissiveIntensity: 0.25, shininess: 90 });
+  const headMat = new THREE.MeshPhongMaterial({ color: 0x42A5F5, emissive: 0x1565C0, emissiveIntensity: 0.25, shininess: 110 });
+  const eyeWhite = new THREE.MeshPhongMaterial({ color: 0xFFFFFF, shininess: 60 });
+  const eyeDark  = new THREE.MeshPhongMaterial({ color: 0x111122 });
+  const mouthMat = new THREE.MeshPhongMaterial({ color: 0x0a2a6e, emissive: 0x000033 });
+
+  const mk = (geo, mat, py) => { const m = new THREE.Mesh(geo, mat); m.position.y = py; m.castShadow = true; return m; };
+
+  // Body
+  const body = mk(new THREE.CapsuleGeometry(0.55, 0.85, 8, 16), bodyMat, 1.02);
+  g.add(body);
+
+  // Head
+  const head = new THREE.Group();
+  head.add(mk(new THREE.SphereGeometry(0.52, 20, 14), headMat, 0));
+  head.position.set(0, 2.28, 0);
+  g.add(head);
+
+  // Eyes
+  function makeEye(x) {
+    const eye = new THREE.Group();
+    eye.add(mk(new THREE.SphereGeometry(0.14, 12, 10), eyeWhite, 0));
+    const pupil = mk(new THREE.SphereGeometry(0.085, 8, 8), eyeDark, 0);
+    pupil.position.z = 0.09;
+    eye.add(pupil);
+    eye.position.set(x, 0.06, 0.44);
+    return eye;
+  }
+  const leftEye  = makeEye(-0.19);
+  const rightEye = makeEye( 0.19);
+  head.add(leftEye);
+  head.add(rightEye);
+
+  // Mouth (torus arc = smile)
+  const mouth = new THREE.Mesh(
+    new THREE.TorusGeometry(0.17, 0.038, 6, 14, Math.PI),
+    mouthMat
+  );
+  mouth.position.set(0, -0.17, 0.46);
+  mouth.rotation.z = Math.PI;
+  head.add(mouth);
+
+  g.position.set(0, 0, 0);
+  scene.add(g);
+  return { group: g, head, leftEye, rightEye, mouth, body };
+}
+
+const blueDude = createBlueDude();
+
+let dudeClock = 0;
 let lastFrame = 0;
 function animate() {
   lastFrame = performance.now();
   requestAnimationFrame(animate);
+  dudeClock += 0.016;
+
+  // Idle / speaking animation
+  const isSpeaking = speaking;
+  const bobSpeed = isSpeaking ? 4.0 : 0.9;
+  const bobAmp   = isSpeaking ? 0.07 : 0.028;
+  const swayAmp  = isSpeaking ? 0.10 : 0.04;
+  blueDude.group.position.y = Math.sin(dudeClock * bobSpeed) * bobAmp;
+  blueDude.head.rotation.y  = Math.sin(dudeClock * 0.65) * swayAmp * 2;
+  blueDude.head.rotation.z  = Math.sin(dudeClock * 0.4)  * swayAmp * 0.5;
+
+  // Mouth opens/closes when speaking
+  if (isSpeaking) {
+    blueDude.mouth.scale.y = 0.5 + 0.5 * Math.abs(Math.sin(dudeClock * 9));
+  } else {
+    blueDude.mouth.scale.y += (1 - blueDude.mouth.scale.y) * 0.12;
+  }
+
+  // Blink
+  const blinkCycle = dudeClock % 4.2;
+  const blink = blinkCycle > 3.9 ? Math.max(0.05, 1 - ((blinkCycle - 3.9) / 0.15)) : 1;
+  blueDude.leftEye.scale.y  = blink;
+  blueDude.rightEye.scale.y = blink;
+
   controls.update();
   renderer.render(scene, camera);
 }
