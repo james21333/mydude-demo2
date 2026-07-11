@@ -56,6 +56,32 @@ const ASSET_LIBRARY = [
   { id:'sky_cloud', name:'Cloud', path:'/assets/sky/cloud.glb', category:'Sky', color:0xFFFFFF, fallback:'cloud' },
 ];
 
+// ── KENNEY CATALOG ────────────────────────────────────────────────────────────
+const KENNEY_BASE = 'https://bridge2.mydude.live/kenney';
+let kenneyCatalog = [];
+
+async function fetchKenneyCatalog() {
+  try {
+    const res = await fetch(`${KENNEY_BASE}/catalog.json`);
+    kenneyCatalog = await res.json();
+  } catch (e) {
+    console.warn('Kenney catalog unavailable:', e.message);
+  }
+}
+
+function searchKenney(query) {
+  if (!kenneyCatalog.length) return null;
+  const words = query.toLowerCase().split(/\W+/).filter(w => w.length > 1);
+  let best = null, bestScore = 0; // 0 = no match threshold
+  for (const entry of kenneyCatalog) {
+    const tags = entry.tags.toLowerCase();
+    let score = 0;
+    for (const w of words) if (tags.includes(w)) score++;
+    if (score > bestScore) { bestScore = score; best = entry; }
+  }
+  return best ? `${KENNEY_BASE}/${best.path}` : null;
+}
+
 // ── THREE.JS SCENE SETUP ─────────────────────────────────────────────────────
 const canvas = document.getElementById('three-canvas');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -518,6 +544,26 @@ function normalizePath(p) { return p.replace(/\s*\.\s*/g, '.').trim(); }
 
 function loadAsset(rawPath) {
   const path = normalizePath(rawPath);
+
+  // Kenney catalog search: "kenney:search terms" → resolve to real GLB URL
+  if (path.startsWith('kenney:')) {
+    const url = searchKenney(path.slice(7));
+    if (!url) return Promise.resolve(makeFallback(null));
+    if (gltfCache.has(url)) return Promise.resolve(gltfCache.get(url).clone());
+    return new Promise(resolve => {
+      gltfLoader.load(url,
+        gltf => {
+          const root = gltf.scene;
+          root.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+          gltfCache.set(url, root);
+          resolve(root.clone());
+        },
+        undefined,
+        () => resolve(makeFallback(null))
+      );
+    });
+  }
+
   if (gltfCache.has(path)) {
     return Promise.resolve(gltfCache.get(path).clone());
   }
@@ -732,9 +778,7 @@ function sendToBridge(userText) {
     if (p.type === 'ready') {
       setStatus('building');
       showMsg('Thinking…');
-      // Build a compact asset list to fit in the instruction field
-      const assetLines = ASSET_LIBRARY.map(a => `${a.id}: "${a.path}"`).join(', ');
-      const instruction = `You are a 3D scene JSON API. RESPOND ONLY with a short spoken reply, then a \`\`\`json code block. Never skip the \`\`\`json block. Schema: [{id,assetPath,action:"add"|"update"|"remove",position:{x,y,z},rotation:{x,y,z},scale:{x,y,z},label}]. Y=0=ground, rotation in degrees. Assets: ${assetLines}. If no change, output []. ALWAYS end with the \`\`\`json block.`;
+      const instruction = `You are a 3D scene JSON API. RESPOND ONLY with a short spoken reply, then a \`\`\`json code block. Never skip the \`\`\`json block. Schema: [{id,assetPath,action:"add"|"update"|"remove",position:{x,y,z},rotation:{x,y,z},scale:{x,y,z},label}]. Y=0=ground, rotation in degrees. For assetPath use "kenney:WORDS" — pick words from these real packs: blaster (guns), blocky characters (people), car kit (vehicles), city commercial/industrial/suburban (buildings/roads), cube pets (animals), factory kit, fantasy town (medieval), graveyard (tombstones), mini dungeon (chests/barrels/swords), modular cave, modular dungeon, modular space (sci-fi), pirate kit, platformer kit (trees/platforms/coins). Examples: "kenney:blaster", "kenney:character", "kenney:car", "kenney:city building", "kenney:barrel dungeon", "kenney:tree platformer", "kenney:tombstone graveyard", "kenney:space corridor", "kenney:pirate", "kenney:cave wall". If no scene change, output []. ALWAYS end with the \`\`\`json block.`;
       socket.send(JSON.stringify({
         type: 'say', sessionId, text: userText,
         instruction,
@@ -982,6 +1026,7 @@ window.switchTab = function(tab) {
 };
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
+fetchKenneyCatalog();
 document.getElementById('prompt-display').value = buildSystemPrompt();
 restoreFromLocalStorage();
 refreshUI();
