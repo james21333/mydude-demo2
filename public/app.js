@@ -464,9 +464,12 @@ function sendToBridge(userText) {
     if (p.type === 'ready') {
       setStatus('building');
       showMsg('Thinking…');
+      const fullPrompt = buildSystemPrompt()
+        + '\n\nALWAYS end your reply with a ```json code block containing the scene command array. If no scene change needed, output [].'
+        + '\n\n---\nUser request: ' + userText;
       socket.send(JSON.stringify({
-        type: 'say', sessionId, text: userText,
-        instruction: buildSystemPrompt() + '\n\nALWAYS end with the ```json block. If no scene change, output [].',
+        type: 'say', sessionId, text: fullPrompt,
+        instruction: 'You are a 3D scene builder. Follow the instructions in the user message exactly, including the JSON output format.',
         avatar: null, personality: null,
       }));
     }
