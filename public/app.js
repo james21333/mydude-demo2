@@ -69,64 +69,25 @@ async function fetchKenneyCatalog() {
   }
 }
 
-const KENNEY_SYNONYMS = {
-  // vehicles
-  car: 'car sedan', vehicle: 'car sedan', automobile: 'car sedan',
-  truck: 'car truck', van: 'car van', taxi: 'car taxi',
-  // buildings
-  house: 'suburban building', home: 'suburban building', cottage: 'suburban building',
-  factory: 'factory box', warehouse: 'factory box', industrial: 'factory box',
-  // weapons/tools
-  gun: 'blaster', rifle: 'blaster', pistol: 'blaster', firearm: 'blaster',
-  weapon: 'sword dungeon', knife: 'sword dungeon', dagger: 'sword dungeon',
-  // characters
-  knight: 'character blocky', soldier: 'character blocky', person: 'character blocky',
-  human: 'character blocky', man: 'character blocky', woman: 'character blocky',
-  hero: 'character blocky', npc: 'character blocky',
-  // monsters
-  monster: 'zombie graveyard', creature: 'zombie graveyard', undead: 'zombie graveyard',
-  // nautical
-  ship: 'ship pirate', boat: 'ship pirate', vessel: 'ship pirate',
-  // graveyard
-  skull: 'gravestone graveyard', tomb: 'gravestone graveyard', tombstone: 'gravestone graveyard',
-  spooky: 'graveyard coffin', haunted: 'graveyard coffin',
-  // environment
-  cave: 'cave corridor modular', cavern: 'cave corridor modular',
-  space: 'space corridor modular', spaceship: 'space corridor modular', rocket: 'space corridor modular',
-  dungeon: 'dungeon wall modular', sci: 'space corridor modular',
-  // nature
-  forest: 'tree pine platformer', jungle: 'tree platformer',
-  // animals
-  animal: 'animal cube', pet: 'animal cube',
-  // misc
-  box: 'box dungeon', crate: 'box dungeon',
-};
-
 function searchKenney(query) {
   if (!kenneyCatalog.length) return null;
 
-  // Expand synonyms
-  let expanded = query.toLowerCase();
-  for (const [from, to] of Object.entries(KENNEY_SYNONYMS)) {
-    const re = new RegExp(`\\b${from}\\b`);
-    if (re.test(expanded)) expanded = expanded.replace(re, to);
-  }
+  const queryWords = [...new Set(query.toLowerCase().split(/\W+/).filter(w => w.length > 1))];
+  if (!queryWords.length) return null;
 
-  const queryWords = [...new Set(expanded.split(/\W+/).filter(w => w.length > 1))];
   let best = null, bestScore = 0;
 
   for (const entry of kenneyCatalog) {
-    const [packSlug, fileName] = entry.path.split('/');
-    const packWords = new Set(packSlug.replace('.glb', '').split('-').filter(w => w.length > 1));
-    const fileWordList = fileName.replace('.glb', '').split('-').filter(w => w.length > 1);
+    const fileName = entry.path.split('/')[1].replace('.glb', '');
+    const fileWordList = fileName.split('-').filter(w => w.length > 1);
     const fileWords = new Set(fileWordList);
+    const tagWords = new Set(entry.tags.split(/\s+/).filter(w => w.length > 1));
 
     let score = 0;
     for (const w of queryWords) {
       if (fileWords.has(w)) {
-        // First word in filename = strongest signal (it's the primary noun)
         score += fileWordList[0] === w ? 3 : 2;
-      } else if (packWords.has(w)) {
+      } else if (tagWords.has(w)) {
         score += 1;
       }
     }
@@ -832,7 +793,7 @@ function sendToBridge(userText) {
     if (p.type === 'ready') {
       setStatus('building');
       showMsg('Thinking…');
-      const instruction = `You are a 3D scene JSON API. RESPOND ONLY with a short spoken reply, then a \`\`\`json code block. Never skip the \`\`\`json block. Schema: [{id,assetPath,action:"add"|"update"|"remove",position:{x,y,z},rotation:{x,y,z},scale:{x,y,z},label}]. Y=0=ground, rotation in degrees. For assetPath use "kenney:WORDS" using EXACT catalog words. Pack vocabulary — blaster kit: blaster; blocky characters: character; car kit: car sedan hatchback ambulance; city commercial: building road; city industrial: factory warehouse; city suburban: house tree; cube pets: cat dog pet; fantasy town: sword shield chest potion; graveyard kit: gravestone coffin ghost zombie pumpkin shovel candle; mini dungeon: barrel chest sword weapon; modular cave: cave rock wall; modular dungeon: dungeon floor wall door; modular space: space corridor; pirate kit: pirate barrel cannon ship; platformer kit: tree coin platform crate. Examples: "kenney:blaster", "kenney:character", "kenney:car sedan", "kenney:gravestone", "kenney:coffin", "kenney:zombie", "kenney:pumpkin", "kenney:barrel", "kenney:space corridor", "kenney:pirate cannon". If no scene change, output []. ALWAYS end with the \`\`\`json block.`;
+      const instruction = `You are a 3D scene JSON API. RESPOND ONLY with a short spoken reply, then a \`\`\`json code block. Never skip the \`\`\`json block. Schema: [{id,assetPath,action:"add"|"update"|"remove",position:{x,y,z},rotation:{x,y,z},scale:{x,y,z},label}]. Y=0=ground, rotation in degrees. For assetPath use "kenney:WORDS" — pick 1-3 words that describe the object. Available packs and their best search words: WEAPONS→ blaster gun rifle laser; CHARACTERS→ character hero npc soldier; VEHICLES→ car sedan ambulance truck van taxi hatchback; CITY BUILDINGS→ building skyscraper office store suburban house; FACTORY→ factory warehouse conveyor industrial; MEDIEVAL/FANTASY→ medieval sword shield chest potion wall town; HORROR/HALLOWEEN→ horror zombie ghost gravestone coffin pumpkin spooky halloween; DUNGEON→ dungeon barrel door floor corridor room; CAVE→ cave rock underground; SPACE/SCI-FI→ space station corridor rocket scifi spacecraft; PIRATE→ pirate cannon ship boat island tropical treasure; PLATFORMER→ platform coin tree crate jump; ANIMALS→ cat dog pet animal bunny. Examples: "kenney:zombie", "kenney:horror", "kenney:space corridor", "kenney:rocket", "kenney:car sedan", "kenney:blaster", "kenney:medieval sword", "kenney:pirate cannon", "kenney:gravestone", "kenney:cave rock", "kenney:dog", "kenney:dungeon barrel". If no scene change, output []. ALWAYS end with the \`\`\`json block.`;
       socket.send(JSON.stringify({
         type: 'say', sessionId, text: userText,
         instruction,
