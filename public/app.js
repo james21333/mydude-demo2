@@ -233,7 +233,7 @@ function createBlueDude() {
 
   g.position.set(0, 0, 0);
   scene.add(g);
-  return { group: g, head, leftEye, rightEye, mouth, leftArm, rightArm };
+  return { group: g, head, leftEye, rightEye, mouth, leftArm, rightArm, leftLeg, rightLeg };
 }
 
 const blueDude = createBlueDude();
@@ -333,6 +333,16 @@ function animate() {
     blueDude.mouth.scale.y = 1.0 + 0.55 * Math.abs(Math.sin(dudeClock * 9.5));
   } else {
     blueDude.mouth.scale.y += (1 - blueDude.mouth.scale.y) * 0.14;
+  }
+
+  // Leg swing when walking
+  if (isWalking) {
+    const swing = Math.sin(dudeClock * 7.5) * 0.38;
+    blueDude.leftLeg.rotation.x  =  swing;
+    blueDude.rightLeg.rotation.x = -swing;
+  } else {
+    blueDude.leftLeg.rotation.x  += (0 - blueDude.leftLeg.rotation.x)  * 0.15;
+    blueDude.rightLeg.rotation.x += (0 - blueDude.rightLeg.rotation.x) * 0.15;
   }
 
   // Blink every ~4 seconds
