@@ -687,7 +687,10 @@ function speakText(text) {
   const estimatedMs = Math.max(2500, wordCount * 380);
   let speakTimer = setTimeout(doneSpeaking, estimatedMs);
 
+  let doneCalled = false;
   function doneSpeaking() {
+    if (doneCalled) return;
+    doneCalled = true;
     clearTimeout(speakTimer);
     speakTimer = null;
     speaking = false;
@@ -716,16 +719,22 @@ const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition = null;
 let activated = false;
 let listenTimer = null;
+let listenGen = 0; // incremented each call so stale onend handlers are ignored
 
 function startListening() {
   if (!SR) { showMsg('Speech recognition unavailable — type below.'); return; }
-  if (recognition) { try { recognition.abort(); } catch {} }
-  recognition = new SR();
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.lang = 'en-US';
+  clearTimeout(listenTimer);
+  const gen = ++listenGen;
+  if (recognition) { try { recognition.abort(); } catch {} recognition = null; }
 
-  recognition.onresult = (e) => {
+  const r = new SR();
+  recognition = r;
+  r.continuous = false;
+  r.interimResults = false;
+  r.lang = 'en-US';
+
+  r.onresult = (e) => {
+    if (gen !== listenGen) return;
     const text = e.results[e.results.length - 1][0].transcript.trim();
     if (!text) return;
     showMsg(`You: "${text}"`, 4000);
@@ -733,18 +742,20 @@ function startListening() {
     sendToBridge(text);
   };
 
-  recognition.onend = () => {
+  r.onend = () => {
+    if (gen !== listenGen) return; // stale — a newer recognition already owns this slot
     if (activated && currentStatus === 'listening') {
-      listenTimer = setTimeout(startListening, 400);
+      listenTimer = setTimeout(startListening, 350);
     }
   };
 
-  recognition.onerror = (e) => {
+  r.onerror = (e) => {
+    if (gen !== listenGen) return;
     if (e.error !== 'no-speech' && e.error !== 'aborted') showMsg(`Mic: ${e.error}`);
-    if (activated) listenTimer = setTimeout(startListening, 800);
+    if (activated) listenTimer = setTimeout(startListening, 600);
   };
 
-  try { recognition.start(); } catch {}
+  try { r.start(); } catch(err) { showMsg(`Mic start error: ${err.message}`); }
 }
 
 function stopListening() {
