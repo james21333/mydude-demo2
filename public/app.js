@@ -559,6 +559,9 @@ async function executeSceneCommands(commands) {
     if (action === 'add') {
       const group = await loadAsset(assetPath);
       const tid = id || `obj_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
+      // If the same id was already in the scene, remove the old group first so it doesn't orphan
+      const existing = sceneObjects.get(tid);
+      if (existing) scene.remove(existing.group);
       group.userData.trackId = tid;
       applyTransform(group, pos, rot, scl);
       scene.add(group);
