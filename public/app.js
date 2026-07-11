@@ -589,6 +589,10 @@ async function executeSceneCommands(commands) {
 function doClearScene() {
   for (const [, e] of sceneObjects) scene.remove(e.group);
   sceneObjects.clear();
+  // Also sweep any orphaned groups not tracked in sceneObjects
+  const keep = new Set([blueDude.group, gridHelper, groundMesh,
+    ambientLight, sunLight, fillLight, rimLight]);
+  [...scene.children].forEach(c => { if (!keep.has(c)) scene.remove(c); });
   saveToLocalStorage();
   refreshUI();
 }
