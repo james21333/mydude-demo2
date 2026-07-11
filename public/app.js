@@ -203,6 +203,12 @@ function createBlueDude() {
       f.castShadow = true;
       hand.add(f);
     }
+    // Thumb on inner side (toward body)
+    const thumb = new THREE.Mesh(new THREE.CapsuleGeometry(0.042, 0.058, 6, 10), handMat);
+    thumb.position.set(-side * 0.138, -0.068, 0.0);
+    thumb.rotation.z = -side * (Math.PI / 2.6);
+    thumb.castShadow = true;
+    hand.add(thumb);
     // bottom of capsule: -(height/2 + radius) = -(0.22 + 0.145) = -0.365
     hand.position.set(0, -0.365, 0);
     arm.add(hand);
