@@ -182,6 +182,7 @@ const blueDude = createBlueDude();
 
 let dudeClock = 0;
 let lastFrame = 0;
+let speaking = false;
 function animate() {
   lastFrame = performance.now();
   requestAnimationFrame(animate);
@@ -586,8 +587,6 @@ function finishBridgeReply() {
 }
 
 // ── TTS ──────────────────────────────────────────────────────────────────────
-let speaking = false;
-
 function speakText(text) {
   if (!window.speechSynthesis) { setStatus('listening'); if (activated) startListening(); return; }
   speechSynthesis.cancel();
