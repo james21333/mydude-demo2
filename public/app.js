@@ -189,7 +189,7 @@ function createBlueDude() {
     arm.position.set(side * 0.76, 1.0, 0);
     arm.rotation.z = side * -0.28;
     // HAND — parented to arm so it waves with it
-    const handMat = new THREE.MeshPhongMaterial({ color: PRIMARY, emissive: DARK, emissiveIntensity: 0.08, shininess: 80, specular: 0x88bbdd });
+    const handMat = darkMat();
     const hand = new THREE.Group();
     // Palm — soft oval blob, like the feet
     const palm = new THREE.Mesh(new THREE.SphereGeometry(0.13, 14, 10), handMat);
@@ -203,10 +203,10 @@ function createBlueDude() {
       f.castShadow = true;
       hand.add(f);
     }
-    // Thumb — round, angled outward on the side
+    // Thumb — round, on the inner side (toward body)
     const thumb = new THREE.Mesh(new THREE.CapsuleGeometry(0.044, 0.058, 6, 10), handMat);
-    thumb.position.set(side * 0.138, -0.068, 0.0);
-    thumb.rotation.z = side * (Math.PI / 2.6);
+    thumb.position.set(-side * 0.138, -0.068, 0.0);
+    thumb.rotation.z = -side * (Math.PI / 2.6);
     thumb.castShadow = true;
     hand.add(thumb);
     // bottom of capsule: -(height/2 + radius) = -(0.22 + 0.145) = -0.365
