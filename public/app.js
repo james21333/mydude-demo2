@@ -173,7 +173,7 @@ function createBlueDude() {
   );
   mouth.rotation.z = Math.PI;
   mouth.rotation.x = 0.08;
-  mouth.position.set(0, -0.16, 0.66);
+  mouth.position.set(0, -0.16, 0.73);
   head.add(mouth);
   head.position.set(0, 2.05, 0);
   g.add(head);
