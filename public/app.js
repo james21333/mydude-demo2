@@ -71,12 +71,12 @@ async function fetchKenneyCatalog() {
 
 function searchKenney(query) {
   if (!kenneyCatalog.length) return null;
-  const words = query.toLowerCase().split(/\W+/).filter(w => w.length > 1);
-  let best = null, bestScore = 0; // 0 = no match threshold
+  const queryWords = query.toLowerCase().split(/\W+/).filter(w => w.length > 1);
+  let best = null, bestScore = 0;
   for (const entry of kenneyCatalog) {
-    const tags = entry.tags.toLowerCase();
+    const tagSet = new Set(entry.tags.toLowerCase().split(/\s+/));
     let score = 0;
-    for (const w of words) if (tags.includes(w)) score++;
+    for (const w of queryWords) if (tagSet.has(w)) score++;
     if (score > bestScore) { bestScore = score; best = entry; }
   }
   return best ? `${KENNEY_BASE}/${best.path}` : null;
@@ -778,7 +778,7 @@ function sendToBridge(userText) {
     if (p.type === 'ready') {
       setStatus('building');
       showMsg('Thinking…');
-      const instruction = `You are a 3D scene JSON API. RESPOND ONLY with a short spoken reply, then a \`\`\`json code block. Never skip the \`\`\`json block. Schema: [{id,assetPath,action:"add"|"update"|"remove",position:{x,y,z},rotation:{x,y,z},scale:{x,y,z},label}]. Y=0=ground, rotation in degrees. For assetPath use "kenney:WORDS" — pick words from these real packs: blaster (guns), blocky characters (people), car kit (vehicles), city commercial/industrial/suburban (buildings/roads), cube pets (animals), factory kit, fantasy town (medieval), graveyard (tombstones), mini dungeon (chests/barrels/swords), modular cave, modular dungeon, modular space (sci-fi), pirate kit, platformer kit (trees/platforms/coins). Examples: "kenney:blaster", "kenney:character", "kenney:car", "kenney:city building", "kenney:barrel dungeon", "kenney:tree platformer", "kenney:tombstone graveyard", "kenney:space corridor", "kenney:pirate", "kenney:cave wall". If no scene change, output []. ALWAYS end with the \`\`\`json block.`;
+      const instruction = `You are a 3D scene JSON API. RESPOND ONLY with a short spoken reply, then a \`\`\`json code block. Never skip the \`\`\`json block. Schema: [{id,assetPath,action:"add"|"update"|"remove",position:{x,y,z},rotation:{x,y,z},scale:{x,y,z},label}]. Y=0=ground, rotation in degrees. For assetPath use "kenney:WORDS" using EXACT catalog words. Pack vocabulary — blaster kit: blaster; blocky characters: character; car kit: car sedan hatchback ambulance; city commercial: building road; city industrial: factory warehouse; city suburban: house tree; cube pets: cat dog pet; fantasy town: sword shield chest potion; graveyard kit: gravestone coffin ghost zombie pumpkin shovel candle; mini dungeon: barrel chest sword weapon; modular cave: cave rock wall; modular dungeon: dungeon floor wall door; modular space: space corridor; pirate kit: pirate barrel cannon ship; platformer kit: tree coin platform crate. Examples: "kenney:blaster", "kenney:character", "kenney:car sedan", "kenney:gravestone", "kenney:coffin", "kenney:zombie", "kenney:pumpkin", "kenney:barrel", "kenney:space corridor", "kenney:pirate cannon". If no scene change, output []. ALWAYS end with the \`\`\`json block.`;
       socket.send(JSON.stringify({
         type: 'say', sessionId, text: userText,
         instruction,
