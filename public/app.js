@@ -165,16 +165,15 @@ function createBlueDude() {
   const leftEye  = makeEye(-0.22);
   const rightEye = makeEye( 0.22);
   head.add(leftEye); head.add(rightEye);
-  // Mouth — filled half-disc smile matching original `M-18 -2 Q0 14 18 -2 fill="#0f172a"`
-  // flat edge on top, arc curves downward = classic cartoon smile
-  // At speaking scale.y ≈ 2, the half-disc stretches into a full oval (open mouth)
-  const smileShape = new THREE.Shape();
-  smileShape.absarc(0, 0, 0.155, Math.PI, 0, true); // lower half arc, clockwise
+  // Mouth — fat half-torus (tube ≈ ring radius so the hole nearly disappears = filled-arc look)
+  // rotation.z = PI flips arc to bottom = smile. rotation.x tilts it to hug the face.
   const mouth = new THREE.Mesh(
-    new THREE.ShapeGeometry(smileShape, 28),
-    new THREE.MeshBasicMaterial({ color: 0x0f172a, side: THREE.DoubleSide })
+    new THREE.TorusGeometry(0.14, 0.092, 10, 28, Math.PI),
+    new THREE.MeshPhongMaterial({ color: 0x0f172a, shininess: 8 })
   );
-  mouth.position.set(0, -0.19, 0.74);
+  mouth.rotation.z = Math.PI;
+  mouth.rotation.x = 0.18;
+  mouth.position.set(0, -0.16, 0.62);
   head.add(mouth);
   head.position.set(0, 2.05, 0);
   g.add(head);
