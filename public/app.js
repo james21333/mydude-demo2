@@ -464,12 +464,12 @@ function sendToBridge(userText) {
     if (p.type === 'ready') {
       setStatus('building');
       showMsg('Thinking…');
-      const fullPrompt = buildSystemPrompt()
-        + '\n\nALWAYS end your reply with a ```json code block containing the scene command array. If no scene change needed, output [].'
-        + '\n\n---\nUser request: ' + userText;
+      // Build a compact asset list to fit in the instruction field
+      const assetLines = ASSET_LIBRARY.map(a => `${a.id}: "${a.path}"`).join(', ');
+      const instruction = `You are a 3D scene JSON API. RESPOND ONLY with a short spoken reply, then a \`\`\`json code block. Never skip the \`\`\`json block. Schema: [{id,assetPath,action:"add"|"update"|"remove",position:{x,y,z},rotation:{x,y,z},scale:{x,y,z},label}]. Y=0=ground, rotation in degrees. Assets: ${assetLines}. If no change, output []. ALWAYS end with the \`\`\`json block.`;
       socket.send(JSON.stringify({
-        type: 'say', sessionId, text: fullPrompt,
-        instruction: 'You are a 3D scene builder. Follow the instructions in the user message exactly, including the JSON output format.',
+        type: 'say', sessionId, text: userText,
+        instruction,
         avatar: null, personality: null,
       }));
     }
