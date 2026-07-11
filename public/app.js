@@ -166,12 +166,12 @@ function createBlueDude() {
   const rightEye = makeEye( 0.22);
   head.add(leftEye); head.add(rightEye);
   // Mouth — small closed-lip expression: narrow ring, very thin tube, gentle arc
-  // Mouth — small dark oval circle
+  // Mouth — small dark circle dot; animate loop drives scale.y so keep x/z only here
   const mouth = new THREE.Mesh(
-    new THREE.SphereGeometry(0.058, 16, 12),
+    new THREE.SphereGeometry(0.038, 14, 10),
     new THREE.MeshPhongMaterial({ color: 0x0f172a, shininess: 10 })
   );
-  mouth.scale.set(1.2, 0.72, 0.9);
+  mouth.scale.set(1.15, 1.0, 0.82);
   mouth.position.set(0, -0.17, 0.70);
   head.add(mouth);
   head.position.set(0, 2.05, 0);
@@ -266,9 +266,9 @@ function animate() {
     blueDude.rightArm.rotation.z += ( 0.28 - blueDude.rightArm.rotation.z) * 0.10;
   }
 
-  // Mouth: scale.y=1 → closed smile half-disc; ~1.8 → open oval (speaking)
+  // Mouth: scale.y=1 at rest (small circle); opens slightly when speaking
   if (isSpeaking) {
-    blueDude.mouth.scale.y = 1.0 + 0.85 * Math.abs(Math.sin(dudeClock * 9.5));
+    blueDude.mouth.scale.y = 1.0 + 0.55 * Math.abs(Math.sin(dudeClock * 9.5));
   } else {
     blueDude.mouth.scale.y += (1 - blueDude.mouth.scale.y) * 0.14;
   }
