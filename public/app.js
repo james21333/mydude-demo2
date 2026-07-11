@@ -153,43 +153,28 @@ function createBlueDude() {
   // Shine highlight (upper-left)
   const shineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.28 });
   head.add(mk(new THREE.SphereGeometry(0.20, 10, 8), shineMat, -0.30, 0.28, 0.62));
-  // Eyes — softer, smaller dark circles with a subtle iris tint and white glint
+  // Eyes — pure white sclera with dark pupil (bigger, cartoonish)
   function makeEye(x) {
     const eg = new THREE.Group();
-    // Iris — very dark navy, not pure black
-    eg.add(mk(new THREE.SphereGeometry(0.078, 14, 10), new THREE.MeshPhongMaterial({ color: 0x0a1628, shininess: 40 }), 0, 0, 0));
-    // Pupil — pure black centre dot
-    eg.add(mk(new THREE.SphereGeometry(0.044, 10, 8), new THREE.MeshBasicMaterial({ color: 0x000000 }), 0, 0, 0.042));
-    // Small white glint
-    eg.add(mk(new THREE.SphereGeometry(0.022, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffffff }), -0.028, 0.028, 0.066));
-    eg.position.set(x, 0.04, 0.68);
+    eg.add(mk(new THREE.SphereGeometry(0.115, 16, 12), new THREE.MeshPhongMaterial({ color: 0xffffff, shininess: 80 }), 0, 0, 0));
+    eg.add(mk(new THREE.SphereGeometry(0.062, 12, 9),  new THREE.MeshBasicMaterial({ color: 0x050505 }), 0, 0, 0.076));
+    eg.add(mk(new THREE.SphereGeometry(0.022, 8, 6),   new THREE.MeshBasicMaterial({ color: 0xffffff }), -0.026, 0.026, 0.104));
+    eg.position.set(x, 0.06, 0.66);
     return eg;
   }
-  const leftEye  = makeEye(-0.20);
-  const rightEye = makeEye( 0.20);
+  const leftEye  = makeEye(-0.22);
+  const rightEye = makeEye( 0.22);
   head.add(leftEye); head.add(rightEye);
-  // Mouth — thin lips: upper lip ridge, lower lip, and a dark line between
-  const mouth = new THREE.Group();
-  const lipDark = new THREE.MeshPhongMaterial({ color: 0x0d0505, shininess: 20 });
-  const lipLo   = new THREE.MeshPhongMaterial({ color: 0x1a0c0c, shininess: 35 });
-  // Dark inner line / mouth opening arc
-  const arc = mk(new THREE.TorusGeometry(0.155, 0.020, 6, 20, Math.PI * 0.72), lipDark, 0, 0, 0);
-  arc.rotation.z = Math.PI;
-  mouth.add(arc);
-  // Lower lip — fuller flattened ellipsoid
-  const lowerLip = mk(new THREE.SphereGeometry(0.145, 14, 8), lipLo, 0, -0.048, 0.012);
-  lowerLip.scale.set(0.88, 0.28, 0.52);
-  mouth.add(lowerLip);
-  // Upper lip — thinner ridge
-  const upperLip = mk(new THREE.SphereGeometry(0.130, 14, 8), lipDark, 0, 0.028, 0.008);
-  upperLip.scale.set(0.82, 0.18, 0.44);
-  mouth.add(upperLip);
-  // Mouth corners — small dots
-  for (const cx of [-0.145, 0.145]) {
-    mouth.add(mk(new THREE.SphereGeometry(0.022, 8, 6), lipDark, cx, -0.008, 0));
-  }
-  mouth.position.set(0, -0.22, 0.64);
-  mouth.rotation.x = 0.10;
+  // Mouth — filled half-disc smile matching original `M-18 -2 Q0 14 18 -2 fill="#0f172a"`
+  // flat edge on top, arc curves downward = classic cartoon smile
+  // At speaking scale.y ≈ 2, the half-disc stretches into a full oval (open mouth)
+  const smileShape = new THREE.Shape();
+  smileShape.absarc(0, 0, 0.155, Math.PI, 0, true); // lower half arc, clockwise
+  const mouth = new THREE.Mesh(
+    new THREE.ShapeGeometry(smileShape, 28),
+    new THREE.MeshBasicMaterial({ color: 0x0f172a, side: THREE.DoubleSide })
+  );
+  mouth.position.set(0, -0.19, 0.672);
   head.add(mouth);
   head.position.set(0, 2.05, 0);
   g.add(head);
@@ -283,9 +268,9 @@ function animate() {
     blueDude.rightArm.rotation.z += ( 0.28 - blueDude.rightArm.rotation.z) * 0.10;
   }
 
-  // Mouth opens/closes when speaking
+  // Mouth: scale.y=1 → closed smile half-disc; ~1.8 → open oval (speaking)
   if (isSpeaking) {
-    blueDude.mouth.scale.y = 0.45 + 0.55 * Math.abs(Math.sin(dudeClock * 9.5));
+    blueDude.mouth.scale.y = 1.0 + 0.85 * Math.abs(Math.sin(dudeClock * 9.5));
   } else {
     blueDude.mouth.scale.y += (1 - blueDude.mouth.scale.y) * 0.14;
   }
