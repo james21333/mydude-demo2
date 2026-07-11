@@ -166,15 +166,13 @@ function createBlueDude() {
   const rightEye = makeEye( 0.22);
   head.add(leftEye); head.add(rightEye);
   // Mouth — small closed-lip expression: narrow ring, very thin tube, gentle arc
-  // Mouth — half-cylinder disc (solid filled arc, guaranteed visible)
-  // CylinderGeometry arc in XZ plane; rotation.x=PI/2 tips the solid cap to face +Z (camera)
-  // and naturally makes the arc bow downward = smile shape — no z-rotation trick needed
+  // Mouth — small dark oval circle
   const mouth = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.092, 0.092, 0.042, 28, 1, false, 0, Math.PI),
+    new THREE.SphereGeometry(0.058, 16, 12),
     new THREE.MeshPhongMaterial({ color: 0x0f172a, shininess: 10 })
   );
-  mouth.rotation.x = Math.PI / 2;
-  mouth.position.set(0, -0.155, 0.73);
+  mouth.scale.set(1.2, 0.72, 0.9);
+  mouth.position.set(0, -0.17, 0.70);
   head.add(mouth);
   head.position.set(0, 2.05, 0);
   g.add(head);
