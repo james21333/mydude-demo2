@@ -174,7 +174,7 @@ function createBlueDude() {
     new THREE.ShapeGeometry(smileShape, 28),
     new THREE.MeshBasicMaterial({ color: 0x0f172a, side: THREE.DoubleSide })
   );
-  mouth.position.set(0, -0.19, 0.672);
+  mouth.position.set(0, -0.19, 0.74);
   head.add(mouth);
   head.position.set(0, 2.05, 0);
   g.add(head);
