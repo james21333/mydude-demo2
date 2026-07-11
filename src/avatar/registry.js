@@ -2,7 +2,7 @@
 // Tree-shaking in Vite ensures only imported icons land in the bundle.
 import {
   Sword, MagicWand, DeviceTablet, Flask, BookOpen, Shield,
-  Tree, Buildings, Globe, Waves, Castle, Mountains,
+  Tree, Buildings, Globe, Waves, CastleTurret, Mountains,
   Robot, User, Alien, Ghost, Star,
 } from '@phosphor-icons/react';
 
@@ -32,7 +32,7 @@ export const SCENE_REGISTRY = {
   city:    Buildings,
   space:   Globe,
   ocean:   Waves,
-  castle:  Castle,
+  castle:  CastleTurret,
   mountain: Mountains,
   none:    null,
 };
