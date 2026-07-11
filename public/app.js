@@ -166,8 +166,9 @@ function createBlueDude() {
   const rightEye = makeEye( 0.22);
   head.add(leftEye); head.add(rightEye);
   // Mouth — small closed-lip expression: narrow ring, very thin tube, gentle arc
+  // arc must be exactly PI so endpoints are symmetric (left/right) after rotation.z flip
   const mouth = new THREE.Mesh(
-    new THREE.TorusGeometry(0.105, 0.022, 6, 24, Math.PI * 0.85),
+    new THREE.TorusGeometry(0.088, 0.022, 6, 24, Math.PI),
     new THREE.MeshPhongMaterial({ color: 0x0f172a, shininess: 8 })
   );
   mouth.rotation.z = Math.PI;
