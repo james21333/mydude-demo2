@@ -238,29 +238,91 @@ function createBlueDude() {
 
 const blueDude = createBlueDude();
 
+// ── KEYBOARD + DPAD INPUT ────────────────────────────────────────────────────
+const keysDown  = new Set();
+const dpadKeys  = new Set();
+
+window.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if (['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k)) {
+    keysDown.add(k);
+    e.preventDefault();
+  }
+});
+window.addEventListener('keyup', e => keysDown.delete(e.key.toLowerCase()));
+window.addEventListener('blur', () => { keysDown.clear(); dpadKeys.clear(); });
+
+function setupDpad(id, dir) {
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  const press   = e => { e.preventDefault(); dpadKeys.add(dir); };
+  const release = ()  => dpadKeys.delete(dir);
+  btn.addEventListener('touchstart',  press,   { passive: false });
+  btn.addEventListener('touchend',    release, { passive: false });
+  btn.addEventListener('touchcancel', release);
+  btn.addEventListener('mousedown',   press);
+  btn.addEventListener('mouseup',     release);
+  btn.addEventListener('mouseleave',  release);
+}
+setupDpad('dpad-up',    'arrowup');
+setupDpad('dpad-down',  'arrowdown');
+setupDpad('dpad-left',  'arrowleft');
+setupDpad('dpad-right', 'arrowright');
+
+function lerpAngle(cur, tgt, t) {
+  let d = tgt - cur;
+  while (d >  Math.PI) d -= Math.PI * 2;
+  while (d < -Math.PI) d += Math.PI * 2;
+  return cur + d * t;
+}
+
 let dudeClock = 0;
 let lastFrame = 0;
-let speaking = false;
+let speaking  = false;
+let isWalking = false;
+
 function animate() {
   lastFrame = performance.now();
   requestAnimationFrame(animate);
   dudeClock += 0.016;
 
-  const isSpeaking = speaking;
-  const bobSpeed = isSpeaking ? 4.2 : 0.85;
-  const bobAmp   = isSpeaking ? 0.08 : 0.03;
+  // ── Movement ──────────────────────────────────────────────────────────────
+  let dx = 0, dz = 0;
+  if (keysDown.has('arrowup')    || keysDown.has('w') || dpadKeys.has('arrowup'))    dz -= 1;
+  if (keysDown.has('arrowdown')  || keysDown.has('s') || dpadKeys.has('arrowdown'))  dz += 1;
+  if (keysDown.has('arrowleft')  || keysDown.has('a') || dpadKeys.has('arrowleft'))  dx -= 1;
+  if (keysDown.has('arrowright') || keysDown.has('d') || dpadKeys.has('arrowright')) dx += 1;
 
-  // Body bob
+  if (dx !== 0 || dz !== 0) {
+    const len = Math.sqrt(dx * dx + dz * dz);
+    blueDude.group.position.x += (dx / len) * 0.055;
+    blueDude.group.position.z += (dz / len) * 0.055;
+    blueDude.group.rotation.y  = lerpAngle(blueDude.group.rotation.y, Math.atan2(dx, dz), 0.14);
+    // camera target softly follows
+    controls.target.x += (blueDude.group.position.x - controls.target.x) * 0.04;
+    controls.target.z += (blueDude.group.position.z - controls.target.z) * 0.04;
+    isWalking = true;
+  } else {
+    isWalking = false;
+  }
+
+  const isSpeaking = speaking;
+  const bobSpeed = isSpeaking ? 4.2 : isWalking ? 3.8 : 0.85;
+  const bobAmp   = isSpeaking ? 0.08 : isWalking ? 0.05 : 0.03;
+
+  // Body bob (Y offset on top of current walk position)
   blueDude.group.position.y = Math.sin(dudeClock * bobSpeed) * bobAmp;
 
   // Head gentle sway
   blueDude.head.rotation.y = Math.sin(dudeClock * 0.7) * (isSpeaking ? 0.18 : 0.06);
   blueDude.head.rotation.z = Math.sin(dudeClock * 0.4) * (isSpeaking ? 0.06 : 0.02);
 
-  // Arms wave when speaking (matches original arm animation)
-  if (isSpeaking) {
-    blueDude.leftArm.rotation.z  =  0.28 + Math.sin(dudeClock * 4.0)        * 0.28;
-    blueDude.rightArm.rotation.z = -0.28 + Math.sin(dudeClock * 4.0 + 0.9)  * 0.28;
+  // Arms swing when walking or speaking
+  if (isSpeaking || isWalking) {
+    const spd = isSpeaking ? 4.0 : 3.2;
+    const amp = isSpeaking ? 0.28 : 0.20;
+    blueDude.leftArm.rotation.z  =  0.28 + Math.sin(dudeClock * spd)        * amp;
+    blueDude.rightArm.rotation.z = -0.28 + Math.sin(dudeClock * spd + Math.PI) * amp;
   } else {
     blueDude.leftArm.rotation.z  += (-0.28 - blueDude.leftArm.rotation.z)  * 0.10;
     blueDude.rightArm.rotation.z += ( 0.28 - blueDude.rightArm.rotation.z) * 0.10;

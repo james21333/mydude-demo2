@@ -336,6 +336,37 @@
     }
     #send-btn:hover { background: rgba(14,165,233,0.28); }
 
+    /* ── D-pad ── */
+    #dpad {
+      position: fixed;
+      bottom: 96px;
+      left: 16px;
+      display: grid;
+      grid-template-columns: repeat(3, 42px);
+      grid-template-rows: repeat(3, 42px);
+      gap: 3px;
+      z-index: 100;
+    }
+    .dpad-btn {
+      width: 42px; height: 42px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.13);
+      border-radius: 8px;
+      color: #64748b;
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+      transition: background 0.1s, color 0.1s;
+    }
+    .dpad-btn:active,
+    .dpad-btn.pressed { background: rgba(125,211,252,0.15); color: #7dd3fc; border-color: rgba(125,211,252,0.3); }
+    .dpad-empty { visibility: hidden; }
+
     #clear-btn {
       height: 50px;
       padding: 0 18px;
@@ -404,6 +435,19 @@
       <button class="btn-danger"    onclick="clearStorageUI()">Clear Storage</button>
     </div>
   </div>
+</div>
+
+<!-- D-pad -->
+<div id="dpad">
+  <div class="dpad-empty"></div>
+  <button class="dpad-btn" id="dpad-up">↑</button>
+  <div class="dpad-empty"></div>
+  <button class="dpad-btn" id="dpad-left">←</button>
+  <div class="dpad-empty"></div>
+  <button class="dpad-btn" id="dpad-right">→</button>
+  <div class="dpad-empty"></div>
+  <button class="dpad-btn" id="dpad-down">↓</button>
+  <div class="dpad-empty"></div>
 </div>
 
 <!-- Scene info -->
