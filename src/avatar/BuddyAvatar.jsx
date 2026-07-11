@@ -257,19 +257,21 @@ export function BuddyAvatar({
           )}
         </AnimatePresence>
 
-        {/* Eyes */}
-        <AnimatePresence mode="wait">
-          <motion.g
-            key={expression}
-            transform="translate(100 80)"
-            initial={{ scaleY: 0, opacity: 0 }}
-            animate={{ scaleY: 1, opacity: 1 }}
-            exit={{ scaleY: 0,    opacity: 0 }}
-            transition={SPRING_FAST}
-          >
-            <Eyes expression={expression}/>
-          </motion.g>
-        </AnimatePresence>
+        {/* Eyes — outer g positions, inner motion.g animates */}
+        <g transform="translate(100 80)">
+          <AnimatePresence mode="wait">
+            <motion.g
+              key={expression}
+              style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+              initial={{ scaleY: 0, opacity: 0 }}
+              animate={{ scaleY: 1, opacity: 1 }}
+              exit={{ scaleY: 0,    opacity: 0 }}
+              transition={SPRING_FAST}
+            >
+              <Eyes expression={expression}/>
+            </motion.g>
+          </AnimatePresence>
+        </g>
 
         {/* Scientist glasses */}
         <AnimatePresence>
@@ -286,24 +288,27 @@ export function BuddyAvatar({
           )}
         </AnimatePresence>
 
-        {/* Mouth */}
-        <motion.g
-          transform="translate(100 102)"
-          animate={{ scaleY: mouthPhase === 2 ? 1.7 : mouthPhase === 1 ? 1.25 : 1 }}
-          transition={{ type: 'spring', stiffness: 650, damping: 24 }}
-        >
-          <AnimatePresence mode="wait">
-            <motion.g
-              key={`${expression}-${mouthPhase > 0 ? 'open' : 'closed'}`}
-              initial={{ scaleX: 0.5, opacity: 0 }}
-              animate={{ scaleX: 1,   opacity: 1 }}
-              exit={{ scaleX: 0.5,    opacity: 0 }}
-              transition={SPRING_FAST}
-            >
-              <Mouth expression={expression} phase={mouthPhase}/>
-            </motion.g>
-          </AnimatePresence>
-        </motion.g>
+        {/* Mouth — outer g positions, inner motion.g animates */}
+        <g transform="translate(100 102)">
+          <motion.g
+            style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+            animate={{ scaleY: mouthPhase === 2 ? 1.7 : mouthPhase === 1 ? 1.25 : 1 }}
+            transition={{ type: 'spring', stiffness: 650, damping: 24 }}
+          >
+            <AnimatePresence mode="wait">
+              <motion.g
+                key={`${expression}-${mouthPhase > 0 ? 'open' : 'closed'}`}
+                style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+                initial={{ scaleX: 0.5, opacity: 0 }}
+                animate={{ scaleX: 1,   opacity: 1 }}
+                exit={{ scaleX: 0.5,    opacity: 0 }}
+                transition={SPRING_FAST}
+              >
+                <Mouth expression={expression} phase={mouthPhase}/>
+              </motion.g>
+            </AnimatePresence>
+          </motion.g>
+        </g>
 
         {/* Legs */}
         <ellipse cx="82"  cy="200" rx="16" ry="21" fill={fillRef} stroke={darkColor} strokeWidth="2.5"/>
