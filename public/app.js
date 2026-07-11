@@ -50,6 +50,10 @@ const ASSET_LIBRARY = [
   { id:'urban_car',       name:'Car',          path:'/assets/kenney/urban/car.glb',           category:'Urban',  color:0xEF5350, fallback:'car'      },
   { id:'urban_lamp',      name:'Lamp Post',    path:'/assets/kenney/urban/lamp_post.glb',     category:'Urban',  color:0xFFD54F, fallback:'lamp'     },
   { id:'urban_bench',     name:'Bench',        path:'/assets/kenney/urban/bench.glb',         category:'Urban',  color:0xA1887F, fallback:'bench'    },
+  // Sky
+  { id:'sky_sun',   name:'Sun',   path:'/assets/sky/sun.glb',   category:'Sky', color:0xFFD600, fallback:'sun'   },
+  { id:'sky_moon',  name:'Moon',  path:'/assets/sky/moon.glb',  category:'Sky', color:0xE0E8FF, fallback:'moon'  },
+  { id:'sky_cloud', name:'Cloud', path:'/assets/sky/cloud.glb', category:'Sky', color:0xFFFFFF, fallback:'cloud' },
 ];
 
 // ── THREE.JS SCENE SETUP ─────────────────────────────────────────────────────
@@ -128,54 +132,86 @@ window.addEventListener('resize', () => {
 });
 
 // ── BLUE DUDE ────────────────────────────────────────────────────────────────
+// Matches original BuddyAvatar: #38bdf8 primary, #2563eb dark, balloon head, arms, legs, feet
 function createBlueDude() {
   const g = new THREE.Group();
 
-  const bodyMat = new THREE.MeshPhongMaterial({ color: 0x2196F3, emissive: 0x0D47A1, emissiveIntensity: 0.25, shininess: 90 });
-  const headMat = new THREE.MeshPhongMaterial({ color: 0x42A5F5, emissive: 0x1565C0, emissiveIntensity: 0.25, shininess: 110 });
-  const eyeWhite = new THREE.MeshPhongMaterial({ color: 0xFFFFFF, shininess: 60 });
-  const eyeDark  = new THREE.MeshPhongMaterial({ color: 0x111122 });
-  const mouthMat = new THREE.MeshPhongMaterial({ color: 0x0a2a6e, emissive: 0x000033 });
+  const PRIMARY = 0x38bdf8;
+  const DARK    = 0x2563eb;
+  const FACE    = 0x0f172a;
 
-  const mk = (geo, mat, py) => { const m = new THREE.Mesh(geo, mat); m.position.y = py; m.castShadow = true; return m; };
+  const blueMat  = (emI = 0.18) => new THREE.MeshPhongMaterial({ color: PRIMARY, emissive: DARK, emissiveIntensity: emI, shininess: 120, specular: 0xaaccff });
+  const darkMat  = () => new THREE.MeshPhongMaterial({ color: DARK,  emissive: 0x0a1a6e, emissiveIntensity: 0.1, shininess: 60 });
+  const faceMat  = () => new THREE.MeshPhongMaterial({ color: FACE });
+  const mk = (geo, mat, x=0, y=0, z=0) => { const m = new THREE.Mesh(geo, mat); m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true; return m; };
 
-  // Body
-  const body = mk(new THREE.CapsuleGeometry(0.55, 0.85, 8, 16), bodyMat, 1.02);
-  g.add(body);
-
-  // Head
+  // HEAD — big balloon sphere like original (wider than tall)
   const head = new THREE.Group();
-  head.add(mk(new THREE.SphereGeometry(0.52, 20, 14), headMat, 0));
-  head.position.set(0, 2.28, 0);
+  const headMesh = mk(new THREE.SphereGeometry(0.74, 32, 24), blueMat(0.2));
+  headMesh.scale.set(1.08, 1.0, 0.98); // slightly wider
+  head.add(headMesh);
+  // Shine highlight (upper-left, matches original ellipse shine)
+  const shineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.30 });
+  head.add(mk(new THREE.SphereGeometry(0.22, 10, 8), shineMat, -0.32, 0.30, 0.60));
+  // Eyes — dark circles with white dot (like original)
+  function makeEye(x) {
+    const eg = new THREE.Group();
+    eg.add(mk(new THREE.SphereGeometry(0.115, 14, 10), faceMat(), 0, 0, 0));
+    const hi = mk(new THREE.SphereGeometry(0.042, 8, 6), new THREE.MeshBasicMaterial({color:0xffffff}), -0.04, 0.04, 0.08);
+    eg.add(hi);
+    eg.position.set(x, 0.06, 0.68);
+    return eg;
+  }
+  const leftEye  = makeEye(-0.24);
+  const rightEye = makeEye( 0.24);
+  head.add(leftEye); head.add(rightEye);
+  // Mouth — wide smile arc matching original `M-18 -2 Q0 14 18 -2`
+  const mouth = mk(new THREE.TorusGeometry(0.22, 0.048, 6, 18, Math.PI * 0.78), faceMat(), 0, -0.24, 0.64);
+  mouth.rotation.z = Math.PI;
+  mouth.rotation.x = 0.12;
+  head.add(mouth);
+  head.position.set(0, 2.05, 0);
   g.add(head);
 
-  // Eyes
-  function makeEye(x) {
-    const eye = new THREE.Group();
-    eye.add(mk(new THREE.SphereGeometry(0.14, 12, 10), eyeWhite, 0));
-    const pupil = mk(new THREE.SphereGeometry(0.085, 8, 8), eyeDark, 0);
-    pupil.position.z = 0.09;
-    eye.add(pupil);
-    eye.position.set(x, 0.06, 0.44);
-    return eye;
-  }
-  const leftEye  = makeEye(-0.19);
-  const rightEye = makeEye( 0.19);
-  head.add(leftEye);
-  head.add(rightEye);
+  // BODY — round blob (sphere scaled to be slightly tall, like the round variant)
+  const body = mk(new THREE.SphereGeometry(0.60, 28, 18), blueMat(0.15));
+  body.scale.set(0.98, 1.30, 0.88);
+  body.position.set(0, 1.02, 0);
+  g.add(body);
 
-  // Mouth (torus arc = smile)
-  const mouth = new THREE.Mesh(
-    new THREE.TorusGeometry(0.17, 0.038, 6, 14, Math.PI),
-    mouthMat
-  );
-  mouth.position.set(0, -0.17, 0.46);
-  mouth.rotation.z = Math.PI;
-  head.add(mouth);
+  // ARMS — ellipse capsules angled out (wave when speaking)
+  function makeArm(side) {
+    const arm = mk(new THREE.CapsuleGeometry(0.145, 0.44, 6, 10), blueMat(0.1));
+    arm.position.set(side * 0.76, 1.0, 0);
+    arm.rotation.z = side * -0.28;
+    return arm;
+  }
+  const leftArm  = makeArm(-1);
+  const rightArm = makeArm( 1);
+  g.add(leftArm); g.add(rightArm);
+
+  // LEGS — short round blobs
+  function makeLeg(x) {
+    const leg = mk(new THREE.CapsuleGeometry(0.165, 0.22, 6, 10), blueMat(0.1));
+    leg.position.set(x, 0.32, 0);
+    return leg;
+  }
+  const leftLeg  = makeLeg(-0.24);
+  const rightLeg = makeLeg( 0.24);
+  g.add(leftLeg); g.add(rightLeg);
+
+  // FEET — dark flattened ellipses
+  function makeFoot(x) {
+    const f = mk(new THREE.SphereGeometry(0.22, 14, 8), darkMat());
+    f.scale.set(1.35, 0.52, 1.15);
+    f.position.set(x, 0.06, 0.05);
+    return f;
+  }
+  g.add(makeFoot(-0.24)); g.add(makeFoot(0.24));
 
   g.position.set(0, 0, 0);
   scene.add(g);
-  return { group: g, head, leftEye, rightEye, mouth, body };
+  return { group: g, head, leftEye, rightEye, mouth, leftArm, rightArm };
 }
 
 const blueDude = createBlueDude();
@@ -188,25 +224,36 @@ function animate() {
   requestAnimationFrame(animate);
   dudeClock += 0.016;
 
-  // Idle / speaking animation
   const isSpeaking = speaking;
-  const bobSpeed = isSpeaking ? 4.0 : 0.9;
-  const bobAmp   = isSpeaking ? 0.07 : 0.028;
-  const swayAmp  = isSpeaking ? 0.10 : 0.04;
+  const bobSpeed = isSpeaking ? 4.2 : 0.85;
+  const bobAmp   = isSpeaking ? 0.08 : 0.03;
+
+  // Body bob
   blueDude.group.position.y = Math.sin(dudeClock * bobSpeed) * bobAmp;
-  blueDude.head.rotation.y  = Math.sin(dudeClock * 0.65) * swayAmp * 2;
-  blueDude.head.rotation.z  = Math.sin(dudeClock * 0.4)  * swayAmp * 0.5;
+
+  // Head gentle sway
+  blueDude.head.rotation.y = Math.sin(dudeClock * 0.7) * (isSpeaking ? 0.18 : 0.06);
+  blueDude.head.rotation.z = Math.sin(dudeClock * 0.4) * (isSpeaking ? 0.06 : 0.02);
+
+  // Arms wave when speaking (matches original arm animation)
+  if (isSpeaking) {
+    blueDude.leftArm.rotation.z  =  0.28 + Math.sin(dudeClock * 4.0)        * 0.28;
+    blueDude.rightArm.rotation.z = -0.28 + Math.sin(dudeClock * 4.0 + 0.9)  * 0.28;
+  } else {
+    blueDude.leftArm.rotation.z  += (-0.28 - blueDude.leftArm.rotation.z)  * 0.10;
+    blueDude.rightArm.rotation.z += ( 0.28 - blueDude.rightArm.rotation.z) * 0.10;
+  }
 
   // Mouth opens/closes when speaking
   if (isSpeaking) {
-    blueDude.mouth.scale.y = 0.5 + 0.5 * Math.abs(Math.sin(dudeClock * 9));
+    blueDude.mouth.scale.y = 0.45 + 0.55 * Math.abs(Math.sin(dudeClock * 9.5));
   } else {
-    blueDude.mouth.scale.y += (1 - blueDude.mouth.scale.y) * 0.12;
+    blueDude.mouth.scale.y += (1 - blueDude.mouth.scale.y) * 0.14;
   }
 
-  // Blink
+  // Blink every ~4 seconds
   const blinkCycle = dudeClock % 4.2;
-  const blink = blinkCycle > 3.9 ? Math.max(0.05, 1 - ((blinkCycle - 3.9) / 0.15)) : 1;
+  const blink = blinkCycle > 3.95 ? Math.max(0.05, 1 - ((blinkCycle - 3.95) / 0.12)) : 1;
   blueDude.leftEye.scale.y  = blink;
   blueDude.rightEye.scale.y = blink;
 
@@ -322,6 +369,36 @@ function makeFallback(entry) {
     for (const bx of [-0.3, 0.3]) {
       const l = mesh(new THREE.BoxGeometry(0.06, 0.32, 0.3), null, 0.16); l.position.x = bx; g.add(l);
     }
+  } else if (type === 'sun') {
+    const sunMat = new THREE.MeshStandardMaterial({ color: 0xFFD600, emissive: 0xFFAA00, emissiveIntensity: 1.0, roughness: 0.4, metalness: 0.0 });
+    const sunMesh = new THREE.Mesh(new THREE.SphereGeometry(0.55, 18, 14), sunMat);
+    sunMesh.castShadow = false;
+    g.add(sunMesh);
+    // Rays
+    const rayMat = new THREE.MeshBasicMaterial({ color: 0xFFE040, transparent: true, opacity: 0.55 });
+    for (let i = 0; i < 8; i++) {
+      const ray = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.38, 5), rayMat);
+      const ang = (i / 8) * Math.PI * 2;
+      ray.position.set(Math.cos(ang) * 0.82, Math.sin(ang) * 0.82, 0);
+      ray.rotation.z = ang + Math.PI / 2;
+      g.add(ray);
+    }
+  } else if (type === 'moon') {
+    const moonMat = new THREE.MeshStandardMaterial({ color: 0xDDE8FF, roughness: 0.85, metalness: 0.0 });
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(0.5, 18, 14), moonMat));
+    // Crescent shadow blob
+    const crMat = new THREE.MeshBasicMaterial({ color: 0x1a2540 });
+    const cr = new THREE.Mesh(new THREE.SphereGeometry(0.44, 14, 10), crMat);
+    cr.position.set(0.22, 0.06, 0.08);
+    g.add(cr);
+  } else if (type === 'cloud') {
+    const cloudMat = new THREE.MeshLambertMaterial({ color: 0xFFFFFF });
+    const blob = (x, y, z, r) => { const m = new THREE.Mesh(new THREE.SphereGeometry(r, 10, 8), cloudMat); m.position.set(x, y, z); m.castShadow = false; return m; };
+    g.add(blob(0, 0, 0, 0.44));
+    g.add(blob(-0.44, -0.08, 0, 0.32));
+    g.add(blob(0.46, -0.06, 0, 0.34));
+    g.add(blob(-0.18, 0.22, 0, 0.30));
+    g.add(blob(0.20, 0.20, 0, 0.28));
   } else {
     // default box
     g.add(mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), null, 0.25));
@@ -335,11 +412,14 @@ function makeFallback(entry) {
 const gltfLoader = new GLTFLoader();
 const gltfCache  = new Map(); // path → THREE.Group (master clone)
 
-function loadAsset(path) {
+function normalizePath(p) { return p.replace(/\s*\.\s*/g, '.').trim(); }
+
+function loadAsset(rawPath) {
+  const path = normalizePath(rawPath);
   if (gltfCache.has(path)) {
     return Promise.resolve(gltfCache.get(path).clone());
   }
-  const entry = ASSET_LIBRARY.find(a => a.path === path);
+  const entry = ASSET_LIBRARY.find(a => normalizePath(a.path) === path);
   return new Promise((resolve) => {
     gltfLoader.load(
       path,
