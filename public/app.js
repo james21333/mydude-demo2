@@ -150,25 +150,46 @@ function createBlueDude() {
   const headMesh = mk(new THREE.SphereGeometry(0.74, 32, 24), blueMat(0.2));
   headMesh.scale.set(1.08, 1.0, 0.98); // slightly wider
   head.add(headMesh);
-  // Shine highlight (upper-left, matches original ellipse shine)
-  const shineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.30 });
-  head.add(mk(new THREE.SphereGeometry(0.22, 10, 8), shineMat, -0.32, 0.30, 0.60));
-  // Eyes — dark circles with white dot (like original)
+  // Shine highlight (upper-left)
+  const shineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.28 });
+  head.add(mk(new THREE.SphereGeometry(0.20, 10, 8), shineMat, -0.30, 0.28, 0.62));
+  // Eyes — softer, smaller dark circles with a subtle iris tint and white glint
   function makeEye(x) {
     const eg = new THREE.Group();
-    eg.add(mk(new THREE.SphereGeometry(0.115, 14, 10), faceMat(), 0, 0, 0));
-    const hi = mk(new THREE.SphereGeometry(0.042, 8, 6), new THREE.MeshBasicMaterial({color:0xffffff}), -0.04, 0.04, 0.08);
-    eg.add(hi);
-    eg.position.set(x, 0.06, 0.68);
+    // Iris — very dark navy, not pure black
+    eg.add(mk(new THREE.SphereGeometry(0.078, 14, 10), new THREE.MeshPhongMaterial({ color: 0x0a1628, shininess: 40 }), 0, 0, 0));
+    // Pupil — pure black centre dot
+    eg.add(mk(new THREE.SphereGeometry(0.044, 10, 8), new THREE.MeshBasicMaterial({ color: 0x000000 }), 0, 0, 0.042));
+    // Small white glint
+    eg.add(mk(new THREE.SphereGeometry(0.022, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffffff }), -0.028, 0.028, 0.066));
+    eg.position.set(x, 0.04, 0.68);
     return eg;
   }
-  const leftEye  = makeEye(-0.24);
-  const rightEye = makeEye( 0.24);
+  const leftEye  = makeEye(-0.20);
+  const rightEye = makeEye( 0.20);
   head.add(leftEye); head.add(rightEye);
-  // Mouth — wide smile arc matching original `M-18 -2 Q0 14 18 -2`
-  const mouth = mk(new THREE.TorusGeometry(0.22, 0.048, 6, 18, Math.PI * 0.78), faceMat(), 0, -0.24, 0.64);
-  mouth.rotation.z = Math.PI;
-  mouth.rotation.x = 0.12;
+  // Mouth — thin lips: upper lip ridge, lower lip, and a dark line between
+  const mouth = new THREE.Group();
+  const lipDark = new THREE.MeshPhongMaterial({ color: 0x0d0505, shininess: 20 });
+  const lipLo   = new THREE.MeshPhongMaterial({ color: 0x1a0c0c, shininess: 35 });
+  // Dark inner line / mouth opening arc
+  const arc = mk(new THREE.TorusGeometry(0.155, 0.020, 6, 20, Math.PI * 0.72), lipDark, 0, 0, 0);
+  arc.rotation.z = Math.PI;
+  mouth.add(arc);
+  // Lower lip — fuller flattened ellipsoid
+  const lowerLip = mk(new THREE.SphereGeometry(0.145, 14, 8), lipLo, 0, -0.048, 0.012);
+  lowerLip.scale.set(0.88, 0.28, 0.52);
+  mouth.add(lowerLip);
+  // Upper lip — thinner ridge
+  const upperLip = mk(new THREE.SphereGeometry(0.130, 14, 8), lipDark, 0, 0.028, 0.008);
+  upperLip.scale.set(0.82, 0.18, 0.44);
+  mouth.add(upperLip);
+  // Mouth corners — small dots
+  for (const cx of [-0.145, 0.145]) {
+    mouth.add(mk(new THREE.SphereGeometry(0.022, 8, 6), lipDark, cx, -0.008, 0));
+  }
+  mouth.position.set(0, -0.22, 0.64);
+  mouth.rotation.x = 0.10;
   head.add(mouth);
   head.position.set(0, 2.05, 0);
   g.add(head);
@@ -184,6 +205,24 @@ function createBlueDude() {
     const arm = mk(new THREE.CapsuleGeometry(0.145, 0.44, 6, 10), blueMat(0.1));
     arm.position.set(side * 0.76, 1.0, 0);
     arm.rotation.z = side * -0.28;
+    // HAND — parented to arm so it waves with it
+    const handMat = new THREE.MeshPhongMaterial({ color: PRIMARY, emissive: DARK, emissiveIntensity: 0.08, shininess: 80, specular: 0x88bbdd });
+    const hand = new THREE.Group();
+    // Palm blob
+    const palm = new THREE.Mesh(new THREE.SphereGeometry(0.115, 12, 9), handMat);
+    palm.scale.set(1.05, 0.82, 0.88);
+    palm.castShadow = true;
+    hand.add(palm);
+    // Three stubby fingers
+    for (let i = -1; i <= 1; i++) {
+      const f = new THREE.Mesh(new THREE.CapsuleGeometry(0.032, 0.068, 4, 7), handMat);
+      f.position.set(i * 0.058, 0.115, 0.018);
+      f.castShadow = true;
+      hand.add(f);
+    }
+    // bottom of capsule: -(height/2 + radius) = -(0.22 + 0.145) = -0.365
+    hand.position.set(0, -0.365, 0);
+    arm.add(hand);
     return arm;
   }
   const leftArm  = makeArm(-1);
