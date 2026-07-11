@@ -411,7 +411,7 @@ RULES:
 • When adding multiple of the same type, vary position and Y rotation.
 
 RESPONSE FORMAT:
-Speak your reply naturally. Then end EVERY response with a ```json code block containing the scene command array. Never omit the block — even for conversation, respond with an empty array [] if no scene change is needed.
+Speak your reply naturally. Then end EVERY response with a \`\`\`json code block containing the scene command array. Never omit the block — even for conversation, respond with an empty array [] if no scene change is needed.
 
 EXAMPLE:
 User: "Add a knight and two pine trees."
