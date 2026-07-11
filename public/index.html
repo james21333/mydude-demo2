@@ -542,12 +542,22 @@ window.addEventListener('resize', () => {
   renderer.setSize(vw(), vh());
 });
 
+let lastFrame = 0;
 function animate() {
+  lastFrame = performance.now();
   requestAnimationFrame(animate);
   controls.update();
   renderer.render(scene, camera);
 }
 animate();
+
+// Fallback render loop for environments where rAF is suppressed (automation, headless)
+setInterval(() => {
+  if (performance.now() - lastFrame > 150) {
+    controls.update();
+    renderer.render(scene, camera);
+  }
+}, 100);
 
 // ── FALLBACK GEOMETRY ────────────────────────────────────────────────────────
 function makeFallback(entry) {
