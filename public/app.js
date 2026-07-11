@@ -165,15 +165,16 @@ function createBlueDude() {
   const leftEye  = makeEye(-0.22);
   const rightEye = makeEye( 0.22);
   head.add(leftEye); head.add(rightEye);
-  // Mouth — fat half-torus (tube ≈ ring radius so the hole nearly disappears = filled-arc look)
-  // rotation.z = PI flips arc to bottom = smile. rotation.x tilts it to hug the face.
+  // Mouth — thin smile arc. Wide ring, thin tube = clean friendly curve.
+  // rotation.z=PI flips the default top-arch into a bottom-bowl (smile).
+  // arc < PI so the curve is gentle, not a harsh deep U.
   const mouth = new THREE.Mesh(
-    new THREE.TorusGeometry(0.14, 0.092, 10, 28, Math.PI),
+    new THREE.TorusGeometry(0.19, 0.034, 6, 30, Math.PI * 0.72),
     new THREE.MeshPhongMaterial({ color: 0x0f172a, shininess: 8 })
   );
   mouth.rotation.z = Math.PI;
-  mouth.rotation.x = 0.18;
-  mouth.position.set(0, -0.16, 0.62);
+  mouth.rotation.x = 0.10;
+  mouth.position.set(0, -0.12, 0.66);
   head.add(mouth);
   head.position.set(0, 2.05, 0);
   g.add(head);
