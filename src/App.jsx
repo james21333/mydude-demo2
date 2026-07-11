@@ -6,6 +6,7 @@ import qualityPresets from '../shared/avatar-quality-presets.json';
 import { CHASSIS_TYPES, classifyChassis } from '../shared/chassis.mjs';
 import { generatePhase1SceneSpec } from '../shared/phase1/phase1-avatar-engine.mjs';
 import TestMatrixApp from './testmatrix/TestMatrixApp.jsx';
+import { Director } from './avatar/Director.jsx';
 import './styles.css';
 
 const ROOT_DOMAIN = 'mydude.live';
@@ -1761,7 +1762,7 @@ function DemoApp() {
     </section>
 
     <section className="stage">
-      <CartoonAvatar avatar={avatar} mouthPhase={mouthPhase} status={status} voiceTheme={avatarVoiceTheme} />
+      <Director avatar={avatar} mouthPhase={mouthPhase} status={status} voiceTheme={avatarVoiceTheme} />
       <div className="voice-panel controls-below compact-controls">
         <div className="control-copy">
           <p>{message}</p>

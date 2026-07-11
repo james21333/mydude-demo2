@@ -19,7 +19,9 @@
     "typescript": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "lucide-react": "latest"
+    "lucide-react": "latest",
+    "framer-motion": "latest",
+    "@phosphor-icons/react": "latest"
   },
   "devDependencies": {
     "wrangler": "^4.92.0"
